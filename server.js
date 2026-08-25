@@ -1,6 +1,10 @@
 // server.js
 require('dotenv').config(); // Carrega as variáveis do arquivo .env
-require('./backend/cron/notificador')
+// O agendador contínuo só deve rodar no servidor local. Na Vercel, tarefas
+// programadas precisam ser acionadas por uma rota de Vercel Cron.
+if (!process.env.VERCEL) {
+    require('./backend/cron/notificador');
+}
 const express = require('express');
 const cors = require('cors');
 const db = require('./backend/config/database');
@@ -20,8 +24,8 @@ app.use(cors()); // Libera o acesso do Front-end
 app.use(express.json()); // Ensina o Express a entender requisições no formato JSON
 
 // A LINHA MÁGICA DA OPÇÃO 2:
-// Isto diz ao Node.js: "Qualquer ficheiro HTML, CSS ou JS que estiver na pasta 'frontend', entregue ao utilizador"
-app.use(express.static(path.join(__dirname, 'frontend')));
+// Entrega localmente os mesmos arquivos públicos que a Vercel publica via CDN.
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Rota de teste simples
@@ -43,8 +47,13 @@ app.use('/api/feedbacks', require('./backend/routes/feedbackRoutes'));
 
 
 
-// Iniciando o servidor
-app.listen(PORT, () => {
-    console.log(`Servidor rodando na porta ${PORT}`);
-    console.log(`Acesse: http://localhost:${PORT}/api/status`);
-});
+// A Vercel importa o app como uma Function. O listener é necessário apenas
+// ao executar o projeto localmente com `npm start`.
+if (!process.env.VERCEL) {
+    app.listen(PORT, () => {
+        console.log(`Servidor rodando na porta ${PORT}`);
+        console.log(`Acesse: http://localhost:${PORT}/api/status`);
+    });
+}
+
+module.exports = app;
