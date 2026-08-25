@@ -1,0 +1,650 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Senac - Central de Administração</title>
+    <!-- Favicon / Meta -->
+    <meta name="theme-color" content="#004a8d" />
+    <link rel="icon" type="image/png" href="assets/logo-connect-senac.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom Design System -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="bg-main d-flex flex-column min-vh-100 dashboard-page admin-page">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
+          <span>Connect Senac</span>
+          <span class="navbar-role-badge">
+            <i class="bi bi-shield-lock-fill"></i> Administração
+          </span>
+        </a>
+
+        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+          <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
+            <i class="bi bi-eye me-1"></i> Visão do Modelo
+          </a>
+          <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Subheader Logged User Details -->
+    <div class="user-subheader-bar mb-4">
+      <div class="container d-flex justify-content-between align-items-center">
+        <span class="text-secondary small">
+          <i class="bi bi-person-badge-fill text-primary me-1"></i> Conectado como: <strong id="userNome" class="text-dark">--</strong>
+        </span>
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 font-heading" id="userPerfil">
+          --
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Admin Container -->
+    <main class="container pb-5 flex-grow-1">
+      <section class="workspace-hero workspace-hero-admin fade-in-up">
+        <div>
+          <span class="workspace-kicker"><i class="bi bi-command"></i> Central de operações</span>
+          <h1>Gestão clara, decisões rápidas.</h1>
+          <p>Acompanhe a operação, organize cursos, vagas e pessoas em uma visão integrada.</p>
+        </div>
+        <div class="admin-hero-visual" aria-hidden="true">
+          <span class="admin-visual-glow"></span>
+          <span class="admin-visual-orbit admin-visual-orbit-one"></span>
+          <span class="admin-visual-orbit admin-visual-orbit-two"></span>
+          <img src="assets/admin-operations-visual.png" alt="" loading="eager">
+        </div>
+      </section>
+      
+      <!-- Nav Tabs -->
+      <div class="dashboard-tabs-shell"><ul class="nav nav-tabs nav-tabs-custom mb-4" id="adminTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link active"
+            id="visao-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#visao"
+            type="button"
+            role="tab"
+          >
+            <i class="bi bi-speedometer2"></i> Visão Geral & Operação
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="catalogo-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#catalogo"
+            type="button"
+            role="tab"
+          >
+            <i class="bi bi-tags-fill"></i> Gestão de Cursos
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="usuarios-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#usuarios"
+            type="button"
+            role="tab"
+          >
+            <i class="bi bi-people-fill"></i> Utilizadores & Moderação
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="pautas-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#pautas"
+            type="button"
+            role="tab"
+          >
+            <i class="bi bi-calendar3-range-fill"></i> Pautas Globais
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            id="equipa-tab"
+            data-bs-toggle="tab"
+            data-bs-target="#equipa"
+            type="button"
+            role="tab"
+          >
+            <i class="bi bi-person-plus-fill"></i> Criar Colaborador
+          </button>
+        </li>
+      </ul></div>
+
+      <div class="tab-content" id="adminTabsContent">
+        
+        <!-- ABA 1: VISÃO GERAL & OPERAÇÃO -->
+        <div class="tab-pane fade show active" id="visao" role="tabpanel">
+          
+          <!-- Métricas KPI -->
+          <div class="row g-3 mb-4" id="painelMetricas">
+            <div class="col-sm-6 col-lg-3">
+              <div class="kpi-card kpi-blue">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="text-muted small fw-bold text-uppercase">Total de Modelos</div>
+                    <h3 class="mb-0 fw-bold text-dark mt-1 font-heading" id="metricUsuarios">--</h3>
+                  </div>
+                  <div class="kpi-icon-box">
+                    <i class="bi bi-people-fill"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="kpi-card kpi-success">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="text-muted small fw-bold text-uppercase">Agendamentos Ativos</div>
+                    <h3 class="mb-0 fw-bold text-success mt-1 font-heading" id="metricAgendados">--</h3>
+                  </div>
+                  <div class="kpi-icon-box">
+                    <i class="bi bi-calendar-check-fill"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="kpi-card kpi-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="text-muted small fw-bold text-uppercase">Aulas Concluídas</div>
+                    <h3 class="mb-0 fw-bold text-warning mt-1 font-heading" id="metricConcluidos">--</h3>
+                  </div>
+                  <div class="kpi-icon-box">
+                    <i class="bi bi-patch-check-fill"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6 col-lg-3">
+              <div class="kpi-card kpi-danger">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <div class="text-muted small fw-bold text-uppercase">Taxa Cancelamento</div>
+                    <h3 class="mb-0 fw-bold text-danger mt-1 font-heading" id="metricCancelamento">--</h3>
+                  </div>
+                  <div class="kpi-icon-box">
+                    <i class="bi bi-slash-circle-fill"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulários Operacionais -->
+          <div class="row g-4">
+            <!-- Form Cadastrar Curso -->
+            <div class="col-lg-6">
+              <div class="card-premium h-100">
+                <div class="p-3 px-4 border-bottom bg-light">
+                  <h6 class="mb-0 fw-bold font-heading" style="color: var(--senac-blue);">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Cadastrar Novo Curso
+                  </h6>
+                </div>
+                <div class="p-4">
+                  <form id="formCurso" novalidate>
+                    <div class="form-floating mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="nomeCurso"
+                        placeholder="Nome do Curso"
+                        required
+                      />
+                      <label for="nomeCurso"><i class="bi bi-book me-1"></i> Nome do Curso</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <select
+                        class="form-select"
+                        id="selectProfissional"
+                        required
+                        aria-label="Professor Responsável"
+                      >
+                        <option value="" disabled selected>
+                          Carregando professores...
+                        </option>
+                      </select>
+                      <label for="selectProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsável</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="localCurso"
+                        value="SENAC - Santo Antônio de Jesus, BA"
+                        required
+                        placeholder="Localização"
+                      />
+                      <label for="localCurso"><i class="bi bi-geo-alt me-1"></i> Localização / Unidade</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input
+                        type="url"
+                        class="form-control"
+                        id="fotoCurso"
+                        placeholder="https://exemplo.com/imagem.jpg"
+                      />
+                      <label for="fotoCurso"><i class="bi bi-image me-1"></i> URL da Imagem de Capa (Opcional)</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <textarea
+                        class="form-control"
+                        id="descricaoCurso"
+                        style="height: 80px"
+                        placeholder="Descrição"
+                        required
+                      ></textarea>
+                      <label for="descricaoCurso"><i class="bi bi-card-text me-1"></i> Descrição do Curso / Serviço</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <textarea
+                        class="form-control"
+                        id="motivoCurso"
+                        style="height: 60px"
+                        placeholder="Benefícios para o modelo"
+                      ></textarea>
+                      <label for="motivoCurso"><i class="bi bi-gift me-1"></i> Benefícios para o Modelo</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <textarea
+                        class="form-control"
+                        id="restricoesCurso"
+                        style="height: 60px"
+                        placeholder="Restrições"
+                      ></textarea>
+                      <label for="restricoesCurso"><i class="bi bi-exclamation-triangle me-1"></i> Restrições / Contraindicações</label>
+                    </div>
+
+                    <div id="msgCurso" class="mb-3 text-center small fw-bold"></div>
+
+                    <button type="submit" class="btn btn-brand w-100 py-3 shadow-sm">
+                      <i class="bi bi-check2-circle me-1"></i> Salvar e Publicar Curso
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Form Abrir Vagas -->
+            <div class="col-lg-6">
+              <div class="card-premium h-100">
+                <div class="p-3 px-4 border-bottom bg-light">
+                  <h6 class="mb-0 fw-bold font-heading text-success">
+                    <i class="bi bi-calendar-plus-fill me-1"></i> Disponibilizar Vagas e Horários
+                  </h6>
+                </div>
+                <div class="p-4">
+                  <form id="formVagas" novalidate>
+                    <div class="form-floating mb-3">
+                      <select class="form-select" id="selectCurso" required aria-label="Vincular ao Curso">
+                        <option value="" disabled selected>
+                          A carregar cursos...
+                        </option>
+                      </select>
+                      <label for="selectCurso"><i class="bi bi-journal-bookmark me-1"></i> Vincular ao Curso</label>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                      <div class="col-sm-8">
+                        <div class="form-floating">
+                          <input
+                            type="datetime-local"
+                            class="form-control"
+                            id="dataHora"
+                            required
+                          />
+                          <label for="dataHora"><i class="bi bi-clock me-1"></i> Data e Horário da Aula</label>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-floating">
+                          <input
+                            type="number"
+                            class="form-control"
+                            id="vagasTotais"
+                            min="1"
+                            value="5"
+                            required
+                          />
+                          <label for="vagasTotais"><i class="bi bi-people me-1"></i> Qtd Vagas</label>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div id="msgVaga" class="mb-3 text-center small fw-bold"></div>
+
+                    <button type="submit" class="btn btn-orange w-100 py-3 shadow-sm">
+                      <i class="bi bi-unlock-fill me-1"></i> Abrir Grade de Horário
+                    </button>
+                  </form>
+
+                  <!-- Card Informativo -->
+                  <div class="p-3 bg-light rounded-3 mt-4 border">
+                    <h6 class="fw-bold small text-dark mb-1">
+                      <i class="bi bi-info-circle-fill text-primary me-1"></i> Dica de Gestão
+                    </h6>
+                    <p class="small text-muted mb-0">
+                      As vagas abertas ficam disponíveis instantaneamente para agendamento pelos candidatos no painel de modelos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ABA 2: GESTÃO DE CURSOS (CATÁLOGO) -->
+        <div class="tab-pane fade" id="catalogo" role="tabpanel">
+          <div class="card-premium">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-tags-fill me-1"></i> Catálogo Completo de Cursos
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Gerencie status, instrutores vinculados e detalhes de cada procedimento ofertado.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-custom align-middle">
+                <thead>
+                  <tr>
+                    <th>Curso</th>
+                    <th>Professor Responsável</th>
+                    <th>Localização</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações Administrativas</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaCursosBody">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                      A carregar catálogo...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: UTILIZADORES & MODERAÇÃO -->
+        <div class="tab-pane fade" id="usuarios" role="tabpanel">
+          <div class="card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-people-fill me-1"></i> Base de Utilizadores e Histórico
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Pesquise, filtre, promova cargos ou modere contas ativas na plataforma.</p>
+              </div>
+            </div>
+
+            <!-- Bloco de Filtros Inteligentes -->
+            <div class="row g-2 mb-4 bg-light p-3 rounded-3 border">
+              <div class="col-md-6">
+                <div class="input-group">
+                  <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control" id="filtroTextoUser" placeholder="Buscar por Nome ou E-mail...">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <select class="form-select" id="filtroPerfilUser">
+                  <option value="">Todos os Perfis</option>
+                  <option value="candidato">Candidatos (Modelos)</option>
+                  <option value="profissional">Profissionais (Professores)</option>
+                  <option value="coordenador">Coordenadores</option>
+                  <option value="admin">Administradores</option>
+                </select>
+              </div>
+              <div class="col-md-2">
+                <button class="btn btn-outline-secondary w-100" id="btnLimparFiltros">
+                  <i class="bi bi-arrow-counterclockwise"></i> Limpar
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-custom align-middle">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail / Contato</th>
+                    <th>Função</th>
+                    <th>Matrícula Ativa</th>
+                    <th class="text-center">Confirmados</th>
+                    <th class="text-center">Concluídos</th>
+                    <th class="text-center">Cancelados</th>
+                    <th class="text-end">Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaUsuariosBody">
+                  <tr>
+                    <td colspan="8" class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                      A carregar utilizadores...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: PAUTAS GLOBAIS -->
+        <div class="tab-pane fade" id="pautas" role="tabpanel">
+          <div class="card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-calendar3-range-fill me-1"></i> Pautas e Inscrições por Turma
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Visão global de todas as disciplinas práticas, docentes e modelos confirmados.</p>
+              </div>
+            </div>
+            
+            <div class="accordion accordion-custom" id="accordionPautasGlobais">
+              <div class="empty-state-card py-5">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h6 class="empty-state-title">A carregar a visão global de pautas...</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 5: CRIAR COLABORADOR -->
+        <div class="tab-pane fade" id="equipa" role="tabpanel">
+          <div class="row justify-content-center">
+            <div class="col-md-9 col-lg-7">
+              <div class="card-premium p-4 p-md-5">
+                <div class="text-center mb-4">
+                  <div class="auth-brand-badge mb-2">
+                    <i class="bi bi-key-fill"></i> Acesso Administrativo
+                  </div>
+                  <h4 class="fw-bold font-heading" style="color: var(--senac-blue);">
+                    Registar Membro da Equipe
+                  </h4>
+                  <p class="text-muted small">Crie credenciais de acesso institucional para novos docentes ou coordenadores.</p>
+                </div>
+
+                <form id="formColaborador" novalidate>
+                  <div class="form-floating mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="colabNome"
+                      placeholder="Nome Completo"
+                      required
+                    />
+                    <label for="colabNome"><i class="bi bi-person me-1"></i> Nome Completo</label>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <input
+                      type="email"
+                      class="form-control"
+                      id="colabEmail"
+                      placeholder="E-mail Institucional"
+                      required
+                    />
+                    <label for="colabEmail"><i class="bi bi-envelope me-1"></i> E-mail Institucional</label>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <input
+                      type="tel"
+                      class="form-control"
+                      id="colabTelefone"
+                      placeholder="Telefone"
+                      required
+                    />
+                    <label for="colabTelefone"><i class="bi bi-whatsapp me-1"></i> Telefone (WhatsApp)</label>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <input
+                      type="password"
+                      class="form-control"
+                      id="colabSenha"
+                      placeholder="Palavra-passe Inicial"
+                      required
+                    />
+                    <label for="colabSenha"><i class="bi bi-lock me-1"></i> Palavra-passe Inicial</label>
+                  </div>
+                  <div class="form-floating mb-4">
+                    <select class="form-select" id="colabPerfil" required aria-label="Cargo / Permissão">
+                      <option value="profissional">
+                        Profissional (Professor)
+                      </option>
+                      <option value="coordenador">
+                        Coordenador da Unidade
+                      </option>
+                      <option value="admin">Administrador Global</option>
+                    </select>
+                    <label for="colabPerfil"><i class="bi bi-shield-check me-1"></i> Cargo / Nível de Permissão (RBAC)</label>
+                  </div>
+
+                  <div id="msgColab" class="mb-3 text-center small fw-bold"></div>
+
+                  <button type="submit" class="btn btn-brand w-100 py-3 shadow-sm">
+                    <i class="bi bi-person-check-fill me-1"></i> Criar Acesso Institucional
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- Modal Editar Curso -->
+    <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-content-custom">
+          <div class="modal-header modal-header-custom">
+            <h5 class="modal-title" style="color: var(--senac-blue);"><i class="bi bi-pencil-square me-1"></i> Editar Informações do Curso</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body modal-body-custom">
+            <form id="formEditarCurso" novalidate>
+              <input type="hidden" id="editCursoId">
+
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="editNome" placeholder="Nome do Curso" required>
+                <label for="editNome"><i class="bi bi-book me-1"></i> Nome do Curso</label>
+              </div>
+
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <select class="form-select" id="editProfissional" required aria-label="Professor Responsável"></select>
+                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsável</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="editLocal" placeholder="Localização">
+                    <label for="editLocal"><i class="bi bi-geo-alt me-1"></i> Localização</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-floating mb-3">
+                <textarea class="form-control" id="editDescricao" style="height: 90px" placeholder="Descrição" required></textarea>
+                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> Descrição</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <input type="url" class="form-control" id="editFoto" placeholder="URL da Imagem de Capa">
+                <label for="editFoto"><i class="bi bi-image me-1"></i> URL da Imagem de Capa</label>
+              </div>
+
+              <div id="msgEditCurso" class="mb-3 text-center small fw-bold"></div>
+
+              <div class="modal-footer modal-footer-custom px-0 pb-0">
+                <button type="button" class="btn btn-light-custom" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-brand px-4"><i class="bi bi-save me-1"></i> Atualizar Curso</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+      <div class="container text-center text-md-start">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+              <span class="badge bg-warning text-dark fw-bold">SENAC</span>
+              <strong class="text-white">Connect Senac V2.0</strong>
+            </div>
+            <p class="small text-white-50 mb-0 mt-1">
+              Central Administrativa e de Coordenação Acadêmica.
+            </p>
+          </div>
+          <div class="col-md-6 text-center text-md-end text-white-50 small">
+            <span>&copy; Senac. Todos os direitos reservados.</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/admin.js"></script>
+    <script src="js/ui-effects.js"></script>
+  </body>
+</html>

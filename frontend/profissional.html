@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Senac - Painel do Docente</title>
+    <!-- Favicon / Meta -->
+    <meta name="theme-color" content="#004a8d" />
+    <link rel="icon" type="image/png" href="assets/logo-connect-senac.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+      rel="stylesheet"
+    />
+    <!-- Custom Design System -->
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="bg-main d-flex flex-column min-vh-100 dashboard-page professional-page">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
+          <span>Connect Senac</span>
+          <span class="navbar-role-badge">
+            <i class="bi bi-mortarboard-fill"></i> Professor
+          </span>
+        </a>
+
+        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+          <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
+            <i class="bi bi-eye me-1"></i> Visão do Modelo
+          </a>
+          <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Subheader Logged In Status -->
+    <div class="user-subheader-bar mb-4">
+      <div class="container d-flex justify-content-between align-items-center">
+        <span class="text-secondary small">
+          <i class="bi bi-person-check-fill text-primary me-1"></i> Docente conectado: <strong id="nomeProf" class="text-dark">--</strong>
+        </span>
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1">
+          <i class="bi bi-calendar-check me-1"></i> Gestão de Pautas e Presenças
+        </span>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="container pb-5 flex-grow-1">
+      <section class="workspace-hero workspace-hero-professional fade-in-up">
+        <div>
+          <span class="workspace-kicker"><i class="bi bi-mortarboard-fill"></i> Espaço docente</span>
+          <h1>Suas turmas, sob controle.</h1>
+          <p>Consulte as próximas aulas, acompanhe a ocupação e registre presenças com agilidade.</p>
+        </div>
+        <div class="workspace-hero-icon"><i class="bi bi-person-video3"></i></div>
+      </section>
+      <div class="section-header-custom workspace-section-header mb-4">
+        <div>
+          <h4 class="section-title">
+            <i class="bi bi-journal-text text-primary"></i> As Minhas Turmas e Listas de Modelos
+          </h4>
+          <p class="text-muted small mb-0 mt-1">
+            Gerencie os horários de aula, confirme a presença dos modelos participantes ou acione via WhatsApp.
+          </p>
+        </div>
+      </div>
+
+      <!-- Accordion Turmas -->
+      <div class="accordion accordion-custom" id="accordionTurmas">
+        <div class="empty-state-card py-5">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <h6 class="empty-state-title">A carregar a pauta de presenças...</h6>
+          <p class="empty-state-desc">Buscando as turmas e alunos vinculados ao seu perfil.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+      <div class="container text-center text-md-start">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+              <span class="badge bg-warning text-dark fw-bold">SENAC</span>
+              <strong class="text-white">Connect Senac V2.0</strong>
+            </div>
+            <p class="small text-white-50 mb-0 mt-1">
+              Ambiente Docente - Gestão de turmas e controle de absenteísmo em aulas práticas.
+            </p>
+          </div>
+          <div class="col-md-6 text-center text-md-end text-white-50 small">
+            <span>&copy; Senac. Todos os direitos reservados.</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const API_URL =
+        window.location.protocol === "file:"
+          ? "http://localhost:3000/api"
+          : `${window.location.origin}/api`;
+      const token = localStorage.getItem("token");
+
+      if (!token) window.location.href = "index.html";
+
+      try {
+        const payloadToken = JSON.parse(atob(token.split(".")[1]));
+        document.getElementById("nomeProf").textContent =
+          (payloadToken.email || '').split("@")[0];
+      } catch(e) {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      }
+
+      document.getElementById("btnSair").addEventListener("click", () => {
+        localStorage.removeItem("token");
+        window.location.href = "index.html";
+      });
+
+      async function carregarMinhasTurmas() {
+        const accordion = document.getElementById("accordionTurmas");
+        try {
+          const response = await fetch(
+            `${API_URL}/profissional/minhas-turmas`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+
+          if (response.status === 401) {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+            return;
+          }
+
+          const cursos = await response.json();
+          accordion.innerHTML = "";
+
+          if (!response.ok) {
+            accordion.innerHTML = `<div class="alert alert-danger border-0 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>${cursos.erro || 'Erro ao carregar dados.'}</div>`;
+            return;
+          }
+
+          if (cursos.length === 0) {
+            accordion.innerHTML = `
+              <div class="empty-state-card py-5">
+                <div class="empty-state-icon"><i class="bi bi-journal-x"></i></div>
+                <h5 class="empty-state-title">Nenhum curso ativo vinculado</h5>
+                <p class="empty-state-desc">Você ainda não possui disciplinas com turmas práticas abertas sob sua responsabilidade.</p>
+              </div>
+            `;
+            return;
+          }
+
+          cursos.forEach((curso, index) => {
+            let horariosHTML = "";
+
+            if (curso.disponibilidades && curso.disponibilidades.length > 0) {
+              curso.disponibilidades.sort(
+                (a, b) => new Date(a.data_hora) - new Date(b.data_hora),
+              );
+
+              curso.disponibilidades.forEach((disp) => {
+                const dataFormatada = new Date(disp.data_hora).toLocaleString(
+                  "pt-BR",
+                  { dateStyle: "short", timeStyle: "short" },
+                );
+
+                const agendamentosAtivos = (disp.agendamentos || []).filter(
+                  (a) => a.status !== "cancelado",
+                );
+
+                let tabelaModelos = "";
+                if (agendamentosAtivos.length === 0) {
+                  tabelaModelos = `
+                    <div class="text-center py-3 text-muted small bg-light rounded border">
+                      <i class="bi bi-people me-1"></i> Nenhum modelo agendado para este horário ainda.
+                    </div>
+                  `;
+                } else {
+                  let linhas = agendamentosAtivos
+                    .map((ag) => {
+                      let acoesHTML = '';
+                      if (ag.status === 'agendado') {
+                        acoesHTML = `
+                          <div class="d-flex gap-1 justify-content-end">
+                            <button class="btn btn-sm btn-success fw-bold px-2 py-1" onclick="concluirServico('${ag.id}')" title="Confirmar Presença">
+                              <i class="bi bi-check-lg me-1"></i> Presença
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger fw-bold px-2 py-1" onclick="cancelarAluno('${ag.id}', '${ag.usuarios.nome}')" title="Cancelar / Falta">
+                              <i class="bi bi-x-lg"></i>
+                            </button>
+                          </div>
+                        `;
+                      } else {
+                        acoesHTML = `<div class="text-end"><span class="badge-custom ${ag.status === 'concluido' ? 'badge-status-concluido' : 'badge-status-cancelado'}">${ag.status.toUpperCase()}</span></div>`;
+                      }
+
+                      const telLimpo = (ag.usuarios.telefone || '').replace(/\D/g, '');
+                      const msgProf = encodeURIComponent(`Olá, ${ag.usuarios.nome}! Aqui é a equipe do curso ${curso.nome} no SENAC referente ao seu agendamento.`);
+                      const btnZap = telLimpo
+                        ? `<a href="https://wa.me/55${telLimpo}?text=${msgProf}" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1">
+                             <i class="bi bi-whatsapp text-success me-1"></i> ${ag.usuarios.telefone}
+                           </a>`
+                        : '<span class="text-muted small">Sem telefone</span>';
+
+                      return `
+                        <tr>
+                          <td class="align-middle fw-semibold text-dark font-heading">${ag.usuarios.nome}</td>
+                          <td class="align-middle small text-muted">${ag.usuarios.email}</td>
+                          <td class="align-middle">${btnZap}</td>
+                          <td class="align-middle" style="min-width: 180px;">${acoesHTML}</td>
+                        </tr>
+                      `;
+                    })
+                    .join("");
+
+                  tabelaModelos = `
+                    <div class="table-responsive mt-3">
+                      <table class="table table-custom align-middle">
+                        <thead>
+                          <tr>
+                            <th>Modelo</th>
+                            <th>Email</th>
+                            <th>Contato WhatsApp</th>
+                            <th class="text-end">Ações de Pauta</th>
+                          </tr>
+                        </thead>
+                        <tbody>${linhas}</tbody>
+                      </table>
+                    </div>
+                  `;
+                }
+
+                const vagasOcupadas = disp.vagas_ocupadas;
+                const vagasTotais = disp.vagas_totais;
+                const percentual = Math.round((vagasOcupadas / vagasTotais) * 100);
+
+                horariosHTML += `
+                  <div class="mb-4 p-3 p-md-4 bg-white border rounded-3 shadow-sm">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center border-bottom pb-3 gap-2">
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary px-3 py-2 fs-6 fw-bold">
+                          <i class="bi bi-clock-history me-1"></i> Aula: ${dataFormatada}
+                        </span>
+                      </div>
+                      <div class="d-flex align-items-center gap-2">
+                        <span class="text-muted small fw-semibold">Ocupação:</span>
+                        <span class="badge ${percentual >= 100 ? 'bg-danger' : (percentual >= 50 ? 'bg-warning text-dark' : 'bg-success')} px-2 py-1">
+                          ${vagasOcupadas} / ${vagasTotais} (${percentual}%)
+                        </span>
+                      </div>
+                    </div>
+                    ${tabelaModelos}
+                  </div>
+                `;
+              });
+            }
+
+            const itemOpen = index === 0 ? "show" : "";
+            const btnCollapsed = index === 0 ? "" : "collapsed";
+
+            accordion.innerHTML += `
+              <div class="accordion-item">
+                <h2 class="accordion-header">
+                  <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapse${curso.id}">
+                    <div class="d-flex align-items-center gap-2">
+                      <i class="bi bi-book-half text-primary"></i>
+                      <span>${curso.nome}</span>
+                    </div>
+                  </button>
+                </h2>
+                <div id="collapse${curso.id}" class="accordion-collapse collapse ${itemOpen}" data-bs-parent="#accordionTurmas">
+                  <div class="accordion-body">
+                    ${horariosHTML || '<div class="alert alert-light border text-muted mb-0"><i class="bi bi-info-circle me-1"></i> Sem horários abertos para este curso no momento.</div>'}
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+        } catch (error) {
+          accordion.innerHTML =
+            '<div class="alert alert-danger p-4 rounded-3"><i class="bi bi-wifi-off me-2"></i>Erro ao carregar os dados. Verifique a conexão com o servidor.</div>';
+        }
+      }
+
+      async function cancelarAluno(agendamentoId, nome){
+        if (!confirm(`Deseja remover ${nome} da pauta? A vaga será reaberta automaticamente para outro modelo.`)) return;
+        try {
+          const response = await fetch(`${API_URL}/profissional/agendamentos/${agendamentoId}/cancelar`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (response.ok) carregarMinhasTurmas();
+          else {
+            const err = await response.json();
+            alert(err.erro || 'Erro ao cancelar inscrição.');
+          }
+        } catch (error) { alert('Erro na conexão com o servidor.'); }
+      }
+
+      async function concluirServico(agendamentoId) {
+        if (!confirm("O modelo compareceu e o serviço prático foi realizado com sucesso?")) return;
+
+        try {
+          const response = await fetch(
+            `${API_URL}/profissional/agendamentos/${agendamentoId}/concluir`,
+            {
+              method: "PUT",
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          );
+
+          if (response.ok) {
+            carregarMinhasTurmas();
+          } else {
+            const data = await response.json();
+            alert(data.erro);
+          }
+        } catch (error) {
+          alert("Erro ao conectar ao servidor.");
+        }
+      }
+
+      carregarMinhasTurmas();
+    </script>
+    <script src="js/ui-effects.js"></script>
+  </body>
+</html>

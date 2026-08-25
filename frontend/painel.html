@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connect Senac - Painel do Modelo</title>
+    <!-- Favicon / Meta -->
+    <meta name="theme-color" content="#004a8d">
+    <link rel="icon" type="image/png" href="assets/logo-connect-senac.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Bootstrap 5 & Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Custom Design System -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-main d-flex flex-column min-vh-100 dashboard-page user-page">
+
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac">
+                <span>Connect Senac</span>
+                <span class="navbar-role-badge"><i class="bi bi-person-heart"></i> Modelo</span>
+            </a>
+            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+                <i class="bi bi-list fs-2 text-white"></i>
+            </button>
+            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+                <ul class="navbar-nav mx-auto my-2 my-lg-0 gap-1">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#vitrine"><i class="bi bi-grid-fill"></i> Agendar Serviço</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#meus-agendamentos"><i class="bi bi-calendar2-check-fill"></i> Meus Agendamentos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#minhas-avaliacoes"><i class="bi bi-star-half"></i> Minhas Avaliações</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <button class="btn btn-sm btn-outline-light px-3 py-1" id="btnSair">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="container py-4 flex-grow-1">
+
+        <!-- Hero Welcome Banner -->
+        <section class="hero-welcome-banner user-dashboard-hero fade-in-up">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill fw-bold mb-3">
+                        <i class="bi bi-sparkles"></i> Seja um Modelo SENAC
+                    </span>
+                    <h2>Agende procedimentos práticos gratuitos e com supervisão docente</h2>
+                    <p class="mb-0">Apoie a formação de novos profissionais em estética, beleza e saúde com serviços de alta qualidade realizados em nossas instalações.</p>
+                    <div class="hero-trust-row">
+                        <span><i class="bi bi-shield-check"></i> Supervisão profissional</span>
+                        <span><i class="bi bi-calendar2-heart"></i> Agendamento simples</span>
+                        <span><i class="bi bi-currency-dollar"></i> Serviços gratuitos</span>
+                    </div>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-4 mt-lg-0 model-hero-action">
+                    <div class="model-hero-visual" aria-hidden="true">
+                        <span class="model-visual-glow"></span>
+                        <span class="model-visual-spark model-visual-spark-one"></span>
+                        <span class="model-visual-spark model-visual-spark-two"></span>
+                        <img src="assets/model-booking-visual.png" alt="" loading="eager">
+                    </div>
+                    <a href="#vitrine" class="btn btn-orange btn-lg px-4 shadow">
+                        <i class="bi bi-search"></i> Explorar Vagas
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 1: Os Meus Agendamentos -->
+        <section class="mb-5 pt-2" id="meus-agendamentos">
+            <div class="section-header-custom">
+                <h4 class="section-title">
+                    <i class="bi bi-calendar-event text-primary"></i> Os Meus Agendamentos
+                </h4>
+            </div>
+            <div id="listaMeusAgendamentos" class="row g-3">
+                <!-- Renderizado via JS / Skeletons -->
+                <div class="col-12 text-center text-muted py-4">
+                    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                    A carregar os seus agendamentos...
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 2: Vitrine de Cursos Disponíveis -->
+        <section class="mb-5 pt-2" id="vitrine">
+            <div class="section-header-custom">
+                <h4 class="section-title">
+                    <i class="bi bi-stars text-warning"></i> Cursos Disponíveis para Modelos
+                </h4>
+                <div class="d-none d-md-block">
+                    <span class="badge-custom badge-status-ativo"><i class="bi bi-check-circle-fill"></i> Vagas Abertas</span>
+                </div>
+            </div>
+            
+            <div id="listaCursos" class="row g-4">
+                <!-- Renderizado via JS / Skeletons -->
+                <div class="col-12 text-center text-muted py-4">
+                    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                    A carregar o catálogo de serviços...
+                </div>
+            </div>
+        </section>
+
+        <!-- SECÇÃO 3: As Minhas Avaliações -->
+        <section class="mb-5 pt-2" id="minhas-avaliacoes">
+            <div class="section-header-custom">
+                <h4 class="section-title">
+                    <i class="bi bi-chat-heart text-primary"></i> As Minhas Avaliações
+                </h4>
+            </div>
+            <div class="row g-3" id="listaMeusFeedbacks">
+                <!-- Renderizado via JS / Skeletons -->
+                <div class="col-12 text-center text-muted py-4">
+                    <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                    A carregar o seu histórico...
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal 1: Agendamento e Horários -->
+    <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalCursoNome" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title" id="modalCursoNome">Escolher Horário</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <div class="schedule-intro">
+                        <span class="schedule-intro-icon"><i class="bi bi-calendar2-week"></i></span>
+                        <div><p class="small text-muted mb-1">Você está agendando</p><p class="mb-0" id="modalCursoDescricao"></p></div>
+                    </div>
+                    <div class="schedule-label"><span>Escolha uma opção</span><small><i class="bi bi-hand-index-thumb"></i> Toque para selecionar</small></div>
+                    <div id="gradeHorarios" class="schedule-grid" role="radiogroup" aria-label="Horários disponíveis">
+                        <div class="schedule-loading"><span class="spinner-border spinner-border-sm"></span> Buscando os melhores horários...</div>
+                    </div>
+                    <div class="visually-hidden">
+                        <select class="form-select" id="selectHorarios" tabindex="-1" aria-label="Horário selecionado"><option value="" disabled selected>Selecione um horário</option></select>
+                    </div>
+                    <div id="resumoHorario" class="schedule-summary d-none" aria-live="polite"></div>
+                    <div id="msgAgendamento" class="text-center small fw-bold mb-2"></div>
+                </div>
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-light-custom" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-brand px-4" id="btnConfirmarAgendamento">
+                        Confirmar agendamento <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 2: Enviar Feedback -->
+    <div class="modal fade" id="modalFeedback" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                    <h5 class="modal-title"><i class="bi bi-star-fill text-warning me-1"></i> Avaliar Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body modal-body-custom">
+                    <p class="small text-muted mb-4">Como foi a sua experiência? A sua opinião é fundamental para aprimorar as aulas práticas de nossos alunos!</p>
+
+                    <form id="formFeedback">
+                        <input type="hidden" id="feedbackAgendamentoId">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold small text-secondary">Nota de Avaliação</label>
+                            <select class="form-select form-select-lg" id="feedbackNota" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (5) - Excelente</option>
+                                <option value="4">⭐⭐⭐⭐ (4) - Muito Bom</option>
+                                <option value="3">⭐⭐⭐ (3) - Bom</option>
+                                <option value="2">⭐⭐ (2) - Regular</option>
+                                <option value="1">⭐ (1) - Insatisfatório</option>
+                            </select>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="feedbackComentario" style="height: 110px" placeholder="Deixe um comentário"></textarea>
+                            <label for="feedbackComentario"><i class="bi bi-chat-dots me-1"></i> Comentário (Opcional)</label>
+                        </div>
+
+                        <div id="msgFeedback" class="text-center small fw-bold mb-2"></div>
+
+                        <button type="submit" class="btn btn-brand w-100 py-3 mt-2" id="btnEnviarFeedback">
+                            <i class="bi bi-send-fill me-1"></i> Enviar Avaliação
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 3: Detalhes do Curso e Avaliações -->
+    <div class="modal fade" id="modalDetalhesCurso" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content modal-content-custom">
+                
+                <!-- Capa do Modal -->
+                <div class="position-relative" style="height: 240px; background-color: var(--senac-blue-light);">
+                    <img id="detalheCursoImagem" src="" class="w-100 h-100" style="object-fit: cover;" alt="Capa do Curso">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-dark rounded-circle shadow" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+
+                <div class="modal-body modal-body-custom pt-3">
+                    
+                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+                        <div>
+                            <h3 class="modal-title fw-bold" id="detalheCursoNome" style="color: var(--senac-blue-dark);">Nome do Curso</h3>
+                            <div class="text-muted small mt-1 d-flex flex-wrap gap-3">
+                                <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> <span id="detalheCursoLocal">Localização</span></span>
+                                <span><i class="bi bi-person-badge-fill text-primary me-1"></i> Prof. <span id="detalheCursoProf">Nome</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-2">Sobre o Procedimento</h6>
+                        <p id="detalheCursoDescricao" class="text-secondary mb-0"></p>
+                    </div>
+
+                    <!-- Bloco de Restrições -->
+                    <div id="blocoRestricoes" class="mb-4">
+                        <div class="p-3 bg-danger bg-opacity-10 border-start border-danger border-4 rounded-end">
+                            <h6 class="fw-bold text-danger mb-1"><i class="bi bi-exclamation-triangle-fill me-1"></i> Atenção (Restrições para Modelos)</h6>
+                            <p id="detalheCursoRestricoes" class="text-secondary small mb-0"></p>
+                        </div>
+                    </div>
+
+                    <!-- Avaliações -->
+                    <div class="border-top pt-3 mt-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-star-fill text-warning me-1"></i> Avaliações de Outros Modelos</h6>
+                        <div id="detalheCursoAvaliacoes" class="pe-2" style="max-height: 220px; overflow-y: auto;">
+                            <div class="text-muted small text-center py-2">A carregar avaliações...</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-light-custom" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-brand px-4" id="btnIrParaHorarios">
+                        <i class="bi bi-calendar-plus me-1"></i> Ver Horários Disponíveis
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer-custom">
+        <div class="container text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                        <span class="badge bg-warning text-dark fw-bold">SENAC</span>
+                        <strong class="text-white">Connect Senac V2.0</strong>
+                    </div>
+                    <p class="small text-white-50 mb-0 mt-1">Plataforma oficial de integração e agendamento de modelos para aulas práticas.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end text-white-50 small">
+                    <span>&copy; Senac. Todos os direitos reservados.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap & Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/painel.js"></script>
+    <script src="js/ui-effects.js"></script>
+</body>
+</html>
