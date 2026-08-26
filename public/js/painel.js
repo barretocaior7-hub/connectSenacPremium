@@ -106,6 +106,12 @@ async function carregarCursos(){
 
         if (!Array.isArray(baseCursos)) baseCursos = [];
         renderizarVitrineCursos();
+
+        const requestedCourseId = new URLSearchParams(window.location.search).get('curso');
+        if (requestedCourseId && window.cursosAtivosMap.has(String(requestedCourseId))) {
+            window.history.replaceState({}, '', `${window.location.pathname}#vitrine`);
+            setTimeout(() => abrirModalDetalhesCurso(requestedCourseId), 250);
+        }
     } catch (error) {
         divCursos.innerHTML = `
             <div class="col-12">

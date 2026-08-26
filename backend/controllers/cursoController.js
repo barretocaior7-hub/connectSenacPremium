@@ -88,3 +88,21 @@ exports.arquivar = async (req, res) => {
         res.status(500).json({ erro: 'Erro ao arquivar o curso.' });
     }
 };
+
+exports.buscarAtivoPorId = async (req, res) => {
+    try {
+        const { data: curso, error } = await supabase
+            .from('cursos')
+            .select(`id, nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, status, usuarios ( nome )`)
+            .eq('id', req.params.id)
+            .eq('status', 'ativo')
+            .maybeSingle();
+
+        if (error) throw error;
+        if (!curso) return res.status(404).json({ erro: 'Curso não encontrado.' });
+
+        res.json(curso);
+    } catch (error) {
+        res.status(500).json({ erro: 'Erro ao buscar o curso.' });
+    }
+};

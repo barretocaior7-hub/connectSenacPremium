@@ -2,8 +2,14 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { jwtSecret } = require('../config/auth');
 const crypto = require('crypto'); // Biblioteca nativa do Node.js para criptografia
 
+const gerarToken = (utilizador) => jwt.sign(
+    { id: utilizador.id, email: utilizador.email, perfil: utilizador.perfil },
+    jwtSecret,
+    { expiresIn: '24h' }
+);
 
 // 1. LÓGICA DE REGISTO (CADASTRO)
 exports.registrar = async (req, res) => {
@@ -66,7 +72,18 @@ exports.registrar = async (req, res) => {
 
         if (erroInsercao) throw erroInsercao;
 
-        res.status(201).json({ mensagem: 'Utilizador registado com sucesso!', id: novoUtilizador[0].id });
+        const utilizadorCriado = novoUtilizador[0];
+        const token = gerarToken(utilizadorCriado);
+
+        res.status(201).json({
+            mensagem: 'Utilizador registado e autenticado com sucesso!',
+            token,
+            utilizador: {
+                nome: utilizadorCriado.nome,
+                email: utilizadorCriado.email,
+                perfil: utilizadorCriado.perfil
+            }
+        });
     } catch (error) {
         console.error('Erro no registo:', error.message);
         res.status(500).json({ erro: 'Erro interno ao processar o registo.' });
@@ -99,11 +116,7 @@ exports.login = async (req, res) => {
 
         // Gerar o Token de Autenticação (JWT)
         // Guardamos o 'id' e o 'perfil' (role) dentro do token para o sistema de permissões (RBAC)
-        const token = jwt.sign(
-            { id: utilizador.id, email: utilizador.email, perfil: utilizador.perfil },
-            process.env.JWT_SECRET || 'chave_super_secreta_senac',
-            { expiresIn: '24h' }
-        );
+        const token = gerarToken(utilizador);
 
         res.json({
             mensagem: 'Login realizado com sucesso!',

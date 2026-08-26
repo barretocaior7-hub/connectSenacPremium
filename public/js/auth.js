@@ -7,6 +7,37 @@ const API_URL = isLocalDev
   ? 'http://localhost:3000/api/usuarios' 
   : `${window.location.origin}/api/usuarios`;
 
+function getSafeReturnUrl() {
+  const rawReturnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+  if (!rawReturnUrl || rawReturnUrl.startsWith("//")) return null;
+
+  try {
+    const parsed = new URL(rawReturnUrl, window.location.origin);
+    if (parsed.origin !== window.location.origin) return null;
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch (_) {
+    return null;
+  }
+}
+
+function redirectAfterAuthentication(utilizador) {
+  const returnUrl = getSafeReturnUrl();
+  const perfil = utilizador?.perfil;
+
+  if (perfil === "admin") return window.location.assign("admin.html");
+  if (perfil === "coordenador") return window.location.assign("coordenador.html");
+  if (perfil === "profissional") return window.location.assign("profissional.html");
+  window.location.assign(returnUrl || "painel.html");
+}
+
+function preserveReturnUrl(link) {
+  const returnUrl = getSafeReturnUrl();
+  if (!link || !returnUrl) return;
+  const destination = new URL(link.getAttribute("href"), window.location.href);
+  destination.searchParams.set("returnUrl", returnUrl);
+  link.href = destination.href;
+}
+
 // Helper para alternar visibilidade de senhas
 function setupPasswordToggle(buttonId, inputId, iconId) {
   const btn = document.getElementById(buttonId);
@@ -29,6 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
   setupPasswordToggle("btnToggleConfirmarCad", "confirmar_senha", "iconToggleConfirmarCad");
   setupPasswordToggle("btnToggleNovaSenha", "novaSenha", "iconToggleNovaSenha");
   setupPasswordToggle("btnToggleConfirmarNovaSenha", "confirmarNovaSenha", "iconToggleConfirmarNovaSenha");
+  preserveReturnUrl(document.getElementById("linkCadastro"));
+  preserveReturnUrl(document.getElementById("linkLogin"));
 
   const loginPassword = document.getElementById("senha");
   const passwordPeekHint = document.getElementById("passwordPeekHint");
@@ -85,19 +118,7 @@ if (formLogin) {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-
-        // Redirecionamento Inteligente baseado no Perfil (RBAC)
-        const perfil = data.utilizador.perfil;
-
-        if (perfil === "admin") {
-          window.location.href = "admin.html";
-        } else if (perfil === "coordenador") {
-          window.location.href = "coordenador.html";
-        } else if (perfil === "profissional") {
-          window.location.href = "profissional.html";
-        } else {
-          window.location.href = "painel.html"; // Candidato/Modelo
-        }
+        redirectAfterAuthentication(data.utilizador);
       } else {
         if (msgErro) {
           msgErro.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro || "Falha na autenticação. Verifique os seus dados."}`;
@@ -171,10 +192,11 @@ if (formCadastro) {
       const data = await response.json();
 
       if (response.ok) {
-        msgDiv.innerHTML = `<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle-fill me-1"></i> Conta criada com sucesso! A redirecionar para o login...</div>`;
+        localStorage.setItem("token", data.token);
+        msgDiv.innerHTML = `<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle-fill me-1"></i> Conta criada! A preparar a sua área...</div>`;
         setTimeout(() => {
-          window.location.href = "index.html";
-        }, 1800);
+          redirectAfterAuthentication(data.utilizador);
+        }, 700);
       } else {
         msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
         if (submitBtn) {
