@@ -10,16 +10,16 @@ const autorizarPerfis = require('../middlewares/rbacMiddleware');
 router.get('/usuarios', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.listarUtilizadores);
 
 // 2. Apenas o ADMIN supremo pode bloquear utilizadores
-router.put('/usuarios/:id/bloquear', authMiddleware, autorizarPerfis('admin'), adminController.alterarStatusBloqueio);
+router.put('/usuarios/:id/bloquear', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.alterarStatusBloqueio);
 
 // 3. Apenas o ADMIN supremo pode criar outros colaboradores (Coordenador não tem este acesso)
-router.post('/colaboradores', authMiddleware, autorizarPerfis('admin'), adminController.criarColaborador);
+router.post('/colaboradores', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.criarColaborador);
 
 router.get('/profissionais', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.listarProfissionais);
 
 router.delete('/usuarios/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.excluirUsuario);
 
-router.put('/usuarios/:id/perfil', authMiddleware, autorizarPerfis('admin'), adminController.alterarPerfil);
+router.put('/usuarios/:id/perfil', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.alterarPerfil);
 
 // 6. Pautas Globais de todas as turmas e presenças
 router.get('/pautas-globais', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.listarPautasGlobais);

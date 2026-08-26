@@ -2,6 +2,53 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const interactiveSelector = ".btn, button, [role='button'], .nav-link, .dropdown-item";
 
+  const initMobileSidebar = () => {
+    const sidebar = document.querySelector(".dashboard-page .navbar-custom .navbar-collapse");
+    const toggler = document.querySelector(".dashboard-page .navbar-custom .navbar-toggler");
+    if (!sidebar || !toggler || typeof bootstrap === "undefined") return;
+
+    sidebar.classList.add("mobile-nav-sidebar");
+    toggler.classList.add("mobile-sidebar-toggle");
+    toggler.setAttribute("aria-label", "Abrir menu lateral");
+
+    if (!sidebar.querySelector(".mobile-sidebar-header")) {
+      sidebar.insertAdjacentHTML("afterbegin", `
+        <div class="mobile-sidebar-header">
+          <div><span>Connect Senac</span><small>Menu de navegação</small></div>
+          <button type="button" class="mobile-sidebar-close" aria-label="Fechar menu lateral"><i class="bi bi-x-lg"></i></button>
+        </div>`);
+    }
+
+    const backdrop = document.createElement("button");
+    backdrop.type = "button";
+    backdrop.className = "mobile-sidebar-backdrop";
+    backdrop.setAttribute("aria-label", "Fechar menu lateral");
+    document.body.appendChild(backdrop);
+
+    const collapse = bootstrap.Collapse.getOrCreateInstance(sidebar, { toggle: false });
+    const closeSidebar = () => collapse.hide();
+
+    sidebar.addEventListener("show.bs.collapse", () => {
+      document.body.classList.add("mobile-sidebar-open");
+      toggler.setAttribute("aria-label", "Fechar menu lateral");
+    });
+    sidebar.addEventListener("hidden.bs.collapse", () => {
+      document.body.classList.remove("mobile-sidebar-open");
+      toggler.setAttribute("aria-label", "Abrir menu lateral");
+    });
+    sidebar.querySelector(".mobile-sidebar-close")?.addEventListener("click", closeSidebar);
+    backdrop.addEventListener("click", closeSidebar);
+    sidebar.querySelectorAll(".nav-link").forEach((link) => link.addEventListener("click", () => {
+      if (window.matchMedia("(max-width: 991.98px)").matches) closeSidebar();
+    }));
+    window.addEventListener("resize", () => {
+      if (window.innerWidth >= 992) {
+        document.body.classList.remove("mobile-sidebar-open");
+        collapse.hide();
+      }
+    });
+  };
+
   const markInteractiveElements = (root = document) => {
     root.querySelectorAll(interactiveSelector).forEach((element) => {
       element.classList.add("ui-clickable");
@@ -52,6 +99,7 @@
   });
 
   markInteractiveElements();
+  initMobileSidebar();
   new MutationObserver((mutations) => {
     mutations.forEach(({ addedNodes }) => addedNodes.forEach((node) => {
       if (node.nodeType !== Node.ELEMENT_NODE) return;

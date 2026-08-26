@@ -35,31 +35,67 @@ exports.criar = async (req, res) => {
             return res.status(400).json({ erro: 'Infelizmente, não há mais vagas para este horário.' });
         }
 
-        // Verificar se o candidato já possui agendamento ativo nesta mesma disponibilidade
-        const { data: agExistente } = await supabase
+        // Bloqueia choque entre cursos apenas enquanto o agendamento estiver ativo.
+        // Assim que o utilizador cancela, pode escolher outro curso no mesmo horário.
+        const { data: conflitoHorario, error: erroConflito } = await supabase
             .from('agendamentos')
-            .select('id')
+            .select('id, disponibilidade_id, disponibilidades!inner(data_hora)')
             .eq('usuario_id', usuario_id)
-            .eq('disponibilidade_id', disponibilidade_id)
             .eq('status', 'agendado')
+            .eq('disponibilidades.data_hora', disponibilidade.data_hora)
+            .limit(1)
             .maybeSingle();
 
-        if (agExistente) {
-            return res.status(400).json({ erro: 'Você já possui uma inscrição ativa para este horário.' });
+        if (erroConflito) throw erroConflito;
+        if (conflitoHorario) {
+            return res.status(409).json({
+                erro: conflitoHorario.disponibilidade_id === disponibilidade_id
+                    ? 'Você já possui uma inscrição ativa para esta vaga.'
+                    : 'Você já possui outro curso agendado neste horário. Cancele-o antes de escolher este curso.'
+            });
         }
 
-        // 2. Inserir o Agendamento
-        const { data: novoAgendamento, error: erroAgendamento } = await supabase
+        // Procura um registo anterior para permitir reagendar uma vaga cancelada,
+        // inclusive quando o banco possui UNIQUE(usuario_id, disponibilidade_id).
+        const { data: agendamentoAnterior, error: erroAnterior } = await supabase
             .from('agendamentos')
-            .insert([{ usuario_id, disponibilidade_id, status: 'agendado' }])
-            .select();
+            .select('id, status')
+            .eq('usuario_id', usuario_id)
+            .eq('disponibilidade_id', disponibilidade_id)
+            .maybeSingle();
 
-        if (erroAgendamento) {
-            // Se cair na regra UNIQUE do banco de dados (mesmo utilizador e mesma vaga)
-            if (erroAgendamento.code === '23505') {
-                return res.status(400).json({ erro: 'Você já está agendado para este exato horário!' });
+        if (erroAnterior) throw erroAnterior;
+
+        let novoAgendamento;
+        let agendamentoReativado = false;
+
+        if (agendamentoAnterior) {
+            if (agendamentoAnterior.status !== 'cancelado') {
+                return res.status(409).json({ erro: 'Esta inscrição não pode ser reativada.' });
             }
-            throw erroAgendamento;
+
+            const { data, error } = await supabase
+                .from('agendamentos')
+                .update({ status: 'agendado' })
+                .eq('id', agendamentoAnterior.id)
+                .select()
+                .single();
+
+            if (error) throw error;
+            novoAgendamento = data;
+            agendamentoReativado = true;
+        } else {
+            const { data, error } = await supabase
+                .from('agendamentos')
+                .insert([{ usuario_id, disponibilidade_id, status: 'agendado' }])
+                .select()
+                .single();
+
+            if (error?.code === '23505') {
+                return res.status(409).json({ erro: 'Esta inscrição já existe. Atualize a página e tente novamente.' });
+            }
+            if (error) throw error;
+            novoAgendamento = data;
         }
 
         // 3. Atualizar o contador de vagas ocupadas com proteção
@@ -69,14 +105,17 @@ exports.criar = async (req, res) => {
             .eq('id', disponibilidade_id);
 
         if (erroUpdateDisp) {
-            // Rollback em caso de erro
-            await supabase.from('agendamentos').delete().eq('id', novoAgendamento[0].id);
+            if (agendamentoReativado) {
+                await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', novoAgendamento.id);
+            } else {
+                await supabase.from('agendamentos').delete().eq('id', novoAgendamento.id);
+            }
             throw erroUpdateDisp;
         }
 
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
-            agendamento: novoAgendamento[0]
+            agendamento: novoAgendamento
         });
 
     } catch (error) {
@@ -143,16 +182,26 @@ exports.cancelar = async (req, res) => {
             });
         }
 
-        // Atualiza status para cancelado
-        await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', id);
+        const { error: erroCancelamento } = await supabase
+            .from('agendamentos')
+            .update({ status: 'cancelado' })
+            .eq('id', id)
+            .eq('status', 'agendado');
+
+        if (erroCancelamento) throw erroCancelamento;
 
         // Liberta a vaga na tabela de disponibilidades (se > 0)
         const disp = agendamento.disponibilidades;
         if (disp && disp.vagas_ocupadas > 0) {
-            await supabase
+            const { error: erroLibertarVaga } = await supabase
                 .from('disponibilidades')
                 .update({ vagas_ocupadas: disp.vagas_ocupadas - 1 })
                 .eq('id', disp.id);
+
+            if (erroLibertarVaga) {
+                await supabase.from('agendamentos').update({ status: 'agendado' }).eq('id', id);
+                throw erroLibertarVaga;
+            }
         }
 
         res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi libertada.' });
