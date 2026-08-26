@@ -47,6 +47,20 @@ const modalAgendamento = modalAgendamentoEl ? new bootstrap.Modal(modalAgendamen
 const modalFeedback = modalFeedbackEl ? new bootstrap.Modal(modalFeedbackEl) : null;
 const modalDetalhesCurso = modalDetalhesCursoEl ? new bootstrap.Modal(modalDetalhesCursoEl) : null;
 
+// Helper para sanitizar saídas contra vulnerabilidades XSS
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Mapa para armazenamento seguro de cursos em memória
+window.cursosAtivosMap = new Map();
+
 // ==========================================
 // 1. CARREGAR A VITRINE DE CURSOS
 // ==========================================
@@ -87,6 +101,8 @@ async function carregarCursos(){
         const cursos = await response.json();
 
         divCursos.innerHTML = '';
+        window.cursosAtivosMap.clear();
+
         if (!Array.isArray(cursos) || cursos.length === 0) {
             divCursos.innerHTML = `
                 <div class="col-12">
@@ -101,20 +117,24 @@ async function carregarCursos(){
         }
 
         cursos.forEach(curso => {
-            const profNome = curso.usuarios ? curso.usuarios.nome : 'Docente Responsável';
-            const local = curso.localizacao || 'SENAC';
-            const imagem = curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60';
-            const descResumo = curso.descricao ? (curso.descricao.length > 90 ? curso.descricao.substring(0, 90) + '...' : curso.descricao) : 'Procedimento prático supervisionado.';
+            window.cursosAtivosMap.set(String(curso.id), curso);
+
+            const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Docente Responsável');
+            const local = escapeHTML(curso.localizacao || 'SENAC');
+            const imagem = escapeHTML(curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60');
+            const nomeFormatado = escapeHTML(curso.nome);
+            const descRaw = curso.descricao || 'Procedimento prático supervisionado.';
+            const descResumo = escapeHTML(descRaw.length > 90 ? descRaw.substring(0, 90) + '...' : descRaw);
 
             const card = `
                 <div class="col-md-6 col-lg-4">
-                    <div class="card-premium card-course-interactive" onclick='abrirModalDetalhesCurso(${JSON.stringify(curso).replace(/'/g, "&#39;")})'>
+                    <div class="card-premium card-course-interactive" onclick="abrirModalDetalhesCurso('${curso.id}')">
                         <div class="card-img-container">
-                            <img src="${imagem}" alt="${curso.nome}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
+                            <img src="${imagem}" alt="${nomeFormatado}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
                             <span class="course-badge"><i class="bi bi-tag-fill me-1"></i> Curso SENAC</span>
                         </div>
                         <div class="card-body p-4 d-flex flex-column">
-                            <h5 class="fw-bold mb-2 text-dark font-heading">${curso.nome}</h5>
+                            <h5 class="fw-bold mb-2 text-dark font-heading">${nomeFormatado}</h5>
                             <div class="d-flex align-items-center text-muted small mb-3">
                                 <i class="bi bi-geo-alt-fill text-danger me-1"></i>
                                 <span class="text-truncate">${local}</span>
@@ -147,8 +167,11 @@ async function carregarCursos(){
 // ==========================================
 // 1.5 MODAL DE DETALHES DO CURSO
 // ==========================================
-function abrirModalDetalhesCurso(curso){
+function abrirModalDetalhesCurso(cursoParam){
     if (!modalDetalhesCurso) return;
+
+    const curso = typeof cursoParam === 'object' ? cursoParam : window.cursosAtivosMap.get(String(cursoParam));
+    if (!curso) return;
 
     document.getElementById('detalheCursoNome').textContent = curso.nome;
     document.getElementById('detalheCursoProf').textContent = curso.usuarios ? curso.usuarios.nome : 'Docente a definir';
@@ -198,12 +221,13 @@ function abrirModalDetalhesCurso(curso){
             feedbacks.forEach(f => {
                 const estrelas = '⭐'.repeat(f.nota);
                 const dataFormatada = new Date(f.created_at).toLocaleDateString('pt-BR');
-                const comentarioTexto = f.comentario ? `"${f.comentario}"` : '<span class="text-muted fst-italic">Avaliação sem comentário adicional.</span>';
+                const nomeAvaliador = escapeHTML(f.avaliador_nome || 'Modelo Anônimo');
+                const comentarioTexto = f.comentario ? `"${escapeHTML(f.comentario)}"` : '<span class="text-muted fst-italic">Avaliação sem comentário adicional.</span>';
 
                 html += `
                     <div class="bg-light p-3 rounded mb-2 border-start border-warning border-4">
                         <div class="d-flex justify-content-between align-items-center mb-1">
-                            <strong class="small text-dark font-heading">${f.avaliador_nome || 'Modelo Anônimo'}</strong>
+                            <strong class="small text-dark font-heading">${nomeAvaliador}</strong>
                             <span class="small text-muted">${dataFormatada}</span>
                         </div>
                         <div class="mb-1 text-warning small">${estrelas}</div>
@@ -362,7 +386,8 @@ async function carregarMeusAgendamentos(){
         }
 
         agendamentos.forEach(ag => {
-            const cursoNome = ag.disponibilidades && ag.disponibilidades.cursos ? ag.disponibilidades.cursos.nome : 'Curso Senac';
+            const rawCursoNome = ag.disponibilidades && ag.disponibilidades.cursos ? ag.disponibilidades.cursos.nome : 'Curso Senac';
+            const cursoNome = escapeHTML(rawCursoNome);
             const dataHora = ag.disponibilidades && ag.disponibilidades.data_hora ? new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
             let badge = '';
             let acoesHTML = '';
@@ -423,7 +448,7 @@ async function cancelarAgendamento(agendamentoId){
         if (response.ok) {
             carregarMeusAgendamentos();
         } else {
-            if (msgDiv) msgDiv.innerHTML = `<span class="text-danger fw-bold small"><i class="bi bi-exclamation-circle-fill me-1"></i> ${data.erro}</span>`;
+            if (msgDiv) msgDiv.innerHTML = `<span class="text-danger fw-bold small"><i class="bi bi-exclamation-circle-fill me-1"></i> ${escapeHTML(data.erro)}</span>`;
         }
     } catch (error) {
         if (msgDiv) msgDiv.innerHTML = '<span class="text-danger small">Erro ao processar cancelamento.</span>';
@@ -469,7 +494,7 @@ if (formFeedback) {
             const data = await response.json();
 
             if (response.ok) {
-                msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check2-circle me-1"></i> ${data.mensagem}</div>`;
+                msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check2-circle me-1"></i> ${escapeHTML(data.mensagem)}</div>`;
                 setTimeout(() => {
                     modalFeedback.hide();
                     if (btnSubmit) {
@@ -480,7 +505,7 @@ if (formFeedback) {
                     carregarMeusAgendamentos();
                 }, 1400);
             } else {
-                msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> ${data.erro}</div>`;
+                msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> ${escapeHTML(data.erro)}</div>`;
                 if (btnSubmit) {
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalBtn;
@@ -524,13 +549,14 @@ async function carregarMeusFeedbacks(){
         feedbacks.forEach(f => {
             const estrelas = '⭐'.repeat(f.nota);
             const dataFormatada = new Date(f.created_at).toLocaleDateString('pt-BR');
-            const comentarioTexto = f.comentario ? `"${f.comentario}"` : '<span class="text-muted fst-italic">Avaliação registrada sem comentário escrito.</span>';
+            const cursoNome = escapeHTML(f.curso_nome || 'Curso SENAC');
+            const comentarioTexto = f.comentario ? `"${escapeHTML(f.comentario)}"` : '<span class="text-muted fst-italic">Avaliação registrada sem comentário escrito.</span>';
 
             const card = `
                 <div class="col-12 col-md-6 col-lg-4">
                     <div class="card-premium h-100 p-4">
                         <div class="d-flex justify-content-between align-items-center mb-2 gap-2">
-                            <span class="fw-bold text-dark text-truncate font-heading">${f.curso_nome}</span>
+                            <span class="fw-bold text-dark text-truncate font-heading">${cursoNome}</span>
                             <span class="badge bg-light text-secondary border small">${dataFormatada}</span>
                         </div>
                         <div class="mb-3 fs-6 text-warning">${estrelas} <span class="badge bg-warning bg-opacity-10 text-dark ms-1">${f.nota}.0</span></div>

@@ -15,10 +15,10 @@ exports.criar = async (req, res) => {
     }
 
     try {
-        // 1. Verificar se a vaga existe e tem espaço (Regra de Overbooking)
+        // 1. Verificar se a vaga existe, se a data é futura e se tem espaço (Regra de Overbooking)
         const { data: disponibilidade, error: erroDisp } = await supabase
             .from('disponibilidades')
-            .select('vagas_totais, vagas_ocupadas')
+            .select('id, data_hora, vagas_totais, vagas_ocupadas')
             .eq('id', disponibilidade_id)
             .single();
 
@@ -26,8 +26,26 @@ exports.criar = async (req, res) => {
             return res.status(404).json({ erro: 'Horário não encontrado.' });
         }
 
+        // Validação contra agendamento retroativo
+        if (new Date(disponibilidade.data_hora) <= new Date()) {
+            return res.status(400).json({ erro: 'Este horário já ocorreu ou encerrou as inscrições.' });
+        }
+
         if (disponibilidade.vagas_ocupadas >= disponibilidade.vagas_totais) {
             return res.status(400).json({ erro: 'Infelizmente, não há mais vagas para este horário.' });
+        }
+
+        // Verificar se o candidato já possui agendamento ativo nesta mesma disponibilidade
+        const { data: agExistente } = await supabase
+            .from('agendamentos')
+            .select('id')
+            .eq('usuario_id', usuario_id)
+            .eq('disponibilidade_id', disponibilidade_id)
+            .eq('status', 'agendado')
+            .maybeSingle();
+
+        if (agExistente) {
+            return res.status(400).json({ erro: 'Você já possui uma inscrição ativa para este horário.' });
         }
 
         // 2. Inserir o Agendamento
@@ -44,11 +62,17 @@ exports.criar = async (req, res) => {
             throw erroAgendamento;
         }
 
-        // 3. Atualizar o contador de vagas ocupadas
-        await supabase
+        // 3. Atualizar o contador de vagas ocupadas com proteção
+        const { error: erroUpdateDisp } = await supabase
             .from('disponibilidades')
-            .update({ vagas_ocupadas: disponibilidade.vagas_ocupadas + 1 })
+            .update({ vagas_ocupadas: Math.min(disponibilidade.vagas_totais, disponibilidade.vagas_ocupadas + 1) })
             .eq('id', disponibilidade_id);
+
+        if (erroUpdateDisp) {
+            // Rollback em caso de erro
+            await supabase.from('agendamentos').delete().eq('id', novoAgendamento[0].id);
+            throw erroUpdateDisp;
+        }
 
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
@@ -104,8 +128,8 @@ exports.cancelar = async (req, res) => {
             return res.status(404).json({ erro: 'Agendamento não encontrado ou não pertence a você.' });
         }
 
-        if (agendamento.status === 'cancelado') {
-            return res.status(400).json({ erro: 'Este agendamento já está cancelado.' });
+        if (agendamento.status !== 'agendado') {
+            return res.status(400).json({ erro: 'Apenas agendamentos ativos podem ser cancelados.' });
         }
 
         // Validação da Regra das 2 Horas
@@ -122,11 +146,14 @@ exports.cancelar = async (req, res) => {
         // Atualiza status para cancelado
         await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', id);
 
-        // Liberta a vaga na tabela de disponibilidades
-        await supabase
-            .from('disponibilidades')
-            .update({ vagas_ocupadas: agendamento.disponibilidades.vagas_ocupadas - 1 })
-            .eq('id', agendamento.disponibilidades.id);
+        // Liberta a vaga na tabela de disponibilidades (se > 0)
+        const disp = agendamento.disponibilidades;
+        if (disp && disp.vagas_ocupadas > 0) {
+            await supabase
+                .from('disponibilidades')
+                .update({ vagas_ocupadas: disp.vagas_ocupadas - 1 })
+                .eq('id', disp.id);
+        }
 
         res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi libertada.' });
     } catch (error) {
@@ -152,13 +179,20 @@ exports.adminCancelar = async (req, res) => {
 
         if (!agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' });
 
+        if (agendamento.status !== 'agendado') {
+            return res.status(400).json({ erro: 'Apenas agendamentos ativos podem ser cancelados.' });
+        }
+
         // O Admin cancela sem verificar dono e sem verificar a regra das 2 horas!
         await supabase.from('agendamentos').update({ status: 'cancelado' }).eq('id', id);
 
-        await supabase
-            .from('disponibilidades')
-            .update({ vagas_ocupadas: agendamento.disponibilidades.vagas_ocupadas - 1 })
-            .eq('id', agendamento.disponibilidades.id);
+        const disp = agendamento.disponibilidades;
+        if (disp && disp.vagas_ocupadas > 0) {
+            await supabase
+                .from('disponibilidades')
+                .update({ vagas_ocupadas: disp.vagas_ocupadas - 1 })
+                .eq('id', disp.id);
+        }
 
         res.json({ mensagem: '[ADMIN] Agendamento cancelado forçadamente.' });
     } catch (error) {

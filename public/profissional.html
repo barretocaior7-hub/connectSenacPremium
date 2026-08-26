@@ -132,15 +132,25 @@
         window.location.href = "index.html";
       });
 
+      // Helper para sanitizar saídas contra vulnerabilidades XSS
+      function escapeHTML(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
       async function carregarMinhasTurmas() {
         const accordion = document.getElementById("accordionTurmas");
+        if (!accordion) return;
+
         try {
-          const response = await fetch(
-            `${API_URL}/profissional/minhas-turmas`,
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
+          const response = await fetch(`${API_URL}/profissional/minhas-turmas`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
           if (response.status === 401) {
             localStorage.removeItem("token");
@@ -152,22 +162,23 @@
           accordion.innerHTML = "";
 
           if (!response.ok) {
-            accordion.innerHTML = `<div class="alert alert-danger border-0 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-2"></i>${cursos.erro || 'Erro ao carregar dados.'}</div>`;
+            accordion.innerHTML = `<div class="alert alert-danger p-4 rounded-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>${escapeHTML(cursos.erro || 'Erro ao carregar as turmas.')}</div>`;
             return;
           }
 
-          if (cursos.length === 0) {
+          if (!Array.isArray(cursos) || cursos.length === 0) {
             accordion.innerHTML = `
               <div class="empty-state-card py-5">
                 <div class="empty-state-icon"><i class="bi bi-journal-x"></i></div>
-                <h5 class="empty-state-title">Nenhum curso ativo vinculado</h5>
-                <p class="empty-state-desc">Você ainda não possui disciplinas com turmas práticas abertas sob sua responsabilidade.</p>
+                <h5 class="empty-state-title">Nenhuma turma atribuída</h5>
+                <p class="empty-state-desc">Você ainda não possui cursos com horários cadastrados sob sua responsabilidade docente.</p>
               </div>
             `;
             return;
           }
 
           cursos.forEach((curso, index) => {
+            const cursoNome = escapeHTML(curso.nome);
             let horariosHTML = "";
 
             if (curso.disponibilidades && curso.disponibilidades.length > 0) {
@@ -195,6 +206,10 @@
                 } else {
                   let linhas = agendamentosAtivos
                     .map((ag) => {
+                      const nomeModelo = escapeHTML(ag.usuarios?.nome || 'Modelo');
+                      const emailModelo = escapeHTML(ag.usuarios?.email || '-');
+                      const telFormatado = escapeHTML(ag.usuarios?.telefone || '');
+
                       let acoesHTML = '';
                       if (ag.status === 'agendado') {
                         acoesHTML = `
@@ -202,7 +217,7 @@
                             <button class="btn btn-sm btn-success fw-bold px-2 py-1" onclick="concluirServico('${ag.id}')" title="Confirmar Presença">
                               <i class="bi bi-check-lg me-1"></i> Presença
                             </button>
-                            <button class="btn btn-sm btn-outline-danger fw-bold px-2 py-1" onclick="cancelarAluno('${ag.id}', '${ag.usuarios.nome}')" title="Cancelar / Falta">
+                            <button class="btn btn-sm btn-outline-danger fw-bold px-2 py-1" onclick="cancelarAluno('${ag.id}', '${(ag.usuarios?.nome || '').replace(/'/g, "\\'")}')" title="Cancelar / Falta">
                               <i class="bi bi-x-lg"></i>
                             </button>
                           </div>
@@ -211,18 +226,18 @@
                         acoesHTML = `<div class="text-end"><span class="badge-custom ${ag.status === 'concluido' ? 'badge-status-concluido' : 'badge-status-cancelado'}">${ag.status.toUpperCase()}</span></div>`;
                       }
 
-                      const telLimpo = (ag.usuarios.telefone || '').replace(/\D/g, '');
-                      const msgProf = encodeURIComponent(`Olá, ${ag.usuarios.nome}! Aqui é a equipe do curso ${curso.nome} no SENAC referente ao seu agendamento.`);
+                      const telLimpo = (ag.usuarios?.telefone || '').replace(/\D/g, '');
+                      const msgProf = encodeURIComponent(`Olá, ${ag.usuarios?.nome || ''}! Aqui é a equipe do curso ${curso.nome} no SENAC referente ao seu agendamento.`);
                       const btnZap = telLimpo
                         ? `<a href="https://wa.me/55${telLimpo}?text=${msgProf}" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1">
-                             <i class="bi bi-whatsapp text-success me-1"></i> ${ag.usuarios.telefone}
+                             <i class="bi bi-whatsapp text-success me-1"></i> ${telFormatado}
                            </a>`
                         : '<span class="text-muted small">Sem telefone</span>';
 
                       return `
                         <tr>
-                          <td class="align-middle fw-semibold text-dark font-heading">${ag.usuarios.nome}</td>
-                          <td class="align-middle small text-muted">${ag.usuarios.email}</td>
+                          <td class="align-middle fw-semibold text-dark font-heading">${nomeModelo}</td>
+                          <td class="align-middle small text-muted">${emailModelo}</td>
                           <td class="align-middle">${btnZap}</td>
                           <td class="align-middle" style="min-width: 180px;">${acoesHTML}</td>
                         </tr>

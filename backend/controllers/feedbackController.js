@@ -5,12 +5,13 @@ exports.criar = async (req, res) => {
     const { agendamento_id, nota, comentario } = req.body;
     const usuario_id = req.usuario.id;
 
-    if (!agendamento_id || !nota) {
+    const notaNum = parseInt(nota, 10);
+    if (!agendamento_id || isNaN(notaNum)) {
         return res.status(400).json({ erro: 'O ID do agendamento e a nota são obrigatórios.' });
     }
 
-    if (nota < 1 || nota > 5) {
-        return res.status(400).json({ erro: 'A nota deve ser entre 1 e 5.' });
+    if (!Number.isInteger(notaNum) || notaNum < 1 || notaNum > 5) {
+        return res.status(400).json({ erro: 'A nota deve ser um número inteiro entre 1 e 5.' });
     }
 
     try {

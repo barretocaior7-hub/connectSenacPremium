@@ -9,6 +9,19 @@ const crypto = require('crypto'); // Biblioteca nativa do Node.js para criptogra
 exports.registrar = async (req, res) => {
     const { nome, email, telefone, senha, confirmar_senha, consentimento_termos, consentimento_imagem } = req.body;
 
+    if (!nome || !email || !senha || !confirmar_senha) {
+        return res.status(400).json({ erro: 'Nome, e-mail e palavra-passe são obrigatórios.' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ erro: 'Por favor, insira um endereço de e-mail válido.' });
+    }
+
+    if (senha.length < 6) {
+        return res.status(400).json({ erro: 'A palavra-passe deve ter no mínimo 6 caracteres.' });
+    }
+
     // [Funcionalidade 1.2] Validação de Confirmação de Palavra-passe
     if (senha !== confirmar_senha) {
         return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });

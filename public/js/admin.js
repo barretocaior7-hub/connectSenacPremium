@@ -82,6 +82,19 @@ async function carregarUtilizadores(){
     }
 }
 
+// Helper para sanitizar saídas contra vulnerabilidades XSS
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+window.cursosAdminMap = new Map();
+
 function renderizarTabelaUtilizadores(lista){
     const tbody = document.getElementById('tabelaUsuariosBody');
     if (!tbody) return;
@@ -93,6 +106,11 @@ function renderizarTabelaUtilizadores(lista){
     }
 
     lista.forEach(user => {
+        const nomeFormatado = escapeHTML(user.nome);
+        const emailFormatado = escapeHTML(user.email);
+        const telFormatado = escapeHTML(user.telefone || '-');
+        const cursosAtivosFormatado = escapeHTML(user.cursos_ativos || '-');
+
         const statusBadge = user.is_bloqueado
             ? '<span class="badge-custom badge-status-bloqueado"><i class="bi bi-lock-fill"></i> Bloqueado</span>'
             : '<span class="badge-custom badge-status-concluido"><i class="bi bi-check-circle-fill"></i> Ativo</span>';
@@ -103,7 +121,7 @@ function renderizarTabelaUtilizadores(lista){
             ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success p-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
             : '<span class="text-muted small">-</span>';
 
-        let seletorPerfil = `<span class="badge bg-secondary">${(user.perfil || '').toUpperCase()}</span>`;
+        let seletorPerfil = `<span class="badge bg-secondary">${escapeHTML((user.perfil || '').toUpperCase())}</span>`;
         if (payloadToken.perfil === 'admin') {
             seletorPerfil = `
                 <select class="form-select form-select-sm" style="width: 125px;" onchange="alterarPerfil('${user.id}', this.value)" aria-label="Alterar Cargo">
@@ -122,22 +140,22 @@ function renderizarTabelaUtilizadores(lista){
 
         const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
         const btnExcluir = podeExcluir
-            ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', '${user.nome}')" title="Excluir conta">
+            ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', '${user.nome.replace(/'/g, "\\'")}')" title="Excluir conta">
                 <i class="bi bi-trash-fill"></i>
                </button>` : '';
 
         const row = `
             <tr>
                 <td>
-                    <div class="fw-bold font-heading text-dark">${user.nome}</div>
+                    <div class="fw-bold font-heading text-dark">${nomeFormatado}</div>
                     ${statusBadge}
                 </td>
                 <td>
-                    <div class="small text-dark">${user.email}</div>
-                    <div class="text-muted small">${user.telefone || '-'}</div>
+                    <div class="small text-dark">${emailFormatado}</div>
+                    <div class="text-muted small">${telFormatado}</div>
                 </td>
                 <td>${seletorPerfil}</td>
-                <td><span class="text-secondary small fw-semibold">${user.cursos_ativos || '-'}</span></td>
+                <td><span class="text-secondary small fw-semibold">${cursosAtivosFormatado}</span></td>
                 <td class="text-center fw-bold text-primary">${user.total_agendados || 0}</td>
                 <td class="text-center fw-bold text-success">${user.total_concluidos || 0}</td>
                 <td class="text-center fw-bold text-danger">${user.total_cancelados || 0}</td>
@@ -453,33 +471,39 @@ async function carregarCursosAdmin(){
         const cursos = await response.json();
 
         tbody.innerHTML = '';
+        window.cursosAdminMap.clear();
         if (!Array.isArray(cursos) || cursos.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4"><i class="bi bi-inbox me-1"></i> Nenhum curso cadastrado no sistema.</td></tr>';
             return;
         }
 
         cursos.forEach(curso => {
-            const profNome = curso.usuarios ? curso.usuarios.nome : 'Sem Docente';
+            window.cursosAdminMap.set(String(curso.id), curso);
+            const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Sem Docente');
+            const cursoNome = escapeHTML(curso.nome);
+            const cursoDescricao = escapeHTML(curso.descricao || '');
+            const localizacao = escapeHTML(curso.localizacao || '-');
+
             const statusBadge = curso.status === 'ativo'
                 ? '<span class="badge-custom badge-status-ativo"><i class="bi bi-check2-circle"></i> Ativo</span>'
                 : '<span class="badge-custom badge-status-arquivado"><i class="bi bi-archive"></i> Arquivado</span>';
 
             const btnArquivar = curso.status === 'ativo'
-                ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
+                ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
                 : '';
 
             const row = `
                 <tr>
                     <td>
-                        <div class="fw-bold font-heading text-dark">${curso.nome}</div>
-                        <div class="small text-muted text-truncate" style="max-width: 280px;">${curso.descricao}</div>
+                        <div class="fw-bold font-heading text-dark">${cursoNome}</div>
+                        <div class="small text-muted text-truncate" style="max-width: 280px;">${cursoDescricao}</div>
                     </td>
                     <td><span class="small fw-semibold text-secondary">${profNome}</span></td>
-                    <td><span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${curso.localizacao || '-'}</span></td>
+                    <td><span class="small text-muted"><i class="bi bi-geo-alt me-1"></i>${localizacao}</span></td>
                     <td>${statusBadge}</td>
                     <td class="text-end">
                         <div class="d-inline-flex gap-1">
-                            <button class="btn btn-sm btn-outline-brand p-1 px-2" onclick='abrirModalEdicao(${JSON.stringify(curso).replace(/'/g, "&#39;")})' title="Editar curso">
+                            <button class="btn btn-sm btn-outline-brand p-1 px-2" onclick="abrirModalEdicao('${curso.id}')" title="Editar curso">
                                 <i class="bi bi-pencil-square"></i> Editar
                             </button>
                             ${btnArquivar}
@@ -514,8 +538,11 @@ async function arquivarCurso(id, nome){
     }
 }
 
-function abrirModalEdicao(curso){
+function abrirModalEdicao(cursoParam){
     if (!modalEditarCursoInstance) return;
+
+    const curso = typeof cursoParam === 'object' ? cursoParam : window.cursosAdminMap.get(String(cursoParam));
+    if (!curso) return;
 
     document.getElementById('editCursoId').value = curso.id;
     document.getElementById('editNome').value = curso.nome;
@@ -596,7 +623,7 @@ async function carregarPautasGlobais(){
         accordion.innerHTML = '';
 
         if (!response.ok) {
-            accordion.innerHTML = `<div class="alert alert-danger p-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>${cursos.erro || 'Erro ao carregar as pautas.'}</div>`;
+            accordion.innerHTML = `<div class="alert alert-danger p-3"><i class="bi bi-exclamation-triangle-fill me-2"></i>${escapeHTML(cursos.erro || 'Erro ao carregar as pautas.')}</div>`;
             return;
         }
 
@@ -606,7 +633,8 @@ async function carregarPautasGlobais(){
         }
 
         cursos.forEach((curso, index) => {
-            const profNome = curso.usuarios ? curso.usuarios.nome : 'Professor a definir';
+            const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Professor a definir');
+            const cursoNome = escapeHTML(curso.nome);
             let disponibilidadesHTML = '';
 
             if (curso.disponibilidades && curso.disponibilidades.length > 0) {
@@ -626,19 +654,20 @@ async function carregarPautasGlobais(){
                             else if (ag.status === 'concluido') badgeStatus = '<span class="badge-custom badge-status-concluido">Concluído</span>';
                             else badgeStatus = '<span class="badge-custom badge-status-cancelado">Cancelado</span>';
 
-                            const telLimpo = (ag.usuarios.telefone || '').replace(/\D/g, '');
-                            const msgZap = encodeURIComponent(`Olá, ${ag.usuarios.nome}! Aqui é a Coordenação do SENAC referente ao curso ${curso.nome}.`);
+                            const nomeModelo = escapeHTML(ag.usuarios ? ag.usuarios.nome : 'Modelo');
+                            const telLimpo = (ag.usuarios?.telefone || '').replace(/\D/g, '');
+                            const msgZap = encodeURIComponent(`Olá, ${ag.usuarios?.nome || ''}! Aqui é a Coordenação do SENAC referente ao curso ${curso.nome}.`);
                             const btnZap = telLimpo
-                                ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1" title="WhatsApp"><i class="bi bi-whatsapp"></i> ${ag.usuarios.telefone}</a>`
+                                ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1" title="WhatsApp"><i class="bi bi-whatsapp"></i> ${escapeHTML(ag.usuarios.telefone)}</a>`
                                 : '<span class="text-muted small">-</span>';
 
                             const btnCancelarAdmin = ag.status === 'agendado'
-                                ? `<button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="cancelarAgendamentoAdmin('${ag.id}', '${ag.usuarios.nome}')" title="Cancelar Inscrição (Admin)"><i class="bi bi-x-circle me-1"></i> Cancelar</button>`
+                                ? `<button class="btn btn-sm btn-outline-danger py-0 px-2" onclick="cancelarAgendamentoAdmin('${ag.id}', '${(ag.usuarios?.nome || '').replace(/'/g, "\\'")}')" title="Cancelar Inscrição (Admin)"><i class="bi bi-x-circle me-1"></i> Cancelar</button>`
                                 : '';
 
                             return `
                                 <tr>
-                                    <td class="fw-semibold text-dark font-heading">${ag.usuarios.nome}</td>
+                                    <td class="fw-semibold text-dark font-heading">${nomeModelo}</td>
                                     <td>${btnZap}</td>
                                     <td>${badgeStatus}</td>
                                     <td class="text-end">${btnCancelarAdmin}</td>
@@ -682,7 +711,7 @@ async function carregarPautasGlobais(){
                         <button class="accordion-button ${btnCollapsed}" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePauta${curso.id}">
                             <div class="d-flex align-items-center gap-2">
                                 <i class="bi bi-journal-album text-primary"></i>
-                                <span><strong>${curso.nome}</strong> &nbsp;<span class="text-muted small fw-normal">(Docente: ${profNome})</span></span>
+                                <span><strong>${cursoNome}</strong> &nbsp;<span class="text-muted small fw-normal">(Docente: ${profNome})</span></span>
                             </div>
                         </button>
                     </h2>

@@ -83,12 +83,12 @@ exports.cancelarInscricao = async (req, res) => {
     try {
         const { data: agendamento, error: erroBusca } = await supabase
             .from('agendamentos')
-            .select('status, disponibilidades(cursos(profissional_id))')
+            .select('status, disponibilidades(id, vagas_ocupadas, cursos(profissional_id))')
             .eq('id', id)
             .single();
 
         if (erroBusca || !agendamento) return res.status(404).json({ erro: 'Agendamento não encontrado.' });
-        if (agendamento.disponibilidades.cursos.profissional_id !== profissional_id) {
+        if (agendamento.disponibilidades?.cursos?.profissional_id !== profissional_id) {
             return res.status(403).json({ erro: 'Não tem permissão para alterar a pauta de outro professor.' });
         }
         if (agendamento.status !== 'agendado') {
@@ -101,8 +101,19 @@ exports.cancelarInscricao = async (req, res) => {
             .eq('id', id);
 
         if (erroUpdate) throw erroUpdate;
+
+        // Liberar a vaga no contador da disponibilidade
+        const disp = agendamento.disponibilidades;
+        if (disp && disp.vagas_ocupadas > 0) {
+            await supabase
+                .from('disponibilidades')
+                .update({ vagas_ocupadas: disp.vagas_ocupadas - 1 })
+                .eq('id', disp.id);
+        }
+
         res.json({ mensagem: 'Inscrição cancelada. A vaga foi libertada no sistema.' });
     } catch (error) {
+        console.error('Erro ao cancelar inscrição:', error.message);
         res.status(500).json({ erro: 'Erro ao cancelar a inscrição.' });
     }
 };

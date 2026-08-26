@@ -3,35 +3,46 @@ const supabase = require('../config/database');
 
 exports.obterMetricas = async (req, res) => {
     try {
-        // Utilizamos Promise.all para executar todas as consultas ao banco SIMULTANEAMENTE,
-        // em vez de esperar uma terminar para começar a outra. (Ganho enorme de performance!)
-        const [usuariosResult, cursosResult, agendamentosResult] = await Promise.all([
-            // Conta apenas o total de usuários cadastrados (sem baixar os dados todos)
+        // Consultas otimizadas com { count: 'exact', head: true }
+        // Não trafega linhas de dados pela rede, apenas a contagem exata no banco de dados
+        const [
+            usuariosResult,
+            cursosResult,
+            totalAgendamentosResult,
+            agendadosResult,
+            concluidosResult,
+            canceladosResult
+        ] = await Promise.all([
             supabase.from('usuarios').select('*', { count: 'exact', head: true }),
-
-            // Conta os cursos ativos
             supabase.from('cursos').select('*', { count: 'exact', head: true }).eq('status', 'ativo'),
-
-            // Baixa apenas a coluna 'status' dos agendamentos para fazermos a contagem em memória
-            supabase.from('agendamentos').select('status')
+            supabase.from('agendamentos').select('*', { count: 'exact', head: true }),
+            supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('status', 'agendado'),
+            supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('status', 'concluido'),
+            supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('status', 'cancelado')
         ]);
 
         if (usuariosResult.error) throw usuariosResult.error;
         if (cursosResult.error) throw cursosResult.error;
-        if (agendamentosResult.error) throw agendamentosResult.error;
+        if (totalAgendamentosResult.error) throw totalAgendamentosResult.error;
+        if (agendadosResult.error) throw agendadosResult.error;
+        if (concluidosResult.error) throw concluidosResult.error;
+        if (canceladosResult.error) throw canceladosResult.error;
 
-        // Processamento (Reduce/Filter) dos dados em memória
-        const agendamentos = agendamentosResult.data || [];
+        const total = totalAgendamentosResult.count || 0;
+        const agendados = agendadosResult.count || 0;
+        const concluidos = concluidosResult.count || 0;
+        const cancelados = canceladosResult.count || 0;
+
         const metricasAgendamentos = {
-            total: agendamentos.length,
-            agendados: agendamentos.filter(a => a.status === 'agendado').length,
-            concluidos: agendamentos.filter(a => a.status === 'concluido').length,
-            cancelados: agendamentos.filter(a => a.status === 'cancelado').length,
+            total,
+            agendados,
+            concluidos,
+            cancelados
         };
 
         // Calculando a taxa de absenteísmo/cancelamento
-        const taxaCancelamento = metricasAgendamentos.total > 0
-            ? ((metricasAgendamentos.cancelados / metricasAgendamentos.total) * 100).toFixed(1)
+        const taxaCancelamento = total > 0
+            ? ((cancelados / total) * 100).toFixed(1)
             : 0;
 
         res.json({
