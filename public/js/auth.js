@@ -89,8 +89,10 @@ if (formLogin) {
         // Redirecionamento Inteligente baseado no Perfil (RBAC)
         const perfil = data.utilizador.perfil;
 
-        if (perfil === "admin" || perfil === "coordenador") {
+        if (perfil === "admin") {
           window.location.href = "admin.html";
+        } else if (perfil === "coordenador") {
+          window.location.href = "coordenador.html";
         } else if (perfil === "profissional") {
           window.location.href = "profissional.html";
         } else {

@@ -1,0 +1,437 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect Senac - Painel da Coordenacao</title>
+    <meta name="theme-color" content="#004a8d" />
+    <link rel="icon" type="image/png" href="assets/logo-connect-senac.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="bg-main d-flex flex-column min-vh-100 dashboard-page admin-page">
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
+      <div class="container">
+        <a class="navbar-brand" href="#">
+          <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
+          <span>Connect Senac</span>
+          <span class="navbar-role-badge"><i class="bi bi-person-gear-fill"></i> Coordenacao</span>
+        </a>
+        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+          <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
+            <i class="bi bi-eye me-1"></i> Visao do Modelo
+          </a>
+          <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
+            <i class="bi bi-box-arrow-right"></i> Sair
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- SUBHEADER -->
+    <div class="user-subheader-bar mb-4">
+      <div class="container d-flex justify-content-between align-items-center">
+        <span class="text-secondary small">
+          <i class="bi bi-person-badge-fill text-primary me-1"></i> Conectado como:
+          <strong id="userNome" class="text-dark">--</strong>
+        </span>
+        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 font-heading">
+          <i class="bi bi-award-fill me-1"></i> Coordenador da Unidade
+        </span>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <main class="container pb-5 flex-grow-1">
+
+      <!-- Hero -->
+      <section class="workspace-hero workspace-hero-admin fade-in-up">
+        <div>
+          <span class="workspace-kicker"><i class="bi bi-person-gear"></i> Espaco da coordenacao</span>
+          <h1>Visao completa, gestao eficiente.</h1>
+          <p>Gerencie cursos, abra vagas, acompanhe todas as pautas e modere os candidatos da plataforma.</p>
+        </div>
+        <div class="admin-hero-visual" aria-hidden="true">
+          <span class="admin-visual-glow"></span>
+          <span class="admin-visual-orbit admin-visual-orbit-one"></span>
+          <span class="admin-visual-orbit admin-visual-orbit-two"></span>
+          <img src="assets/admin-operations-visual.png" alt="" loading="eager">
+        </div>
+      </section>
+
+      <!-- KPI Cards -->
+      <div class="row g-3 mb-4" id="painelMetricas">
+        <div class="col-sm-6 col-lg-3">
+          <div class="kpi-card kpi-blue">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-bold text-uppercase">Total de Modelos</div>
+                <h3 class="mb-0 fw-bold text-dark mt-1 font-heading" id="metricUsuarios">--</h3>
+              </div>
+              <div class="kpi-icon-box"><i class="bi bi-people-fill"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="kpi-card kpi-success">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-bold text-uppercase">Agendamentos Ativos</div>
+                <h3 class="mb-0 fw-bold text-success mt-1 font-heading" id="metricAgendados">--</h3>
+              </div>
+              <div class="kpi-icon-box"><i class="bi bi-calendar-check-fill"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="kpi-card kpi-warning">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-bold text-uppercase">Aulas Concluidas</div>
+                <h3 class="mb-0 fw-bold text-warning mt-1 font-heading" id="metricConcluidos">--</h3>
+              </div>
+              <div class="kpi-icon-box"><i class="bi bi-patch-check-fill"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+          <div class="kpi-card kpi-danger">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small fw-bold text-uppercase">Taxa Cancelamento</div>
+                <h3 class="mb-0 fw-bold text-danger mt-1 font-heading" id="metricCancelamento">--</h3>
+              </div>
+              <div class="kpi-icon-box"><i class="bi bi-slash-circle-fill"></i></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="dashboard-tabs-shell">
+        <ul class="nav nav-tabs nav-tabs-custom mb-4" id="coordTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="operacao-tab" data-bs-toggle="tab" data-bs-target="#operacao" type="button" role="tab">
+              <i class="bi bi-speedometer2"></i> Cursos &amp; Vagas
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="catalogo-tab" data-bs-toggle="tab" data-bs-target="#catalogo" type="button" role="tab">
+              <i class="bi bi-tags-fill"></i> Catalogo de Cursos
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="pautas-tab" data-bs-toggle="tab" data-bs-target="#pautas" type="button" role="tab">
+              <i class="bi bi-calendar3-range-fill"></i> Pautas Globais
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="moderacao-tab" data-bs-toggle="tab" data-bs-target="#moderacao" type="button" role="tab">
+              <i class="bi bi-people-fill"></i> Moderacao de Candidatos
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      <div class="tab-content" id="coordTabsContent">
+
+        <!-- ABA 1: CURSOS & VAGAS -->
+        <div class="tab-pane fade show active" id="operacao" role="tabpanel">
+          <div class="row g-4">
+            <!-- Cadastrar Curso -->
+            <div class="col-lg-6">
+              <div class="card-premium h-100">
+                <div class="p-3 px-4 border-bottom bg-light">
+                  <h6 class="mb-0 fw-bold font-heading" style="color: var(--senac-blue);">
+                    <i class="bi bi-plus-circle-fill me-1"></i> Cadastrar Novo Curso
+                  </h6>
+                </div>
+                <div class="p-4">
+                  <form id="formCurso" novalidate>
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="nomeCurso" placeholder="Nome do Curso" required />
+                      <label for="nomeCurso"><i class="bi bi-book me-1"></i> Nome do Curso</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <select class="form-select" id="selectProfissional" required aria-label="Professor Responsavel">
+                        <option value="" disabled selected>Carregando professores...</option>
+                      </select>
+                      <label for="selectProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsavel</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="localCurso" value="SENAC - Santo Antonio de Jesus, BA" required placeholder="Localizacao" />
+                      <label for="localCurso"><i class="bi bi-geo-alt me-1"></i> Localizacao / Unidade</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <input type="url" class="form-control" id="fotoCurso" placeholder="https://exemplo.com/imagem.jpg" />
+                      <label for="fotoCurso"><i class="bi bi-image me-1"></i> URL da Imagem de Capa (Opcional)</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <textarea class="form-control" id="descricaoCurso" style="height: 80px" placeholder="Descricao" required></textarea>
+                      <label for="descricaoCurso"><i class="bi bi-card-text me-1"></i> Descricao do Curso / Servico</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <textarea class="form-control" id="motivoCurso" style="height: 60px" placeholder="Beneficios para o modelo"></textarea>
+                      <label for="motivoCurso"><i class="bi bi-gift me-1"></i> Beneficios para o Modelo</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                      <textarea class="form-control" id="restricoesCurso" style="height: 60px" placeholder="Restricoes"></textarea>
+                      <label for="restricoesCurso"><i class="bi bi-exclamation-triangle me-1"></i> Restricoes / Contraindicacoes</label>
+                    </div>
+                    <div id="msgCurso" class="mb-3 text-center small fw-bold"></div>
+                    <button type="submit" class="btn btn-brand w-100 py-3 shadow-sm">
+                      <i class="bi bi-check2-circle me-1"></i> Salvar e Publicar Curso
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+            <!-- Abrir Vagas -->
+            <div class="col-lg-6">
+              <div class="card-premium h-100">
+                <div class="p-3 px-4 border-bottom bg-light">
+                  <h6 class="mb-0 fw-bold font-heading text-success">
+                    <i class="bi bi-calendar-plus-fill me-1"></i> Disponibilizar Vagas e Horarios
+                  </h6>
+                </div>
+                <div class="p-4">
+                  <form id="formVagas" novalidate>
+                    <div class="form-floating mb-3">
+                      <select class="form-select" id="selectCurso" required aria-label="Vincular ao Curso">
+                        <option value="" disabled selected>A carregar cursos...</option>
+                      </select>
+                      <label for="selectCurso"><i class="bi bi-journal-bookmark me-1"></i> Vincular ao Curso</label>
+                    </div>
+                    <div class="row g-2 mb-3">
+                      <div class="col-sm-8">
+                        <div class="form-floating">
+                          <input type="datetime-local" class="form-control" id="dataHora" required />
+                          <label for="dataHora"><i class="bi bi-clock me-1"></i> Data e Horario da Aula</label>
+                        </div>
+                      </div>
+                      <div class="col-sm-4">
+                        <div class="form-floating">
+                          <input type="number" class="form-control" id="vagasTotais" min="1" value="5" required />
+                          <label for="vagasTotais"><i class="bi bi-people me-1"></i> Qtd Vagas</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div id="msgVaga" class="mb-3 text-center small fw-bold"></div>
+                    <button type="submit" class="btn btn-orange w-100 py-3 shadow-sm">
+                      <i class="bi bi-unlock-fill me-1"></i> Abrir Grade de Horario
+                    </button>
+                  </form>
+                  <div class="p-3 bg-light rounded-3 mt-4 border">
+                    <h6 class="fw-bold small text-dark mb-1">
+                      <i class="bi bi-info-circle-fill text-primary me-1"></i> Dica de Gestao
+                    </h6>
+                    <p class="small text-muted mb-0">
+                      As vagas abertas ficam disponiveis instantaneamente para agendamento pelos candidatos no painel de modelos.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 2: CATALOGO DE CURSOS -->
+        <div class="tab-pane fade" id="catalogo" role="tabpanel">
+          <div class="card-premium">
+            <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-tags-fill me-1"></i> Catalogo Completo de Cursos
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Gerencie status, instrutores vinculados e detalhes de cada procedimento ofertado.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-custom align-middle">
+                <thead>
+                  <tr>
+                    <th>Curso</th>
+                    <th>Professor Responsavel</th>
+                    <th>Localizacao</th>
+                    <th>Status</th>
+                    <th class="text-end">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaCursosBody">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                      A carregar catalogo...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 3: PAUTAS GLOBAIS -->
+        <div class="tab-pane fade" id="pautas" role="tabpanel">
+          <div class="card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-calendar3-range-fill me-1"></i> Pautas e Inscricoes por Turma
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Visao global de todas as disciplinas praticas, docentes e modelos confirmados.</p>
+              </div>
+            </div>
+            <div class="accordion accordion-custom" id="accordionPautasGlobais">
+              <div class="empty-state-card py-5">
+                <div class="spinner-border text-primary mb-3" role="status"></div>
+                <h6 class="empty-state-title">A carregar a visao global de pautas...</h6>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ABA 4: MODERACAO DE CANDIDATOS -->
+        <div class="tab-pane fade" id="moderacao" role="tabpanel">
+          <div class="card-premium p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
+                  <i class="bi bi-people-fill me-1"></i> Candidatos (Modelos) Registados
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Pesquise, filtre e modere candidatos da plataforma.</p>
+              </div>
+            </div>
+            <!-- Filtros -->
+            <div class="row g-2 mb-4 bg-light p-3 rounded-3 border">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control" id="filtroTextoUser" placeholder="Buscar por Nome ou E-mail..." />
+                </div>
+              </div>
+              <div class="col-md-4">
+                <button class="btn btn-outline-secondary w-100" id="btnLimparFiltros">
+                  <i class="bi bi-arrow-counterclockwise"></i> Limpar Filtro
+                </button>
+              </div>
+            </div>
+            <!-- Aviso de escopo -->
+            <div class="alert d-flex align-items-start gap-3 mb-4 border-0 rounded-3" style="background: var(--state-info-bg); border-left: 4px solid var(--state-info) !important;">
+              <i class="bi bi-info-circle-fill text-info fs-5 mt-1 flex-shrink-0"></i>
+              <div>
+                <strong class="text-dark d-block mb-1">Escopo de moderacao</strong>
+                <span class="text-secondary small">
+                  Como coordenador, voce pode visualizar todos os candidatos e excluir contas inativas.
+                  Acoes como bloqueio e alteracao de cargo sao restritas ao <strong>Administrador</strong>.
+                </span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-custom align-middle">
+                <thead>
+                  <tr>
+                    <th>Nome</th>
+                    <th>E-mail / Contato</th>
+                    <th>Matricula Ativa</th>
+                    <th class="text-center">Agendados</th>
+                    <th class="text-center">Concluidos</th>
+                    <th class="text-center">Cancelados</th>
+                    <th class="text-end">Acoes</th>
+                  </tr>
+                </thead>
+                <tbody id="tabelaUsuariosBody">
+                  <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                      <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
+                      A carregar candidatos...
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /tab-content -->
+    </main>
+
+    <!-- MODAL: Editar Curso -->
+    <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content modal-content-custom">
+          <div class="modal-header modal-header-custom">
+            <h5 class="modal-title" style="color: var(--senac-blue);">
+              <i class="bi bi-pencil-square me-1"></i> Editar Informacoes do Curso
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+          </div>
+          <div class="modal-body modal-body-custom">
+            <form id="formEditarCurso" novalidate>
+              <input type="hidden" id="editCursoId" />
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="editNome" placeholder="Nome do Curso" required />
+                <label for="editNome"><i class="bi bi-book me-1"></i> Nome do Curso</label>
+              </div>
+              <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <select class="form-select" id="editProfissional" required aria-label="Professor Responsavel"></select>
+                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsavel</label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="editLocal" placeholder="Localizacao" />
+                    <label for="editLocal"><i class="bi bi-geo-alt me-1"></i> Localizacao</label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-floating mb-3">
+                <textarea class="form-control" id="editDescricao" style="height: 90px" placeholder="Descricao" required></textarea>
+                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> Descricao</label>
+              </div>
+              <div class="form-floating mb-3">
+                <input type="url" class="form-control" id="editFoto" placeholder="URL da Imagem de Capa" />
+                <label for="editFoto"><i class="bi bi-image me-1"></i> URL da Imagem de Capa</label>
+              </div>
+              <div id="msgEditCurso" class="mb-3 text-center small fw-bold"></div>
+              <div class="modal-footer modal-footer-custom px-0 pb-0">
+                <button type="button" class="btn btn-light-custom" data-bs-dismiss="modal">Cancelar</button>
+                <button type="submit" class="btn btn-brand px-4">
+                  <i class="bi bi-save me-1"></i> Atualizar Curso
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer-custom">
+      <div class="container text-center text-md-start">
+        <div class="row align-items-center">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+              <span class="badge bg-warning text-dark fw-bold">SENAC</span>
+              <strong class="text-white">Connect Senac V2.0</strong>
+            </div>
+            <p class="small text-white-50 mb-0 mt-1">Espaco de Coordenacao - Gestao academica, cursos e moderacao de candidatos.</p>
+          </div>
+          <div class="col-md-6 text-center text-md-end text-white-50 small">
+            <span>&copy; Senac. Todos os direitos reservados.</span>
+          </div>
+        </div>
+      </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/coordenador.js"></script>
+    <script src="js/ui-effects.js"></script>
+  </body>
+</html>
