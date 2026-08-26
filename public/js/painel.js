@@ -62,6 +62,8 @@ function escapeHTML(str) {
 
 // Mapa para armazenamento seguro de cursos em memória
 window.cursosAtivosMap = new Map();
+let baseCursos = [];
+let categoriaSelecionada = 'todos';
 
 // ==========================================
 // 1. CARREGAR A VITRINE DE CURSOS
@@ -100,60 +102,10 @@ async function carregarCursos(){
 
     try {
         const response = await fetchAuth(`${API_URL}/cursos/ativos`);
-        const cursos = await response.json();
+        baseCursos = await response.json();
 
-        divCursos.innerHTML = '';
-        window.cursosAtivosMap.clear();
-
-        if (!Array.isArray(cursos) || cursos.length === 0) {
-            divCursos.innerHTML = `
-                <div class="col-12">
-                    <div class="empty-state-card">
-                        <div class="empty-state-icon"><i class="bi bi-inbox-fill"></i></div>
-                        <h5 class="empty-state-title">Nenhum serviço disponível no momento</h5>
-                        <p class="empty-state-desc">Novas turmas e vagas para modelos são publicadas regularmente. Volte a consultar em breve!</p>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        cursos.forEach(curso => {
-            window.cursosAtivosMap.set(String(curso.id), curso);
-
-            const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Docente Responsável');
-            const local = escapeHTML(curso.localizacao || 'SENAC');
-            const imagem = escapeHTML(curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60');
-            const nomeFormatado = escapeHTML(curso.nome);
-            const descRaw = curso.descricao || 'Procedimento prático supervisionado.';
-            const descResumo = escapeHTML(descRaw.length > 90 ? descRaw.substring(0, 90) + '...' : descRaw);
-
-            const card = `
-                <div class="col-md-6 col-lg-4">
-                    <div class="card-premium card-course-interactive" onclick="abrirModalDetalhesCurso('${curso.id}')">
-                        <div class="card-img-container">
-                            <img src="${imagem}" alt="${nomeFormatado}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                            <span class="course-badge"><i class="bi bi-tag-fill me-1"></i> Curso SENAC</span>
-                        </div>
-                        <div class="card-body p-4 d-flex flex-column">
-                            <h5 class="fw-bold mb-2 text-dark font-heading">${nomeFormatado}</h5>
-                            <div class="d-flex align-items-center text-muted small mb-3">
-                                <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                <span class="text-truncate">${local}</span>
-                            </div>
-                            <p class="card-text small text-secondary flex-grow-1 mb-3">${descResumo}</p>
-                            <div class="pt-3 border-top d-flex align-items-center justify-content-between">
-                                <span class="small text-muted"><i class="bi bi-person-check me-1"></i> Prof. ${profNome}</span>
-                                <button class="btn btn-outline-brand btn-sm px-3">
-                                    Detalhes <i class="bi bi-arrow-right ms-1"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            divCursos.innerHTML += card;
-        });
+        if (!Array.isArray(baseCursos)) baseCursos = [];
+        renderizarVitrineCursos();
     } catch (error) {
         divCursos.innerHTML = `
             <div class="col-12">
@@ -165,6 +117,110 @@ async function carregarCursos(){
         `;
     }
 }
+
+function renderizarVitrineCursos(){
+    const divCursos = document.getElementById('listaCursos');
+    if (!divCursos) return;
+
+    divCursos.innerHTML = '';
+    window.cursosAtivosMap.clear();
+
+    const termoBusca = (document.getElementById('filtroTextoCurso')?.value || '').toLowerCase().trim();
+
+    const cursosFiltrados = baseCursos.filter(curso => {
+        const nomeMatch = (curso.nome || '').toLowerCase().includes(termoBusca);
+        const descMatch = (curso.descricao || '').toLowerCase().includes(termoBusca);
+        const profMatch = (curso.usuarios?.nome || '').toLowerCase().includes(termoBusca);
+        const textMatch = !termoBusca || nomeMatch || descMatch || profMatch;
+
+        let catMatch = true;
+        if (categoriaSelecionada !== 'todos') {
+            const textoCompleto = `${curso.nome} ${curso.descricao || ''}`.toLowerCase();
+            if (categoriaSelecionada === 'cabelo') {
+                catMatch = textoCompleto.includes('cabelo') || textoCompleto.includes('barba') || textoCompleto.includes('corte') || textoCompleto.includes('cabeleireiro');
+            } else if (categoriaSelecionada === 'facial') {
+                catMatch = textoCompleto.includes('facial') || textoCompleto.includes('pele') || textoCompleto.includes('limpeza') || textoCompleto.includes('maquiagem') || textoCompleto.includes('sobrancelha');
+            } else if (categoriaSelecionada === 'massoterapia') {
+                catMatch = textoCompleto.includes('mass') || textoCompleto.includes('relax') || textoCompleto.includes('drenagem');
+            } else if (categoriaSelecionada === 'unhas') {
+                catMatch = textoCompleto.includes('unha') || textoCompleto.includes('manicure') || textoCompleto.includes('pedicure') || textoCompleto.includes('nail');
+            }
+        }
+
+        return textMatch && catMatch;
+    });
+
+    if (cursosFiltrados.length === 0) {
+        divCursos.innerHTML = `
+            <div class="col-12">
+                <div class="empty-state-card">
+                    <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+                    <h5 class="empty-state-title">Nenhum serviço encontrado</h5>
+                    <p class="empty-state-desc">Tente ajustar o termo de pesquisa ou selecionar outra categoria para ver mais opções.</p>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
+    cursosFiltrados.forEach(curso => {
+        window.cursosAtivosMap.set(String(curso.id), curso);
+
+        const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Docente Responsável');
+        const local = escapeHTML(curso.localizacao || 'SENAC');
+        const imagem = escapeHTML(curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60');
+        const nomeFormatado = escapeHTML(curso.nome);
+        const descRaw = curso.descricao || 'Procedimento prático supervisionado.';
+        const descResumo = escapeHTML(descRaw.length > 90 ? descRaw.substring(0, 90) + '...' : descRaw);
+
+        const card = `
+            <div class="col-md-6 col-lg-4">
+                <div class="card-premium card-course-interactive" onclick="abrirModalDetalhesCurso('${curso.id}')">
+                    <div class="card-img-container">
+                        <img src="${imagem}" alt="${nomeFormatado}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
+                        <span class="course-badge"><i class="bi bi-tag-fill me-1"></i> Curso SENAC</span>
+                    </div>
+                    <div class="card-body p-4 d-flex flex-column">
+                        <h5 class="fw-bold mb-2 text-dark font-heading">${nomeFormatado}</h5>
+                        <div class="d-flex align-items-center text-muted small mb-3">
+                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                            <span class="text-truncate">${local}</span>
+                        </div>
+                        <p class="card-text small text-secondary flex-grow-1 mb-3">${descResumo}</p>
+                        <div class="pt-3 border-top d-flex align-items-center justify-content-between">
+                            <span class="small text-muted"><i class="bi bi-person-check me-1"></i> Prof. ${profNome}</span>
+                            <button class="btn btn-outline-brand btn-sm px-3">
+                                Detalhes <i class="bi bi-arrow-right ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        divCursos.innerHTML += card;
+    });
+}
+
+// Configurar ouvintes de pesquisa e filtros
+document.addEventListener('DOMContentLoaded', () => {
+    const inputBuscaCurso = document.getElementById('filtroTextoCurso');
+    if (inputBuscaCurso) {
+        inputBuscaCurso.addEventListener('input', renderizarVitrineCursos);
+    }
+
+    const containerCategorias = document.getElementById('containerCategorias');
+    if (containerCategorias) {
+        containerCategorias.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-category-pill');
+            if (!btn) return;
+
+            containerCategorias.querySelectorAll('.btn-category-pill').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            categoriaSelecionada = btn.getAttribute('data-categoria') || 'todos';
+            renderizarVitrineCursos();
+        });
+    }
+});
 
 // ==========================================
 // 1.5 MODAL DE DETALHES DO CURSO
