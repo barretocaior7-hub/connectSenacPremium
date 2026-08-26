@@ -1,10 +1,11 @@
 // frontend/js/auth.js
 
-const FALLBACK_BASE_URL = "http://localhost:3000/api/usuarios";
-const API_URL =
-  window.location.protocol === "file:"
-    ? FALLBACK_BASE_URL
-    : `${window.location.origin}/api/usuarios`;
+const isLocalDev = window.location.protocol === 'file:' || 
+  ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '3000');
+
+const API_URL = isLocalDev 
+  ? 'http://localhost:3000/api/usuarios' 
+  : `${window.location.origin}/api/usuarios`;
 
 // Helper para alternar visibilidade de senhas
 function setupPasswordToggle(buttonId, inputId, iconId) {

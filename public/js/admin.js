@@ -1,7 +1,9 @@
 // frontend/js/admin.js
 
-const FALLBACK_BASE_URL = 'http://localhost:3000/api';
-const API_URL = window.location.protocol === 'file:' ? FALLBACK_BASE_URL : `${window.location.origin}/api`;
+const isLocalDev = window.location.protocol === 'file:' || 
+  ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port !== '3000');
+
+const API_URL = isLocalDev ? 'http://localhost:3000/api' : `${window.location.origin}/api`;
 
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
