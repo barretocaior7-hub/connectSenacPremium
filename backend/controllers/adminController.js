@@ -5,32 +5,12 @@ const bcrypt = require('bcrypt');
 // 1. Listar utilizadores com métricas (consome a nossa nova View)
 exports.listarUtilizadores = async (req, res) => {
     try {
-        const [resultadoEstatisticas, resultadoConsentimentos] = await Promise.all([
-            supabase
-                .from('view_usuarios_estatisticas')
-                .select('*')
-                .order('nome', { ascending: true }),
-            supabase
-                .from('usuarios')
-                .select('id, consentimento_termos, consentimento_imagem')
-        ]);
+        const { data: utilizadores, error } = await supabase
+            .from('view_usuarios_estatisticas')
+            .select('*')
+            .order('nome', { ascending: true });
 
-        if (resultadoEstatisticas.error) throw resultadoEstatisticas.error;
-        if (resultadoConsentimentos.error) throw resultadoConsentimentos.error;
-
-        const consentimentosPorUsuario = new Map(
-            (resultadoConsentimentos.data || []).map((usuario) => [String(usuario.id), usuario])
-        );
-
-        const utilizadores = (resultadoEstatisticas.data || []).map((usuario) => {
-            const consentimentos = consentimentosPorUsuario.get(String(usuario.id));
-            return {
-                ...usuario,
-                consentimento_termos: consentimentos?.consentimento_termos ?? null,
-                consentimento_imagem: consentimentos?.consentimento_imagem ?? null
-            };
-        });
-
+        if (error) throw error;
         res.json(utilizadores);
     } catch (error) {
         console.error('Erro ao listar utilizadores:', error.message);
@@ -42,24 +22,8 @@ exports.listarUtilizadores = async (req, res) => {
 exports.alterarStatusBloqueio = async (req, res) => {
     const { id } = req.params;
     const { is_bloqueado } = req.body;
-    const executorPerfil = req.usuario.perfil;
-
-    if (id === req.usuario.id) {
-        return res.status(400).json({ erro: 'Você não pode bloquear a sua própria conta.' });
-    }
 
     try {
-        const { data: alvo, error: erroBusca } = await supabase
-            .from('usuarios')
-            .select('perfil')
-            .eq('id', id)
-            .single();
-
-        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        if (executorPerfil === 'coordenador' && alvo.perfil === 'admin') {
-            return res.status(403).json({ erro: 'Coordenadores não podem bloquear administradores.' });
-        }
-
         const { data, error } = await supabase
             .from('usuarios')
             .update({ is_bloqueado })
@@ -79,7 +43,6 @@ exports.alterarStatusBloqueio = async (req, res) => {
 // 3. Criar Novo Colaborador (Apenas administradores podem fazer isto)
 exports.criarColaborador = async (req, res) => {
     const { nome, email, telefone, senha, perfil } = req.body;
-    const executorPerfil = req.usuario.perfil;
 
     if (!nome || !email || !telefone || !senha || !perfil) {
         return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
@@ -87,10 +50,6 @@ exports.criarColaborador = async (req, res) => {
 
     if (!['admin', 'coordenador', 'profissional'].includes(perfil)) {
         return res.status(400).json({ erro: 'Perfil de colaborador inválido.' });
-    }
-
-    if (executorPerfil === 'coordenador' && perfil === 'admin') {
-        return res.status(403).json({ erro: 'Coordenadores não podem criar administradores.' });
     }
 
     try {
@@ -171,8 +130,8 @@ exports.excluirUsuario = async (req, res) => {
         }
 
         // 2. Aplicar regras restritivas do RBAC
-        if (executorPerfil === 'coordenador' && alvo.perfil === 'admin') {
-            return res.status(403).json({ erro: 'Coordenadores não podem excluir administradores.' });
+        if (executorPerfil === 'coordenador' && alvo.perfil !== 'candidato') {
+            return res.status(403).json({ erro: 'Coordenadores só possuem permissão para excluir contas de candidatos.' });
         }
 
         // 3. Executar deleção (O banco em cascata limpa agendamentos associados)
@@ -195,7 +154,6 @@ exports.alterarPerfil = async (req, res) => {
     const { id } = req.params;
     const { perfil } = req.body;
     const executorId = req.usuario.id;
-    const executorPerfil = req.usuario.perfil;
 
     if (id === executorId) {
         return res.status(400).json({ erro: 'Não pode alterar o seu próprio nível de acesso.' });
@@ -206,17 +164,6 @@ exports.alterarPerfil = async (req, res) => {
     }
 
     try {
-        const { data: alvo, error: erroBusca } = await supabase
-            .from('usuarios')
-            .select('perfil')
-            .eq('id', id)
-            .single();
-
-        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
-        if (executorPerfil === 'coordenador' && (alvo.perfil === 'admin' || perfil === 'admin')) {
-            return res.status(403).json({ erro: 'Coordenadores não podem criar ou alterar contas administrativas.' });
-        }
-
         const { error } = await supabase
             .from('usuarios')
             .update({ perfil })

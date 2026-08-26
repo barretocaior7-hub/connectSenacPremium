@@ -26,24 +26,12 @@ app.use(express.json()); // Ensina o Express a entender requisições no formato
 
 // A LINHA MÁGICA DA OPÇÃO 2:
 // Entrega localmente os mesmos arquivos públicos que a Vercel publica via CDN.
-app.use(express.static(path.join(__dirname, 'public'), { index: false }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 // Rota de teste simples
 app.get('/api/status', (req, res) => {
     res.json({ mensagem: "Servidor Connect Senac rodando com sucesso!", status: "OK" });
-});
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'cursos.html'));
-});
-
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-app.get('/cadastro', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'cadastro.html'));
 });
 
 const escaparHtml = (valor = '') => String(valor)

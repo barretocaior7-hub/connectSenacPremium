@@ -25,9 +25,10 @@ if (document.getElementById('userPerfil')) {
     document.getElementById('userPerfil').textContent = (payloadToken.perfil || '').toUpperCase();
 }
 
-// Coordenadores gerem a equipa, mas não podem criar contas administrativas.
+// Se o utilizador for Coordenador, ocultamos a Tab de criar novos colaboradores (RBAC)
 if (payloadToken.perfil === 'coordenador') {
-    document.querySelector('#colabPerfil option[value="admin"]')?.remove();
+    const equipaTab = document.getElementById('equipa-tab');
+    if (equipaTab) equipaTab.style.display = 'none';
 }
 
 const btnSair = document.getElementById('btnSair');
@@ -79,7 +80,7 @@ async function carregarUtilizadores(){
         baseUtilizadores = await response.json();
         renderizarTabelaUtilizadores(baseUtilizadores);
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao ligar ao servidor.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao ligar ao servidor.</td></tr>';
     }
 }
 
@@ -102,7 +103,7 @@ function renderizarTabelaUtilizadores(lista){
     tbody.innerHTML = '';
 
     if (!Array.isArray(lista) || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum utilizador encontrado com os filtros selecionados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum utilizador encontrado com os filtros selecionados.</td></tr>';
         return;
     }
 
@@ -116,22 +117,6 @@ function renderizarTabelaUtilizadores(lista){
             ? '<span class="badge-custom badge-status-bloqueado"><i class="bi bi-lock-fill"></i> Bloqueado</span>'
             : '<span class="badge-custom badge-status-concluido"><i class="bi bi-check-circle-fill"></i> Ativo</span>';
 
-        const renderConsentimento = (valor, rotulo) => {
-            if (valor === true) {
-                return `<span class="consent-badge consent-accepted" title="Consentimento registrado"><i class="bi bi-check-circle-fill"></i> ${rotulo}</span>`;
-            }
-            if (valor === false) {
-                return `<span class="consent-badge consent-declined" title="Consentimento não concedido"><i class="bi bi-x-circle-fill"></i> ${rotulo}</span>`;
-            }
-            return `<span class="consent-badge consent-unknown" title="Sem informação registrada"><i class="bi bi-question-circle-fill"></i> ${rotulo}</span>`;
-        };
-
-        const consentimentosHTML = `
-            <div class="consent-list">
-                ${renderConsentimento(user.consentimento_termos, 'Termos/LGPD')}
-                ${renderConsentimento(user.consentimento_imagem, 'Uso de imagem')}
-            </div>`;
-
         const telLimpo = (user.telefone || '').replace(/\D/g, '');
         const msgZap = encodeURIComponent(`Olá, ${user.nome}! Aqui é a Coordenação do Connect Senac.`);
         const btnZap = telLimpo
@@ -139,28 +124,23 @@ function renderizarTabelaUtilizadores(lista){
             : '<span class="text-muted small">-</span>';
 
         let seletorPerfil = `<span class="badge bg-secondary">${escapeHTML((user.perfil || '').toUpperCase())}</span>`;
-        const podeGerirPerfil = payloadToken.perfil === 'admin' ||
-            (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin');
-        if (podeGerirPerfil) {
+        if (payloadToken.perfil === 'admin') {
             seletorPerfil = `
                 <select class="form-select form-select-sm" style="width: 125px;" onchange="alterarPerfil('${user.id}', this.value)" aria-label="Alterar Cargo">
                     <option value="candidato" ${user.perfil === 'candidato' ? 'selected' : ''}>Candidato</option>
                     <option value="profissional" ${user.perfil === 'profissional' ? 'selected' : ''}>Professor</option>
                     <option value="coordenador" ${user.perfil === 'coordenador' ? 'selected' : ''}>Coord.</option>
-                    ${payloadToken.perfil === 'admin' ? `<option value="admin" ${user.perfil === 'admin' ? 'selected' : ''}>Admin</option>` : ''}
+                    <option value="admin" ${user.perfil === 'admin' ? 'selected' : ''}>Admin</option>
                 </select>
             `;
         }
 
-        const podeBloquear = payloadToken.perfil === 'admin' ||
-            (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin');
-        const btnBloqueio = podeBloquear
+        const btnBloqueio = payloadToken.perfil === 'admin'
             ? `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueio('${user.id}', ${user.is_bloqueado})" title="${user.is_bloqueado ? 'Desbloquear conta' : 'Bloquear conta'}">
                 <i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i>
                </button>` : '';
 
-        const podeExcluir = payloadToken.perfil === 'admin' ||
-            (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin');
+        const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
         const btnExcluir = podeExcluir
             ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', '${user.nome.replace(/'/g, "\\'")}')" title="Excluir conta">
                 <i class="bi bi-trash-fill"></i>
@@ -177,7 +157,6 @@ function renderizarTabelaUtilizadores(lista){
                     <div class="text-muted small">${telFormatado}</div>
                 </td>
                 <td>${seletorPerfil}</td>
-                <td>${consentimentosHTML}</td>
                 <td><span class="text-secondary small fw-semibold">${cursosAtivosFormatado}</span></td>
                 <td class="text-center fw-bold text-primary">${user.total_agendados || 0}</td>
                 <td class="text-center fw-bold text-success">${user.total_concluidos || 0}</td>

@@ -32,7 +32,7 @@
   if (authActions) {
     authActions.innerHTML = session
       ? `<a class="btn btn-outline-light btn-sm" href="${dashboardFor(session.payload.perfil)}"><i class="bi bi-person-circle"></i> Minha área</a>`
-      : `<a class="btn btn-outline-light btn-sm" href="${authUrl('/login')}">Entrar</a><a class="btn btn-orange btn-sm" href="${authUrl('/cadastro')}">Criar conta</a>`;
+      : `<a class="btn btn-outline-light btn-sm" href="${authUrl('/index.html')}">Entrar</a><a class="btn btn-orange btn-sm" href="${authUrl('/cadastro.html')}">Criar conta</a>`;
   }
 
   const list = document.getElementById("publicCourseList");
@@ -64,7 +64,7 @@
   document.getElementById("btnProtectedEnrollment")?.addEventListener("click", (event) => {
     const courseId = event.currentTarget.dataset.courseId;
     if (!session) {
-      window.location.assign(authUrl("/login"));
+      window.location.assign(authUrl("/index.html"));
       return;
     }
     if (session.payload.perfil !== "candidato") {
