@@ -18,17 +18,21 @@
 <body class="bg-main d-flex flex-column min-vh-100 dashboard-page user-page">
 
     <!-- Top Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
         <div class="container">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="painel.html">
                 <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac">
                 <span>Connect Senac</span>
                 <span class="navbar-role-badge"><i class="bi bi-person-heart"></i> Modelo</span>
             </a>
-            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
+            
+            <!-- Botão Menu Hambúrguer (Mobile) - Abre Drawer da Esquerda -->
+            <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Abrir menu de navegação">
                 <i class="bi bi-list fs-2 text-white"></i>
             </button>
-            <div class="collapse navbar-collapse justify-content-between" id="navbarNav">
+
+            <!-- Menu Desktop Horizontal -->
+            <div class="collapse navbar-collapse justify-content-between d-none d-lg-flex" id="navbarNav">
                 <ul class="navbar-nav mx-auto my-2 my-lg-0 gap-1">
                     <li class="nav-item">
                         <a class="nav-link active" href="#vitrine"><i class="bi bi-grid-fill"></i> Agendar Serviço</a>
@@ -48,6 +52,55 @@
             </div>
         </div>
     </nav>
+
+    <!-- SIDEBAR LATERAL MOBILE (SLIDE DA ESQUERDA PARA A DIREITA) -->
+    <div class="offcanvas offcanvas-start mobile-drawer" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+        <div class="offcanvas-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <img src="assets/logo-connect-senac.png" alt="Connect Senac" style="height: 32px;">
+                <span class="fw-bold text-white font-heading fs-6">Connect Senac</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
+            <div>
+                <!-- Mini Card do Usuário -->
+                <div class="drawer-user-card d-flex align-items-center gap-3 mb-4">
+                    <div class="drawer-avatar">
+                        <i class="bi bi-person-heart"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-white fw-bold small text-truncate" id="drawerUserName">Modelo Conectado</div>
+                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem;"><i class="bi bi-stars"></i> Modelo Voluntário</span>
+                    </div>
+                </div>
+
+                <!-- Links da Sidebar -->
+                <nav class="drawer-nav-list">
+                    <a class="drawer-link active" href="#vitrine" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-grid-fill"></i> Agendar Serviço
+                    </a>
+                    <a class="drawer-link" href="#meus-agendamentos" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-calendar2-check-fill"></i> Meus Agendamentos
+                    </a>
+                    <a class="drawer-link" href="#minhas-avaliacoes" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-star-half"></i> Minhas Avaliações
+                    </a>
+                    <div id="drawerBackofficeLinks"></div>
+                </nav>
+            </div>
+
+            <!-- Footer da Sidebar com Logout -->
+            <div class="pt-3 border-top border-white border-opacity-10">
+                <button class="btn btn-drawer-logout w-100 mb-2" id="btnDrawerSair">
+                    <i class="bi bi-box-arrow-right"></i> Sair da Conta
+                </button>
+                <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
+                    Connect Senac • V2.0 Mobile
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Main Container -->
     <main class="container py-4 flex-grow-1">
@@ -276,6 +329,73 @@
                         <i class="bi bi-calendar-plus me-1"></i> Ver Horários Disponíveis
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal 4: Confirmação de Sucesso com Google Maps Integrado -->
+    <div class="modal fade" id="modalConfirmacaoSucesso" tabindex="-1" aria-labelledby="modalSucessoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content modal-confirmation-card">
+                
+                <!-- Topo do Sucesso -->
+                <div class="modal-success-header">
+                    <div class="success-check-badge">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                    <h3 class="fw-bold font-heading mb-1" id="modalSucessoLabel">Agendamento Confirmado!</h3>
+                    <p class="text-white-50 small mb-0">Sua vaga está garantida. Estamos ansiosos pela sua participação!</p>
+                </div>
+
+                <div class="modal-body p-4">
+                    <!-- Resumo do Procedimento -->
+                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                        <div class="row g-2">
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Procedimento:</span>
+                                <strong class="text-dark font-heading" id="confCursoNome">--</strong>
+                            </div>
+                            <div class="col-sm-6">
+                                <span class="text-muted small d-block">Data e Horário:</span>
+                                <strong class="text-primary font-heading" id="confDataHora">--</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Alerta Obrigatório dos 20 minutos de antecedência -->
+                    <div class="notice-box-20min mb-4">
+                        <i class="bi bi-exclamation-triangle-fill fs-5 flex-shrink-0"></i>
+                        <span>Por favor, compareça com <strong>20 minutos de antecedência</strong> do horário agendado para a preparação e acolhimento.</span>
+                    </div>
+
+                    <!-- Localização & Mapa Interativo SENAC Santo Antônio de Jesus -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold text-dark small"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Local do Atendimento</span>
+                            <span class="text-muted small" id="confLocalizacao">SENAC - Santo Antônio de Jesus, BA</span>
+                        </div>
+                        
+                        <div class="maps-embed-container">
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                style="border:0;" 
+                                loading="lazy" 
+                                allowfullscreen 
+                                referrerpolicy="no-referrer-when-downgrade"
+                                src="https://maps.google.com/maps?q=-12.965733710857474,-39.26765047467337&hl=pt-BR&z=17&output=embed"
+                                title="Localização do SENAC Santo Antônio de Jesus">
+                            </iframe>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0 p-3 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-brand px-5 py-2 fw-bold" data-bs-dismiss="modal">
+                        <i class="bi bi-check2 me-1"></i> Entendido, ver meus agendamentos
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>

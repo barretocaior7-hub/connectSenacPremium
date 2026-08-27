@@ -181,6 +181,154 @@ a:hover {
 }
 
 /* ==========================================================================
+   DRAWER LATERAL MOBILE (SLIDE DA ESQUERDA PARA A DIREITA)
+   ========================================================================== */
+
+/* Botão do Menu Hambúrguer */
+.navbar-toggler {
+  border: none !important;
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.navbar-toggler:hover,
+.navbar-toggler:focus {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+  outline: none;
+}
+
+/* Container do Drawer Lateral */
+.mobile-drawer.offcanvas,
+.mobile-drawer.offcanvas-start {
+  background: linear-gradient(180deg, #00274d 0%, #004a8d 100%) !important;
+  color: #ffffff;
+  width: min(84vw, 320px) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 10px 0 35px rgba(0, 20, 40, 0.4);
+}
+
+/* Backdrop com Blur */
+.offcanvas-backdrop.show {
+  background-color: rgba(0, 20, 40, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Header do Drawer */
+.mobile-drawer .offcanvas-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.25rem 1.25rem;
+}
+
+.mobile-drawer .btn-close-white {
+  filter: invert(1) grayscale(100%) brightness(200%);
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.mobile-drawer .btn-close-white:hover {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+/* Mini Card do Usuário */
+.drawer-user-card {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  backdrop-filter: blur(8px);
+}
+
+.drawer-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--senac-orange);
+  color: #ffffff;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(247, 148, 29, 0.35);
+}
+
+/* Links do Menu Lateral */
+.drawer-nav-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.drawer-nav-list .drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.8rem 1rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  border-left: 3.5px solid transparent;
+}
+
+.drawer-nav-list .drawer-link i {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s ease;
+  width: 24px;
+  text-align: center;
+}
+
+.drawer-nav-list .drawer-link:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.drawer-nav-list .drawer-link:hover i {
+  color: var(--senac-orange);
+}
+
+.drawer-nav-list .drawer-link.active {
+  background: rgba(247, 148, 29, 0.2);
+  color: #ffffff;
+  border-left: 3.5px solid var(--senac-orange);
+  font-weight: 700;
+}
+
+.drawer-nav-list .drawer-link.active i {
+  color: var(--senac-orange);
+}
+
+/* Botão de Logout no Rodapé do Drawer */
+.btn-drawer-logout {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+  font-weight: 600;
+  font-size: 0.92rem;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  transition: all 0.2s ease;
+}
+
+.btn-drawer-logout:hover {
+  background: #ef4444;
+  color: #ffffff;
+  border-color: #ef4444;
+}
+
+/* ==========================================================================
    BOTÕES PREMIUM
    ========================================================================== */
 .btn {
@@ -1459,4 +1607,227 @@ body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease for
   .public-courses-hero { border-radius: 18px; }
   .public-course-detail { border-radius: 18px; }
   .public-course-content { padding: 1.5rem; }
+/* ==========================================================================
+   DESIGN SYSTEM PREMIUM: HERO, PROVA SOCIAL, CARDS, AGENDAMENTO & MAPA (UI/UX)
+   ========================================================================== */
+
+/* 1. HERO SECTION & MICROINTERAÇÕES */
+.hero-premium {
+  position: relative;
+  background: linear-gradient(135deg, #002b54 0%, #004a8d 70%, #0060b3 100%);
+  border-radius: 20px;
+  padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 4vw, 3.5rem);
+  color: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 20px 40px -10px rgba(0, 74, 141, 0.35);
+  margin-bottom: 3rem;
+}
+
+.hero-premium .hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(247, 148, 29, 0.2);
+  border: 1px solid rgba(247, 148, 29, 0.4);
+  color: #ffd8a8;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(8px);
+}
+
+.hero-floating-visual {
+  animation: floatingEffect 5s ease-in-out infinite alternate;
+}
+
+@keyframes floatingEffect {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-10px); }
+}
+
+/* 2. PROVA SOCIAL & DEPOIMENTOS */
+.testimonial-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 28px -6px rgba(0, 74, 141, 0.12);
+  border-color: rgba(0, 74, 141, 0.25);
+}
+
+.testimonial-stars {
+  color: #f59e0b;
+  font-size: 1rem;
+  display: flex;
+  gap: 2px;
+}
+
+.testimonial-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--senac-orange);
+}
+
+/* 3. CARDS DE CURSO ULTRA-DETALHADOS */
+.course-detail-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 4px 14px -2px rgba(0, 74, 141, 0.06);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.course-detail-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 36px -8px rgba(0, 74, 141, 0.16);
+  border-color: rgba(0, 74, 141, 0.3);
+}
+
+.course-syllabus-box {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 12px;
+  padding: 0.9rem;
+  margin: 0.85rem 0;
+}
+
+.course-syllabus-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.course-syllabus-list li {
+  font-size: 0.84rem;
+  color: #334155;
+  margin-bottom: 0.35rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.course-syllabus-list li i {
+  color: var(--senac-blue);
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* 4. CHIPS DE HORÁRIO DINÂMICOS (SELEÇÃO EM FORMATO DE CARDS) */
+.schedule-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 0.75rem;
+}
+
+.schedule-chip {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.schedule-chip:hover:not(.is-disabled) {
+  border-color: var(--senac-blue);
+  background: #f0f7ff;
+  transform: translateY(-2px);
+}
+
+.schedule-chip.is-selected {
+  border-color: var(--senac-blue) !important;
+  background: #e8f2fa !important;
+  box-shadow: 0 0 0 3px rgba(0, 74, 141, 0.25);
+}
+
+.schedule-chip.is-disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.schedule-chip .chip-time {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  display: block;
+}
+
+.schedule-chip .chip-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* 5. MODAL DE SUCESSO & GOOGLE MAPS FLUTUANTE */
+.modal-confirmation-card {
+  border: none;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px -12px rgba(0, 34, 68, 0.35);
+  overflow: hidden;
+}
+
+.modal-success-header {
+  background: linear-gradient(135deg, #004a8d 0%, #002b54 100%);
+  color: #ffffff;
+  padding: 2rem 1.5rem 1.5rem;
+  text-align: center;
+}
+
+.success-check-badge {
+  width: 64px;
+  height: 64px;
+  background: #10b981;
+  color: #ffffff;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.2);
+  margin-bottom: 1rem;
+}
+
+.notice-box-20min {
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  color: #92400e;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Mapa com Bordas Arredondadas e Sombra */
+.maps-embed-container {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  height: 220px;
+  width: 100%;
 }

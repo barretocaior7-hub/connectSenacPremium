@@ -21,6 +21,9 @@ try {
 if (document.getElementById('userNome')) {
     document.getElementById('userNome').textContent = (payloadToken.email || '').split('@')[0];
 }
+if (document.getElementById('drawerAdminName')) {
+    document.getElementById('drawerAdminName').textContent = (payloadToken.email || '').split('@')[0];
+}
 if (document.getElementById('userPerfil')) {
     document.getElementById('userPerfil').textContent = (payloadToken.perfil || '').toUpperCase();
 }
@@ -36,13 +39,25 @@ if (payloadToken.perfil === 'coordenador') {
     }
 }
 
-const btnSair = document.getElementById('btnSair');
-if (btnSair) {
-    btnSair.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-    });
+function logoutAdmin() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
 }
+
+const btnSair = document.getElementById('btnSair');
+const btnAdminDrawerSair = document.getElementById('btnAdminDrawerSair');
+if (btnSair) btnSair.addEventListener('click', logoutAdmin);
+if (btnAdminDrawerSair) btnAdminDrawerSair.addEventListener('click', logoutAdmin);
+
+// Ativação programática de Abas via Drawer Mobile
+function ativarTabMobile(tabBtnId) {
+    const triggerEl = document.getElementById(tabBtnId);
+    if (triggerEl) {
+        const tab = new bootstrap.Tab(triggerEl);
+        tab.show();
+    }
+}
+window.ativarTabMobile = ativarTabMobile;
 
 // ============================================================================
 // 1. CARREGAR MÉTRICAS DO DASHBOARD

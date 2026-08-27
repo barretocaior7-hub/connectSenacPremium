@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -15,16 +15,22 @@
   <body class="bg-main d-flex flex-column min-vh-100 dashboard-page admin-page">
 
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
       <div class="container">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="coordenador.html">
           <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
           <span>Connect Senac</span>
-          <span class="navbar-role-badge"><i class="bi bi-person-gear-fill"></i> Coordenacao</span>
+          <span class="navbar-role-badge"><i class="bi bi-person-gear-fill"></i> Coordenação</span>
         </a>
-        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+
+        <!-- Botão Hambúrguer Mobile -->
+        <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#coordMobileSidebar" aria-controls="coordMobileSidebar" aria-label="Abrir Menu">
+          <i class="bi bi-list fs-2 text-white"></i>
+        </button>
+
+        <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
           <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
-            <i class="bi bi-eye me-1"></i> Visao do Modelo
+            <i class="bi bi-eye me-1"></i> Visão do Modelo
           </a>
           <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
             <i class="bi bi-box-arrow-right"></i> Sair
@@ -32,6 +38,61 @@
         </div>
       </div>
     </nav>
+
+    <!-- SIDEBAR LATERAL MOBILE (SLIDE DA ESQUERDA PARA A DIREITA) -->
+    <div class="offcanvas offcanvas-start mobile-drawer" tabindex="-1" id="coordMobileSidebar" aria-labelledby="coordMobileSidebarLabel">
+      <div class="offcanvas-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <img src="assets/logo-connect-senac.png" alt="Connect Senac" style="height: 32px;">
+          <span class="fw-bold text-white font-heading fs-6">Connect Senac</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
+        <div>
+          <!-- Mini Card do Coordenador -->
+          <div class="drawer-user-card d-flex align-items-center gap-3 mb-4">
+            <div class="drawer-avatar" style="background: #004a8d;">
+              <i class="bi bi-person-gear-fill"></i>
+            </div>
+            <div class="overflow-hidden">
+              <div class="text-white fw-bold small text-truncate" id="drawerCoordName">Coordenador</div>
+              <span class="badge bg-primary text-white" style="font-size: 0.7rem;">Coordenação da Unidade</span>
+            </div>
+          </div>
+
+          <!-- Links de Navegação pelas Abas no Mobile -->
+          <nav class="drawer-nav-list">
+            <a class="drawer-link active" href="#" onclick="ativarTabCoordMobile('tab-operacoes')" data-bs-dismiss="offcanvas">
+              <i class="bi bi-grid-fill"></i> Cursos & Vagas
+            </a>
+            <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-catalogo')" data-bs-dismiss="offcanvas">
+              <i class="bi bi-tags-fill"></i> Catálogo de Cursos
+            </a>
+            <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-pautas')" data-bs-dismiss="offcanvas">
+              <i class="bi bi-journal-album"></i> Pautas Globais
+            </a>
+            <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-candidatos')" data-bs-dismiss="offcanvas">
+              <i class="bi bi-people-fill"></i> Moderação de Candidatos
+            </a>
+            <hr class="border-white border-opacity-15 my-2">
+            <a class="drawer-link text-warning fw-semibold" href="painel.html">
+              <i class="bi bi-eye text-warning"></i> Visão do Modelo
+            </a>
+          </nav>
+        </div>
+
+        <!-- Footer da Sidebar Mobile com Logout -->
+        <div class="pt-3 border-top border-white border-opacity-10">
+          <button class="btn btn-drawer-logout w-100 mb-2" id="btnCoordDrawerSair">
+            <i class="bi bi-box-arrow-right"></i> Sair da Conta
+          </button>
+          <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
+            Connect Senac • Coordenação
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- SUBHEADER -->
     <div class="user-subheader-bar mb-4">

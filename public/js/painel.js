@@ -9,20 +9,28 @@ const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
 
 // Tratamento seguro de token inválido
+let payloadTokenGlobal = null;
 try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (!payload || !payload.id) throw new Error();
+    payloadTokenGlobal = JSON.parse(atob(token.split('.')[1]));
+    if (!payloadTokenGlobal || !payloadTokenGlobal.id) throw new Error();
 } catch (e) {
     localStorage.removeItem('token');
-    window.location.href = 'index.html';
+    window.location.href = 'login.html';
 }
 
 const btnSair = document.getElementById('btnSair');
-if (btnSair) {
-    btnSair.addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-    });
+const btnDrawerSair = document.getElementById('btnDrawerSair');
+
+function logoutUsuario() {
+    localStorage.removeItem('token');
+    window.location.href = 'login.html';
+}
+
+if (btnSair) btnSair.addEventListener('click', logoutUsuario);
+if (btnDrawerSair) btnDrawerSair.addEventListener('click', logoutUsuario);
+
+if (payloadTokenGlobal && document.getElementById('drawerUserName')) {
+    document.getElementById('drawerUserName').textContent = (payloadTokenGlobal.email || 'Modelo').split('@')[0];
 }
 
 // Helper de requisições autenticadas com auto-logout em 401
@@ -44,10 +52,12 @@ async function fetchAuth(url, options = {}) {
 const modalAgendamentoEl = document.getElementById('modalAgendamento');
 const modalFeedbackEl = document.getElementById('modalFeedback');
 const modalDetalhesCursoEl = document.getElementById('modalDetalhesCurso');
+const modalConfirmacaoSucessoEl = document.getElementById('modalConfirmacaoSucesso');
 
 const modalAgendamento = modalAgendamentoEl ? new bootstrap.Modal(modalAgendamentoEl) : null;
 const modalFeedback = modalFeedbackEl ? new bootstrap.Modal(modalFeedbackEl) : null;
 const modalDetalhesCurso = modalDetalhesCursoEl ? new bootstrap.Modal(modalDetalhesCursoEl) : null;
+const modalConfirmacaoSucesso = modalConfirmacaoSucessoEl ? new bootstrap.Modal(modalConfirmacaoSucessoEl) : null;
 
 // Helper para sanitizar saídas contra vulnerabilidades XSS
 function escapeHTML(str) {
@@ -173,30 +183,39 @@ function renderizarVitrineCursos(){
         window.cursosAtivosMap.set(String(curso.id), curso);
 
         const profNome = escapeHTML(curso.usuarios ? curso.usuarios.nome : 'Docente Responsável');
-        const local = escapeHTML(curso.localizacao || 'SENAC');
+        const local = escapeHTML(curso.localizacao || 'SENAC Santo Antônio');
         const imagem = escapeHTML(curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60');
         const nomeFormatado = escapeHTML(curso.nome);
         const descRaw = curso.descricao || 'Procedimento prático supervisionado.';
         const descResumo = escapeHTML(descRaw.length > 90 ? descRaw.substring(0, 90) + '...' : descRaw);
+        const motivo = escapeHTML(curso.motivo_modelo || 'Prática supervisionada em ambiente de excelência.');
 
         const card = `
             <div class="col-md-6 col-lg-4">
-                <div class="card-premium card-course-interactive" onclick="abrirModalDetalhesCurso('${curso.id}')">
-                    <div class="card-img-container">
-                        <img src="${imagem}" alt="${nomeFormatado}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                        <span class="course-badge"><i class="bi bi-tag-fill me-1"></i> Curso SENAC</span>
+                <div class="course-detail-card h-100" onclick="abrirModalDetalhesCurso('${curso.id}')" style="cursor: pointer;">
+                    <div class="card-img-container position-relative" style="height: 180px; overflow: hidden;">
+                        <img src="${imagem}" alt="${nomeFormatado}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
+                        <span class="course-badge position-absolute top-0 start-0 m-3"><i class="bi bi-stars me-1"></i> Vagas Abertas</span>
                     </div>
-                    <div class="card-body p-4 d-flex flex-column">
-                        <h5 class="fw-bold mb-2 text-dark font-heading">${nomeFormatado}</h5>
-                        <div class="d-flex align-items-center text-muted small mb-3">
-                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                            <span class="text-truncate">${local}</span>
+                    <div class="p-4 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-1 text-dark font-heading">${nomeFormatado}</h5>
+                        <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                            <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}</span>
+                            <span>•</span>
+                            <span><i class="bi bi-person-badge-fill text-primary me-1"></i> Prof. ${profNome}</span>
                         </div>
-                        <p class="card-text small text-secondary flex-grow-1 mb-3">${descResumo}</p>
-                        <div class="pt-3 border-top d-flex align-items-center justify-content-between">
-                            <span class="small text-muted"><i class="bi bi-person-check me-1"></i> Prof. ${profNome}</span>
-                            <button class="btn btn-outline-brand btn-sm px-3">
-                                Detalhes <i class="bi bi-arrow-right ms-1"></i>
+                        <p class="card-text small text-secondary mb-2">${descResumo}</p>
+                        
+                        <div class="course-syllabus-box">
+                            <ul class="course-syllabus-list">
+                                <li><i class="bi bi-check2-circle"></i> <span>${motivo}</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="pt-3 border-top mt-auto d-flex align-items-center justify-content-between">
+                            <span class="badge bg-light text-primary border"><i class="bi bi-clock me-1"></i> 1h a 2h</span>
+                            <button class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation(); abrirModalDetalhesCurso('${curso.id}');">
+                                Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
                             </button>
                         </div>
                     </div>
@@ -310,8 +329,20 @@ function abrirModalDetalhesCurso(cursoParam){
 // ==========================================
 // 2. FLUXO DE AGENDAMENTO (MODAL E HORÁRIOS)
 // ==========================================
+window.currentSchedulingData = {
+    cursoNome: '',
+    dataHoraFormatada: '',
+    localizacao: 'SENAC - Santo Antônio de Jesus, BA'
+};
+
 async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
     if (!modalAgendamento) return;
+
+    window.currentSchedulingData.cursoNome = cursoNome;
+    const cursoObj = window.cursosAtivosMap.get(String(cursoId));
+    if (cursoObj && cursoObj.localizacao) {
+        window.currentSchedulingData.localizacao = cursoObj.localizacao;
+    }
 
     document.getElementById('modalCursoNome').textContent = cursoNome;
     document.getElementById('modalCursoDescricao').textContent = cursoDescricao;
@@ -321,7 +352,8 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
     const grade = document.getElementById('gradeHorarios');
     const resumo = document.getElementById('resumoHorario');
     select.innerHTML = '<option value="" disabled selected>Selecione um horário</option>';
-    grade.innerHTML = '<div class="schedule-loading"><span class="spinner-border spinner-border-sm"></span> Buscando os melhores horários...</div>';
+    grade.className = 'schedule-chip-grid';
+    grade.innerHTML = '<div class="col-12 text-center text-muted py-4"><span class="spinner-border spinner-border-sm me-1 text-primary"></span> Buscando os melhores horários...</div>';
     resumo.classList.add('d-none');
     resumo.innerHTML = '';
 
@@ -338,47 +370,68 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
         select.innerHTML = '<option value="" disabled selected>Selecione o melhor dia e horário</option>';
 
         if (!Array.isArray(horarios) || horarios.length === 0) {
-            grade.innerHTML = '<div class="schedule-empty"><i class="bi bi-calendar2-x"></i><strong>Nenhum horário disponível</strong><span>Novas vagas podem aparecer em breve. Volte para conferir.</span></div>';
+            grade.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="bi bi-calendar2-x fs-2 d-block mb-2 text-warning"></i><strong>Nenhum horário cadastrado</strong><p class="small text-muted mb-0">Novas vagas podem aparecer em breve.</p></div>';
             btnConfirmar.disabled = true;
             return;
         }
 
         const horariosLivres = horarios.filter(h => (h.vagas_totais - h.vagas_ocupadas) > 0);
         grade.innerHTML = '';
+
+        if (horariosLivres.length === 0) {
+            grade.innerHTML = '<div class="col-12 text-center text-muted py-4"><i class="bi bi-people fs-2 d-block mb-2 text-danger"></i><strong>Todas as vagas foram preenchidas</strong><p class="small text-muted mb-0">Escolha outro serviço ou consulte novamente mais tarde.</p></div>';
+            btnConfirmar.disabled = true;
+            return;
+        }
+
         horariosLivres.forEach((h, index) => {
             const data = new Date(h.data_hora);
-            const diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
-            const dia = data.toLocaleDateString('pt-BR', { day: '2-digit' });
-            const mes = data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '');
+            const diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase();
+            const diaMes = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
             const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const dataCompleta = data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
             const vagasLivres = h.vagas_totais - h.vagas_ocupadas;
+
             select.innerHTML += `<option value="${h.id}">${dataCompleta}, ${hora}</option>`;
-            const botao = document.createElement('button');
-            botao.type = 'button';
-            botao.className = 'schedule-option';
-            botao.setAttribute('role', 'radio');
-            botao.setAttribute('aria-checked', 'false');
-            botao.style.setProperty('--item-delay', `${index * 45}ms`);
-            botao.innerHTML = `<span class="schedule-date"><small>${diaSemana}</small><strong>${dia}</strong><small>${mes}</small></span><span class="schedule-time"><i class="bi bi-clock"></i><strong>${hora}</strong><small>Atendimento presencial</small></span><span class="schedule-spots ${vagasLivres <= 2 ? 'is-low' : ''}"><strong>${vagasLivres}</strong><small>vaga${vagasLivres > 1 ? 's' : ''}</small></span><i class="bi bi-check-circle-fill schedule-check"></i>`;
-            botao.addEventListener('click', () => {
-                grade.querySelectorAll('.schedule-option').forEach(item => { item.classList.remove('selected'); item.setAttribute('aria-checked', 'false'); });
-                botao.classList.add('selected');
-                botao.setAttribute('aria-checked', 'true');
+
+            const chip = document.createElement('div');
+            chip.className = 'schedule-chip';
+            chip.setAttribute('role', 'radio');
+            chip.setAttribute('aria-checked', 'false');
+
+            let badgeStatus = '';
+            if (vagasLivres === 1) {
+                badgeStatus = '<span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 chip-status"><i class="bi bi-fire text-danger"></i> Última vaga</span>';
+            } else if (vagasLivres === 2) {
+                badgeStatus = '<span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 chip-status">Últimas 2 vagas</span>';
+            } else {
+                badgeStatus = `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 chip-status"><i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> ${vagasLivres} vagas</span>`;
+            }
+
+            chip.innerHTML = `
+                <div class="small fw-bold text-muted mb-1">${diaSemana} • ${diaMes}</div>
+                <span class="chip-time">${hora}</span>
+                <div class="mt-2">${badgeStatus}</div>
+            `;
+
+            chip.addEventListener('click', () => {
+                grade.querySelectorAll('.schedule-chip').forEach(item => {
+                    item.classList.remove('is-selected');
+                    item.setAttribute('aria-checked', 'false');
+                });
+                chip.classList.add('is-selected');
+                chip.setAttribute('aria-checked', 'true');
                 select.value = h.id;
                 btnConfirmar.disabled = false;
-                resumo.innerHTML = `<i class="bi bi-check2-circle"></i><span><small>Horário selecionado</small><strong>${dataCompleta}, às ${hora}</strong></span>`;
+                window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora}`;
+                resumo.innerHTML = `<i class="bi bi-check2-circle text-success me-1"></i><span><small class="text-muted d-block">Horário selecionado:</small><strong class="text-dark">${dataCompleta}, às ${hora}</strong></span>`;
                 resumo.classList.remove('d-none');
             });
-            grade.appendChild(botao);
+            grade.appendChild(chip);
         });
 
-        if (horariosLivres.length === 0) {
-            grade.innerHTML = '<div class="schedule-empty"><i class="bi bi-people"></i><strong>Todas as vagas foram preenchidas</strong><span>Escolha outro serviço ou consulte novamente mais tarde.</span></div>';
-            btnConfirmar.disabled = true;
-        }
     } catch (error) {
-        grade.innerHTML = '<div class="schedule-empty is-error"><i class="bi bi-wifi-off"></i><strong>Não foi possível carregar</strong><span>Verifique sua conexão e tente novamente.</span></div>';
+        grade.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Não foi possível carregar os horários.</div>';
     }
 }
 
@@ -407,11 +460,25 @@ async function realizarAgendamento(disponibilidadeId){
         if (response.ok) {
             msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i> Inscrição confirmada com sucesso!</div>`;
             carregarMeusAgendamentos();
+            
             setTimeout(() => {
-                modalAgendamento.hide();
+                if (modalAgendamento) modalAgendamento.hide();
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerHTML = originalBtn;
-            }, 1400);
+
+                // Abrir Modal Flutuante de Confirmação com Google Maps
+                if (modalConfirmacaoSucesso) {
+                    const confCurso = document.getElementById('confCursoNome');
+                    const confData = document.getElementById('confDataHora');
+                    const confLoc = document.getElementById('confLocalizacao');
+
+                    if (confCurso) confCurso.textContent = window.currentSchedulingData.cursoNome;
+                    if (confData) confData.textContent = window.currentSchedulingData.dataHoraFormatada || 'Data e horário agendados';
+                    if (confLoc) confLoc.textContent = window.currentSchedulingData.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
+
+                    modalConfirmacaoSucesso.show();
+                }
+            }, 600);
         } else {
             msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-x-circle-fill me-1"></i> ${data.erro}</div>`;
             btnConfirmar.disabled = false;
@@ -641,13 +708,15 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const payloadToken = JSON.parse(atob(token.split('.')[1]));
             const navbar = document.querySelector('.navbar-nav');
+            const drawerBackoffice = document.getElementById('drawerBackofficeLinks');
 
-            if (navbar) {
-                if (payloadToken.perfil === 'admin' || payloadToken.perfil === 'coordenador') {
-                    navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="admin.html"><i class="bi bi-speedometer2 me-1"></i> Voltar ao Backoffice</a></li>`;
-                } else if (payloadToken.perfil === 'profissional') {
-                    navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="profissional.html"><i class="bi bi-journal-check me-1"></i> Voltar à Pauta Docente</a></li>`;
-                }
+            if (payloadToken.perfil === 'admin' || payloadToken.perfil === 'coordenador') {
+                const urlBackoffice = payloadToken.perfil === 'coordenador' ? 'coordenador.html' : 'admin.html';
+                if (navbar) navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="${urlBackoffice}"><i class="bi bi-speedometer2 me-1"></i> Voltar ao Backoffice</a></li>`;
+                if (drawerBackoffice) drawerBackoffice.innerHTML = `<a class="drawer-link text-warning fw-bold" href="${urlBackoffice}"><i class="bi bi-speedometer2 text-warning"></i> Voltar ao Backoffice</a>`;
+            } else if (payloadToken.perfil === 'profissional') {
+                if (navbar) navbar.innerHTML += `<li class="nav-item"><a class="nav-link text-warning fw-bold" href="profissional.html"><i class="bi bi-journal-check me-1"></i> Voltar à Pauta Docente</a></li>`;
+                if (drawerBackoffice) drawerBackoffice.innerHTML = `<a class="drawer-link text-warning fw-bold" href="profissional.html"><i class="bi bi-journal-check text-warning"></i> Voltar à Pauta Docente</a>`;
             }
         } catch(e) {}
     }

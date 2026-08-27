@@ -23,9 +23,9 @@
   </head>
   <body class="bg-main d-flex flex-column min-vh-100 dashboard-page professional-page">
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-custom">
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
       <div class="container">
-        <a class="navbar-brand" href="#">
+        <a class="navbar-brand" href="profissional.html">
           <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
           <span>Connect Senac</span>
           <span class="navbar-role-badge">
@@ -33,7 +33,12 @@
           </span>
         </a>
 
-        <div class="d-flex align-items-center gap-2 mt-2 mt-lg-0">
+        <!-- Botão Hambúrguer Mobile -->
+        <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#profMobileSidebar" aria-controls="profMobileSidebar" aria-label="Abrir Menu">
+          <i class="bi bi-list fs-2 text-white"></i>
+        </button>
+
+        <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
           <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
             <i class="bi bi-eye me-1"></i> Visão do Modelo
           </a>
@@ -43,6 +48,52 @@
         </div>
       </div>
     </nav>
+
+    <!-- SIDEBAR LATERAL MOBILE (SLIDE DA ESQUERDA PARA A DIREITA) -->
+    <div class="offcanvas offcanvas-start mobile-drawer" tabindex="-1" id="profMobileSidebar" aria-labelledby="profMobileSidebarLabel">
+      <div class="offcanvas-header d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2">
+          <img src="assets/logo-connect-senac.png" alt="Connect Senac" style="height: 32px;">
+          <span class="fw-bold text-white font-heading fs-6">Connect Senac</span>
+        </div>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+      </div>
+      <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
+        <div>
+          <!-- Mini Card do Professor -->
+          <div class="drawer-user-card d-flex align-items-center gap-3 mb-4">
+            <div class="drawer-avatar" style="background: var(--senac-orange);">
+              <i class="bi bi-mortarboard-fill"></i>
+            </div>
+            <div class="overflow-hidden">
+              <div class="text-white fw-bold small text-truncate" id="drawerProfName">Professor Docente</div>
+              <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Corpo Docente SENAC</span>
+            </div>
+          </div>
+
+          <!-- Links de Navegação pelas Pautas no Mobile -->
+          <nav class="drawer-nav-list">
+            <a class="drawer-link active" href="#pauta-section" data-bs-dismiss="offcanvas">
+              <i class="bi bi-journal-check"></i> Minhas Turmas & Pautas
+            </a>
+            <hr class="border-white border-opacity-15 my-2">
+            <a class="drawer-link text-warning fw-semibold" href="painel.html">
+              <i class="bi bi-eye text-warning"></i> Visão do Modelo
+            </a>
+          </nav>
+        </div>
+
+        <!-- Footer da Sidebar Mobile com Logout -->
+        <div class="pt-3 border-top border-white border-opacity-10">
+          <button class="btn btn-drawer-logout w-100 mb-2" id="btnProfDrawerSair">
+            <i class="bi bi-box-arrow-right"></i> Sair da Conta
+          </button>
+          <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
+            Connect Senac • Pauta Docente
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Subheader Logged In Status -->
     <div class="user-subheader-bar mb-4">
@@ -123,21 +174,27 @@
         : `${window.location.origin}/api`;
       const token = localStorage.getItem("token");
 
-      if (!token) window.location.href = "index.html";
+      if (!token) window.location.href = "login.html";
+
+      function logoutDocente() {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+      }
 
       try {
         const payloadToken = JSON.parse(atob(token.split(".")[1]));
-        document.getElementById("nomeProf").textContent =
-          (payloadToken.email || '').split("@")[0];
+        const nomeDocente = (payloadToken.email || '').split("@")[0];
+        if (document.getElementById("nomeProf")) document.getElementById("nomeProf").textContent = nomeDocente;
+        if (document.getElementById("drawerProfName")) document.getElementById("drawerProfName").textContent = nomeDocente;
       } catch(e) {
         localStorage.removeItem("token");
-        window.location.href = "index.html";
+        window.location.href = "login.html";
       }
 
-      document.getElementById("btnSair").addEventListener("click", () => {
-        localStorage.removeItem("token");
-        window.location.href = "index.html";
-      });
+      const btnSair = document.getElementById("btnSair");
+      const btnProfDrawerSair = document.getElementById("btnProfDrawerSair");
+      if (btnSair) btnSair.addEventListener("click", logoutDocente);
+      if (btnProfDrawerSair) btnProfDrawerSair.addEventListener("click", logoutDocente);
 
       // Helper para sanitizar saídas contra vulnerabilidades XSS
       function escapeHTML(str) {

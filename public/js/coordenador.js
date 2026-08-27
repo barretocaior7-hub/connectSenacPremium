@@ -1,4 +1,4 @@
-﻿// js/coordenador.js
+// js/coordenador.js
 // Logica exclusiva da pagina da Coordenacao — Connect Senac V2.0
 
 // ============================================================================
@@ -35,18 +35,33 @@ if (
   window.location.href = "index.html";
 }
 
-// Preencher nome no subheader
+// Preencher nome no subheader e drawer
 const elNome = document.getElementById("userNome");
 if (elNome) elNome.textContent = (payloadToken.email || "").split("@")[0];
 
-// Botao Sair
-const btnSair = document.getElementById("btnSair");
-if (btnSair) {
-  btnSair.addEventListener("click", () => {
-    localStorage.removeItem("token");
-    window.location.href = "index.html";
-  });
+const drawerCoordName = document.getElementById("drawerCoordName");
+if (drawerCoordName) drawerCoordName.textContent = (payloadToken.email || "Coordenador").split("@")[0];
+
+function logoutCoordenador() {
+  localStorage.removeItem("token");
+  window.location.href = "login.html";
 }
+
+// Botoes Sair
+const btnSair = document.getElementById("btnSair");
+const btnCoordDrawerSair = document.getElementById("btnCoordDrawerSair");
+if (btnSair) btnSair.addEventListener("click", logoutCoordenador);
+if (btnCoordDrawerSair) btnCoordDrawerSair.addEventListener("click", logoutCoordenador);
+
+// Ativação de abas via Drawer Mobile
+function ativarTabCoordMobile(tabBtnId) {
+  const triggerEl = document.getElementById(tabBtnId);
+  if (triggerEl) {
+    const tab = new bootstrap.Tab(triggerEl);
+    tab.show();
+  }
+}
+window.ativarTabCoordMobile = ativarTabCoordMobile;
 
 // ============================================================================
 // UTILITARIO: Sanitizar HTML (anti-XSS)

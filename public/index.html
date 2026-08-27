@@ -25,10 +25,13 @@
                 <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac">
                 <span>Connect Senac</span>
             </a>
-            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navPublica">
-                <i class="bi bi-list fs-2"></i>
+
+            <!-- Botão Hambúrguer Mobile -->
+            <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#publicMobileSidebar" aria-controls="publicMobileSidebar" aria-label="Abrir Menu">
+                <i class="bi bi-list fs-2 text-white"></i>
             </button>
-            <div class="collapse navbar-collapse" id="navPublica">
+
+            <div class="collapse navbar-collapse d-none d-lg-flex" id="navPublica">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
                     <li class="nav-item">
                         <a class="nav-link" href="#como-funciona"><i class="bi bi-info-circle me-1"></i> Como Funciona</a>
@@ -49,25 +52,92 @@
         </div>
     </nav>
 
+    <!-- SIDEBAR LATERAL MOBILE (SLIDE DA ESQUERDA PARA A DIREITA) -->
+    <div class="offcanvas offcanvas-start mobile-drawer" tabindex="-1" id="publicMobileSidebar" aria-labelledby="publicMobileSidebarLabel">
+        <div class="offcanvas-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <img src="assets/logo-connect-senac.png" alt="Connect Senac" style="height: 32px;">
+                <span class="fw-bold text-white font-heading fs-6">Connect Senac</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
+            <div>
+                <div class="drawer-user-card d-flex align-items-center gap-3 mb-4">
+                    <div class="drawer-avatar" style="background: var(--senac-blue-hover);">
+                        <i class="bi bi-stars"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <div class="text-white fw-bold small">Seja Modelo SENAC</div>
+                        <span class="badge bg-warning text-dark" style="font-size: 0.7rem;">Atendimentos Gratuitos</span>
+                    </div>
+                </div>
+
+                <nav class="drawer-nav-list">
+                    <a class="drawer-link active" href="#vitrine" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-stars"></i> Cursos & Vagas Abertas
+                    </a>
+                    <a class="drawer-link" href="#como-funciona" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-info-circle"></i> Como Funciona o Projeto
+                    </a>
+                </nav>
+            </div>
+
+            <div class="pt-3 border-top border-white border-opacity-10" id="drawerAuthActions">
+                <a href="login.html" class="btn btn-outline-light w-100 mb-2 py-2">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Entrar na Plataforma
+                </a>
+                <a href="cadastro.html" class="btn btn-orange w-100 mb-3 py-2">
+                    <i class="bi bi-person-plus-fill me-1"></i> Criar Conta Grátis
+                </a>
+                <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
+                    Connect Senac • V2.0 Mobile
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <header class="py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--senac-blue-dark) 0%, var(--senac-blue) 75%, #0264b8 100%);">
-        <div class="container py-4 text-center position-relative z-1">
-            <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-3 d-inline-flex align-items-center gap-1 shadow-sm">
-                <i class="bi bi-stars"></i> Atendimentos Práticos 100% Gratuitos e Supervisionados
-            </span>
-            <h1 class="display-4 fw-bold font-heading mb-3 text-white">
-                Seja Modelo nos Cursos Práticos do SENAC
-            </h1>
-            <p class="lead text-white-50 mx-auto mb-4" style="max-width: 680px;">
-                Receba procedimentos de beleza, estética, barbearia e massoterapia realizados por alunos sob a supervisão atenta dos melhores docentes do SENAC.
-            </p>
-            <div class="d-flex flex-wrap justify-content-center gap-3">
-                <a href="#vitrine" class="btn btn-orange btn-lg px-4 shadow">
-                    <i class="bi bi-calendar2-heart-fill me-2"></i> Explorar Vagas Abertas
-                </a>
-                <a href="#como-funciona" class="btn btn-outline-light btn-lg px-4">
-                    <i class="bi bi-question-circle me-1"></i> Entenda o Projeto
-                </a>
+    <header class="container py-4">
+        <div class="hero-premium">
+            <div class="row align-items-center g-4">
+                <div class="col-lg-7">
+                    <span class="hero-tag mb-3">
+                        <i class="bi bi-stars"></i> Atendimentos Práticos 100% Gratuitos & Supervisionados
+                    </span>
+                    <h1 class="display-4 fw-bold font-heading mb-3 text-white">
+                        Seja Modelo nos Cursos Práticos do SENAC
+                    </h1>
+                    <p class="lead text-white-50 mb-4" style="max-width: 600px; font-size: 1.1rem; line-height: 1.7;">
+                        Vivencie procedimentos profissionais de estética facial, corte, barbearia, massoterapia e manicure realizados por estudantes dedicados com supervisão integral dos docentes especialistas do SENAC.
+                    </p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <a href="#vitrine" class="btn btn-orange btn-lg px-4 shadow">
+                            <i class="bi bi-calendar2-heart-fill me-2"></i> Reservar Vaga Agora
+                        </a>
+                        <a href="#depoimentos" class="btn btn-outline-light btn-lg px-4">
+                            <i class="bi bi-chat-heart-fill me-2"></i> Ver Avaliações (5.0 ⭐)
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-5 d-none d-lg-block text-center hero-floating-visual">
+                    <div class="p-4 rounded-4 bg-white bg-opacity-10 border border-white border-opacity-20 shadow-lg backdrop-blur" style="max-width: 380px; margin: 0 auto;">
+                        <div class="d-flex align-items-center gap-3 mb-3 text-start">
+                            <div class="drawer-avatar" style="background: var(--senac-orange);">
+                                <i class="bi bi-shield-check"></i>
+                            </div>
+                            <div>
+                                <strong class="text-white d-block">Supervisão 100% Ativa</strong>
+                                <small class="text-white-50">Docentes com registro profissional</small>
+                            </div>
+                        </div>
+                        <hr class="border-white border-opacity-15 my-2">
+                        <div class="d-flex justify-content-between align-items-center text-white small pt-2">
+                            <span><i class="bi bi-geo-alt-fill text-warning me-1"></i> SENAC Santo Antônio</span>
+                            <span class="badge bg-success"><i class="bi bi-check2"></i> Vagas Abertas</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -107,7 +177,104 @@
                             <i class="bi bi-person-check-fill"></i>
                         </div>
                         <h5 class="fw-bold font-heading text-dark mb-2">3. Compareça ao SENAC</h5>
-                        <p class="text-muted small mb-0">Dirija-se à unidade na hora marcada e desfrute do atendimento supervisionado pelo professor.</p>
+                        <p class="text-muted small mb-0">Dirija-se à unidade na hora marcada com 20 minutos de antecedência para o atendimento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção: Prova Social (Depoimentos de Modelos) -->
+    <section class="py-5 bg-light border-bottom" id="depoimentos">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-warning fw-bold small text-uppercase tracking-wider">
+                    <i class="bi bi-star-fill me-1"></i> Experiência Comprovada
+                </span>
+                <h2 class="fw-bold font-heading text-dark mt-1">O que nossos modelos dizem</h2>
+                <p class="text-muted small mx-auto" style="max-width: 540px;">
+                    Mais de 500 atendimentos realizados com nota máxima de satisfação e acompanhamento profissional.
+                </p>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="testimonial-stars">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-10 text-dark fw-bold" style="font-size: 0.75rem;">5.0 / 5.0</span>
+                            </div>
+                            <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                                "Fui modelo para o curso de Limpeza de Pele Profunda. O atendimento foi impecável, a aluna foi super cuidadosa e a professora acompanhou cada etapa do procedimento. Recomendo demais!"
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 pt-3 border-top">
+                            <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120&auto=format&fit=crop&q=80" alt="Juliana Costa" class="testimonial-avatar">
+                            <div>
+                                <strong class="text-dark small d-block font-heading">Juliana Costa</strong>
+                                <span class="text-muted" style="font-size: 0.75rem;">Modelo em Estética Facial</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="testimonial-stars">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-10 text-dark fw-bold" style="font-size: 0.75rem;">5.0 / 5.0</span>
+                            </div>
+                            <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                                "Participei da aula prática de Barbearia & Corte Masculino. Ambiente climatizado, materiais 100% higienizados e o corte ficou de altíssimo nível. Já agendei a próxima sessão!"
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 pt-3 border-top">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&auto=format&fit=crop&q=80" alt="Marcos Vinícius" class="testimonial-avatar">
+                            <div>
+                                <strong class="text-dark small d-block font-heading">Marcos Vinícius</strong>
+                                <span class="text-muted" style="font-size: 0.75rem;">Modelo em Barbearia Clássica</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="testimonial-card">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="testimonial-stars">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                                <span class="badge bg-warning bg-opacity-10 text-dark fw-bold" style="font-size: 0.75rem;">5.0 / 5.0</span>
+                            </div>
+                            <p class="text-secondary small mb-4" style="line-height: 1.6;">
+                                "A sessão de Massoterapia Relaxante foi maravilhosa. Toda a equipe do SENAC foi extremamente profissional e acolhedora. Uma oportunidade excelente para quem quer cuidar do corpo."
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-3 pt-3 border-top">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80" alt="Beatriz Souza" class="testimonial-avatar">
+                            <div>
+                                <strong class="text-dark small d-block font-heading">Beatriz Souza</strong>
+                                <span class="text-muted" style="font-size: 0.75rem;">Modelo em Massoterapia</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -172,14 +339,27 @@
     <script>
         const token = localStorage.getItem('token');
         const authButtons = document.getElementById('authNavButtons');
+        const drawerAuthActions = document.getElementById('drawerAuthActions');
 
-        // Se já estiver logado, altera botões da navbar para ir direto ao painel
+        // Se já estiver logado, altera botões da navbar e drawer para ir direto ao painel
         if (token) {
-            authButtons.innerHTML = `
-                <a href="painel.html" class="btn btn-sm btn-orange px-3 fw-bold">
-                    <i class="bi bi-speedometer2 me-1"></i> Meu Painel
-                </a>
-            `;
+            if (authButtons) {
+                authButtons.innerHTML = `
+                    <a href="painel.html" class="btn btn-sm btn-orange px-3 fw-bold">
+                        <i class="bi bi-speedometer2 me-1"></i> Meu Painel
+                    </a>
+                `;
+            }
+            if (drawerAuthActions) {
+                drawerAuthActions.innerHTML = `
+                    <a href="painel.html" class="btn btn-orange w-100 mb-3 py-2 fw-bold">
+                        <i class="bi bi-speedometer2 me-1"></i> Acessar Meu Painel
+                    </a>
+                    <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
+                        Connect Senac • V2.0 Mobile
+                    </div>
+                `;
+            }
         }
 
         let cursosPublicos = [];
@@ -240,27 +420,41 @@
                 const nome = escapeHTML(c.nome);
                 const desc = escapeHTML(c.descricao || 'Atendimento prático supervisionado.');
                 const prof = escapeHTML(c.usuarios?.nome || 'Docente SENAC');
-                const local = escapeHTML(c.localizacao || 'SENAC');
+                const local = escapeHTML(c.localizacao || 'SENAC Santo Antônio de Jesus');
+                const motivo = escapeHTML(c.motivo_modelo || 'Prática supervisionada em ambiente laboratorial com produtos profissionais.');
+                const restricoes = escapeHTML(c.restricoes || 'Sem contraindicações graves. Comparecer 20min antes.');
 
                 const urlDestino = token ? `painel.html?curso=${c.id}` : `login.html?curso=${c.id}`;
 
                 div.innerHTML += `
                     <div class="col-md-6 col-lg-4">
-                        <div class="card-premium card-course-interactive h-100 d-flex flex-column" onclick="window.location.href='${urlDestino}'">
-                            <div class="card-img-container">
-                                <img src="${img}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                                <span class="course-badge"><i class="bi bi-check-circle-fill me-1"></i> Vagas Abertas</span>
+                        <div class="course-detail-card h-100" onclick="window.location.href='${urlDestino}'" style="cursor: pointer;">
+                            <div class="card-img-container position-relative" style="height: 190px; overflow: hidden;">
+                                <img src="${img}" alt="${nome}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
+                                <span class="course-badge position-absolute top-0 start-0 m-3"><i class="bi bi-check-circle-fill me-1"></i> Vagas Abertas</span>
                             </div>
-                            <div class="card-body p-4 d-flex flex-column flex-grow-1">
-                                <h5 class="fw-bold font-heading text-dark mb-2">${nome}</h5>
-                                <div class="d-flex align-items-center text-muted small mb-2">
-                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}
+                            <div class="p-4 d-flex flex-column flex-grow-1">
+                                <h5 class="fw-bold font-heading text-dark mb-1">${nome}</h5>
+                                <div class="d-flex align-items-center gap-2 text-muted small mb-3">
+                                    <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}</span>
+                                    <span>•</span>
+                                    <span><i class="bi bi-clock-fill text-primary me-1"></i> 1h a 2h</span>
                                 </div>
-                                <p class="card-text small text-secondary flex-grow-1 mb-3">${desc}</p>
-                                <div class="pt-3 border-top d-flex align-items-center justify-content-between">
-                                    <span class="small text-muted"><i class="bi bi-person-badge me-1"></i> Prof. ${prof}</span>
-                                    <a href="${urlDestino}" class="btn btn-outline-brand btn-sm px-3" onclick="event.stopPropagation();">
-                                        Agendar Vaga <i class="bi bi-arrow-right ms-1"></i>
+                                <p class="card-text small text-secondary mb-2">${desc}</p>
+                                
+                                <div class="course-syllabus-box">
+                                    <strong class="d-block text-dark small fw-bold mb-1"><i class="bi bi-journal-text text-primary me-1"></i> O que você recebe na sessão:</strong>
+                                    <ul class="course-syllabus-list">
+                                        <li><i class="bi bi-check2-circle"></i> <span>${motivo}</span></li>
+                                        <li><i class="bi bi-check2-circle"></i> <span>Supervisão direta com Prof. ${prof}</span></li>
+                                        <li><i class="bi bi-exclamation-circle text-warning"></i> <span class="text-muted">${restricoes}</span></li>
+                                    </ul>
+                                </div>
+
+                                <div class="pt-3 border-top mt-auto d-flex align-items-center justify-content-between">
+                                    <span class="badge bg-light text-primary border"><i class="bi bi-person-badge me-1"></i> ${prof}</span>
+                                    <a href="${urlDestino}" class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation();">
+                                        Reservar Vaga <i class="bi bi-arrow-right ms-1"></i>
                                     </a>
                                 </div>
                             </div>
