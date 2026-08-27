@@ -1607,6 +1607,8 @@ body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease for
   .public-courses-hero { border-radius: 18px; }
   .public-course-detail { border-radius: 18px; }
   .public-course-content { padding: 1.5rem; }
+}
+
 /* ==========================================================================
    DESIGN SYSTEM PREMIUM: HERO, PROVA SOCIAL, CARDS, AGENDAMENTO & MAPA (UI/UX)
    ========================================================================== */
@@ -1831,3 +1833,20 @@ body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease for
   height: 220px;
   width: 100%;
 }
+
+.backdrop-blur {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.course-badge {
+  background: rgba(0, 49, 91, 0.88) !important;
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
