@@ -545,6 +545,11 @@ a:hover {
   border-radius: 2px;
 }
 
+/* O subtítulo da vitrine fica livre do traço decorativo do título. */
+#vitrine .section-title::after {
+  display: none;
+}
+
 /* ==========================================================================
    HERO / BANNER DE BOAS-VINDAS
    ========================================================================== */
