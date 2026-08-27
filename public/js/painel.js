@@ -655,5 +655,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Inicialização
 carregarMeusFeedbacks();
-carregarCursos();
+carregarCursos().then(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const autoCursoId = urlParams.get('curso');
+    if (autoCursoId) {
+        setTimeout(() => {
+            abrirModalDetalhesCurso(autoCursoId);
+        }, 300);
+    }
+});
 carregarMeusAgendamentos();

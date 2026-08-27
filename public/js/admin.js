@@ -25,10 +25,15 @@ if (document.getElementById('userPerfil')) {
     document.getElementById('userPerfil').textContent = (payloadToken.perfil || '').toUpperCase();
 }
 
-// Se o utilizador for Coordenador, ocultamos a Tab de criar novos colaboradores (RBAC)
+// Se o utilizador for Coordenador, limitamos os cargos que ele pode cadastrar (não pode criar Admin nem Coordenador)
 if (payloadToken.perfil === 'coordenador') {
-    const equipaTab = document.getElementById('equipa-tab');
-    if (equipaTab) equipaTab.style.display = 'none';
+    const colabSelect = document.getElementById('colabPerfil');
+    if (colabSelect) {
+        colabSelect.innerHTML = `
+            <option value="profissional" selected>Profissional (Professor)</option>
+            <option value="candidato">Candidato (Modelo)</option>
+        `;
+    }
 }
 
 const btnSair = document.getElementById('btnSair');
@@ -123,6 +128,14 @@ function renderizarTabelaUtilizadores(lista){
             ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success p-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
             : '<span class="text-muted small">-</span>';
 
+        const badgeLgpd = user.consentimento_termos
+            ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;" title="Termos LGPD Aceitos"><i class="bi bi-shield-check me-1"></i> LGPD OK</span>'
+            : '<span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.72rem;" title="Termos LGPD Não Aceitos"><i class="bi bi-shield-x me-1"></i> Sem LGPD</span>';
+
+        const badgeImagem = user.consentimento_imagem
+            ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.72rem;" title="Uso de Imagem Autorizado"><i class="bi bi-camera-fill me-1"></i> Imagem OK</span>'
+            : '<span class="badge bg-light text-muted border" style="font-size: 0.72rem;" title="Uso de Imagem Não Autorizado"><i class="bi bi-camera-video-off me-1"></i> Sem Imagem</span>';
+
         let seletorPerfil = `<span class="badge bg-secondary">${escapeHTML((user.perfil || '').toUpperCase())}</span>`;
         if (payloadToken.perfil === 'admin') {
             seletorPerfil = `
@@ -133,14 +146,22 @@ function renderizarTabelaUtilizadores(lista){
                     <option value="admin" ${user.perfil === 'admin' ? 'selected' : ''}>Admin</option>
                 </select>
             `;
+        } else if (payloadToken.perfil === 'coordenador' && (user.perfil === 'candidato' || user.perfil === 'profissional')) {
+            seletorPerfil = `
+                <select class="form-select form-select-sm" style="width: 125px;" onchange="alterarPerfil('${user.id}', this.value)" aria-label="Alterar Cargo">
+                    <option value="candidato" ${user.perfil === 'candidato' ? 'selected' : ''}>Candidato</option>
+                    <option value="profissional" ${user.perfil === 'profissional' ? 'selected' : ''}>Professor</option>
+                </select>
+            `;
         }
 
-        const btnBloqueio = payloadToken.perfil === 'admin'
+        const podeBloquear = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin' && user.perfil !== 'coordenador');
+        const btnBloqueio = podeBloquear
             ? `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueio('${user.id}', ${user.is_bloqueado})" title="${user.is_bloqueado ? 'Desbloquear conta' : 'Bloquear conta'}">
                 <i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i>
                </button>` : '';
 
-        const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil === 'candidato');
+        const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin' && user.perfil !== 'coordenador');
         const btnExcluir = podeExcluir
             ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', '${user.nome.replace(/'/g, "\\'")}')" title="Excluir conta">
                 <i class="bi bi-trash-fill"></i>
@@ -157,6 +178,9 @@ function renderizarTabelaUtilizadores(lista){
                     <div class="text-muted small">${telFormatado}</div>
                 </td>
                 <td>${seletorPerfil}</td>
+                <td>
+                    <div class="d-flex flex-column gap-1">${badgeLgpd}${badgeImagem}</div>
+                </td>
                 <td><span class="text-secondary small fw-semibold">${cursosAtivosFormatado}</span></td>
                 <td class="text-center fw-bold text-primary">${user.total_agendados || 0}</td>
                 <td class="text-center fw-bold text-success">${user.total_concluidos || 0}</td>

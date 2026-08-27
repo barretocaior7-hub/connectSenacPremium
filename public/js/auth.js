@@ -8,7 +8,13 @@ const API_URL = isLocalDev
   : `${window.location.origin}/api/usuarios`;
 
 function getSafeReturnUrl() {
-  const rawReturnUrl = new URLSearchParams(window.location.search).get("returnUrl");
+  const params = new URLSearchParams(window.location.search);
+  const cursoId = params.get("curso");
+  if (cursoId) {
+    return `painel.html?curso=${encodeURIComponent(cursoId)}`;
+  }
+
+  const rawReturnUrl = params.get("returnUrl");
   if (!rawReturnUrl || rawReturnUrl.startsWith("//")) return null;
 
   try {
@@ -290,7 +296,7 @@ if (formRedefinir) {
 
       if (response.ok) {
         msgDiv.innerHTML = `<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle-fill me-1"></i> ${data.mensagem} A redirecionar...</div>`;
-        setTimeout(() => (window.location.href = "index.html"), 2500);
+        setTimeout(() => (window.location.href = "login.html"), 2500);
       } else {
         msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
         if (submitBtn) {

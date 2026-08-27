@@ -22,8 +22,26 @@ exports.listarUtilizadores = async (req, res) => {
 exports.alterarStatusBloqueio = async (req, res) => {
     const { id } = req.params;
     const { is_bloqueado } = req.body;
+    const executorPerfil = req.usuario.perfil;
+    const executorId = req.usuario.id;
+
+    if (id === executorId) {
+        return res.status(400).json({ erro: 'Não pode bloquear a sua própria conta.' });
+    }
 
     try {
+        const { data: alvo, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('perfil')
+            .eq('id', id)
+            .single();
+
+        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
+
+        if (executorPerfil === 'coordenador' && (alvo.perfil === 'admin' || alvo.perfil === 'coordenador')) {
+            return res.status(403).json({ erro: 'Coordenadores não possuem permissão para moderar administradores ou outros coordenadores.' });
+        }
+
         const { data, error } = await supabase
             .from('usuarios')
             .update({ is_bloqueado })
@@ -40,16 +58,22 @@ exports.alterarStatusBloqueio = async (req, res) => {
     }
 };
 
-// 3. Criar Novo Colaborador (Apenas administradores podem fazer isto)
+// 3. Criar Novo Colaborador (Admin cria qualquer um; Coordenador cria apenas Professor ou Candidato)
 exports.criarColaborador = async (req, res) => {
     const { nome, email, telefone, senha, perfil } = req.body;
+    const executorPerfil = req.usuario.perfil;
 
     if (!nome || !email || !telefone || !senha || !perfil) {
         return res.status(400).json({ erro: 'Todos os campos são obrigatórios.' });
     }
 
-    if (!['admin', 'coordenador', 'profissional'].includes(perfil)) {
+    if (!['admin', 'coordenador', 'profissional', 'candidato'].includes(perfil)) {
         return res.status(400).json({ erro: 'Perfil de colaborador inválido.' });
+    }
+
+    // Regra restritiva para perfil Coordenador
+    if (executorPerfil === 'coordenador' && (perfil === 'admin' || perfil === 'coordenador')) {
+        return res.status(403).json({ erro: 'Coordenadores só podem cadastrar Professores ou Candidatos.' });
     }
 
     try {
@@ -129,9 +153,9 @@ exports.excluirUsuario = async (req, res) => {
             return res.status(404).json({ erro: 'Usuário não encontrado.' });
         }
 
-        // 2. Aplicar regras restritivas do RBAC
-        if (executorPerfil === 'coordenador' && alvo.perfil !== 'candidato') {
-            return res.status(403).json({ erro: 'Coordenadores só possuem permissão para excluir contas de candidatos.' });
+        // 2. Aplicar regras restritivas do RBAC para Coordenador
+        if (executorPerfil === 'coordenador' && (alvo.perfil === 'admin' || alvo.perfil === 'coordenador')) {
+            return res.status(403).json({ erro: 'Coordenadores não possuem permissão para excluir Administradores ou outros Coordenadores.' });
         }
 
         // 3. Executar deleção (O banco em cascata limpa agendamentos associados)
@@ -153,6 +177,7 @@ exports.excluirUsuario = async (req, res) => {
 exports.alterarPerfil = async (req, res) => {
     const { id } = req.params;
     const { perfil } = req.body;
+    const executorPerfil = req.usuario.perfil;
     const executorId = req.usuario.id;
 
     if (id === executorId) {
@@ -164,6 +189,20 @@ exports.alterarPerfil = async (req, res) => {
     }
 
     try {
+        const { data: alvo, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('perfil')
+            .eq('id', id)
+            .single();
+
+        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+
+        if (executorPerfil === 'coordenador') {
+            if (alvo.perfil === 'admin' || perfil === 'admin' || alvo.perfil === 'coordenador' || perfil === 'coordenador') {
+                return res.status(403).json({ erro: 'Coordenadores não podem gerenciar ou conceder cargos de Administrador ou Coordenador.' });
+            }
+        }
+
         const { error } = await supabase
             .from('usuarios')
             .update({ perfil })

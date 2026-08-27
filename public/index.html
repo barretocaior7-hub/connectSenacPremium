@@ -3,78 +3,292 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#003b73">
+    <meta name="theme-color" content="#004a8d">
     <link rel="icon" type="image/png" href="assets/logo-connect-senac.png">
-    <title>Connect Senac — Entre e agende</title>
+    <title>Connect Senac — Seja Modelo em Cursos Práticos</title>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 & Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="login-page">
-    <main class="login-shell">
-        <section class="login-showcase fade-in-up" aria-label="Apresentação do Connect Senac">
-            <div class="login-orb login-orb-one"></div>
-            <div class="login-orb login-orb-two"></div>
-            <div class="login-particles" aria-hidden="true">
-                <span></span><span></span><span></span><span></span><span></span><span></span>
-            </div>
-            <div class="login-showcase-content">
-                <a class="login-logo" href="index.html" aria-label="Connect Senac">
-                    <img class="login-logo-image" src="assets/logo-connect-senac.png" alt="Connect Senac">
-                </a>
-                <div class="login-eyebrow"><i class="bi bi-stars"></i> Aprender transforma</div>
-                <h1>Experiências reais.<br><em>Conexões que inspiram.</em></h1>
-                <p>Encontre serviços realizados por alunos, escolha o melhor horário e acompanhe tudo em um só lugar.</p>
-                <div class="login-feature-list">
-                    <div><i class="bi bi-calendar2-check-fill"></i><span><strong>Agendamento fácil</strong><small>Escolha dia e horário em poucos cliques</small></span></div>
-                    <div><i class="bi bi-shield-check"></i><span><strong>Atendimento supervisionado</strong><small>Práticas acompanhadas por profissionais</small></span></div>
-                    <div><i class="bi bi-heart-fill"></i><span><strong>Faça parte da formação</strong><small>Sua participação ajuda novos talentos</small></span></div>
-                </div>
-            </div>
-            <div class="login-showcase-footer"><span class="live-dot"></span> Novas oportunidades toda semana</div>
-        </section>
+<body class="bg-main d-flex flex-column min-vh-100">
 
-        <section class="login-form-panel">
-            <div class="login-panel-glow" aria-hidden="true"></div>
-            <div class="login-form-wrap fade-in-up">
-                <div class="login-mobile-brand"><img class="login-logo-image" src="assets/logo-connect-senac.png" alt="Connect Senac"></div>
-                <div class="login-heading">
-                    <span class="auth-brand-badge"><i class="bi bi-person-check-fill"></i> Área do participante</span>
-                    <h2>Que bom ter você aqui!</h2>
-                    <p>Acesse sua conta para descobrir os próximos horários.</p>
+    <!-- Top Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">
+                <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac">
+                <span>Connect Senac</span>
+            </a>
+            <button class="navbar-toggler text-white border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navPublica">
+                <i class="bi bi-list fs-2"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navPublica">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#como-funciona"><i class="bi bi-info-circle me-1"></i> Como Funciona</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#vitrine"><i class="bi bi-stars me-1"></i> Serviços & Cursos</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0" id="authNavButtons">
+                    <a href="login.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                    </a>
+                    <a href="cadastro.html" class="btn btn-sm btn-orange px-3 fw-bold">
+                        <i class="bi bi-person-plus-fill me-1"></i> Criar Conta Grátis
+                    </a>
                 </div>
-                <form id="formLogin" novalidate>
-                    <label class="login-field-label" for="email">Seu e-mail</label>
-                    <div class="login-input-group mb-3">
-                        <i class="bi bi-envelope"></i>
-                        <input type="email" class="form-control" id="email" placeholder="voce@email.com" required autocomplete="email" aria-label="E-mail institucional ou pessoal">
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-5 text-white position-relative overflow-hidden" style="background: linear-gradient(135deg, var(--senac-blue-dark) 0%, var(--senac-blue) 75%, #0264b8 100%);">
+        <div class="container py-4 text-center position-relative z-1">
+            <span class="badge bg-warning text-dark px-3 py-2 fw-bold mb-3 d-inline-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-stars"></i> Atendimentos Práticos 100% Gratuitos e Supervisionados
+            </span>
+            <h1 class="display-4 fw-bold font-heading mb-3 text-white">
+                Seja Modelo nos Cursos Práticos do SENAC
+            </h1>
+            <p class="lead text-white-50 mx-auto mb-4" style="max-width: 680px;">
+                Receba procedimentos de beleza, estética, barbearia e massoterapia realizados por alunos sob a supervisão atenta dos melhores docentes do SENAC.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-3">
+                <a href="#vitrine" class="btn btn-orange btn-lg px-4 shadow">
+                    <i class="bi bi-calendar2-heart-fill me-2"></i> Explorar Vagas Abertas
+                </a>
+                <a href="#como-funciona" class="btn btn-outline-light btn-lg px-4">
+                    <i class="bi bi-question-circle me-1"></i> Entenda o Projeto
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Seção: Como Funciona -->
+    <section class="py-5 bg-white border-bottom" id="como-funciona">
+        <div class="container">
+            <div class="text-center mb-5">
+                <span class="text-primary fw-bold small text-uppercase tracking-wider">Passo a Passo</span>
+                <h2 class="fw-bold font-heading text-dark mt-1">Como ser um modelo voluntário?</h2>
+                <p class="text-muted small mx-auto" style="max-width: 540px;">
+                    O processo é simples, rápido e transparente. Veja as 3 etapas para garantir o seu atendimento.
+                </p>
+            </div>
+            <div class="row g-4 text-center">
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light h-100 border">
+                        <div class="empty-state-icon mb-3" style="width: 56px; height: 56px; font-size: 1.5rem;">
+                            <i class="bi bi-search-heart"></i>
+                        </div>
+                        <h5 class="fw-bold font-heading text-dark mb-2">1. Escolha o Curso</h5>
+                        <p class="text-muted small mb-0">Navegue pelas disciplinas com vagas abertas nas áreas de estética, cabelo, unhas e massagens.</p>
                     </div>
-                    <div class="d-flex justify-content-between align-items-center">
-                        <label class="login-field-label" for="senha">Sua senha</label>
-                        <a href="esqueci-senha.html" class="login-forgot">Esqueci minha senha</a>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light h-100 border">
+                        <div class="empty-state-icon mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; background: var(--senac-orange-light); color: var(--senac-orange);">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h5 class="fw-bold font-heading text-dark mb-2">2. Reserve sua Vaga</h5>
+                        <p class="text-muted small mb-0">Crie sua conta gratuita em segundos ou faça login para confirmar a data e o horário ideais.</p>
                     </div>
-                    <div class="login-input-group mb-3 input-password-wrapper">
-                        <i class="bi bi-lock"></i>
-                        <input type="password" class="form-control pe-5" id="senha" placeholder="Digite sua senha" required autocomplete="current-password" aria-label="Senha">
-                        <button type="button" class="btn-toggle-password" id="btnToggleSenha" aria-label="Mostrar ou ocultar senha" title="Mostrar ou ocultar senha"><i class="bi bi-eye" id="iconToggleSenha"></i></button>
-                        <div class="password-peek-hint" id="passwordPeekHint" aria-hidden="true">
-                            <span class="password-peek-eye"><i class="bi bi-eye-fill"></i></span>
-                            <span>Será que tá certa?</span>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-4 rounded-4 bg-light h-100 border">
+                        <div class="empty-state-icon mb-3" style="width: 56px; height: 56px; font-size: 1.5rem; background: var(--state-success-bg); color: var(--state-success);">
+                            <i class="bi bi-person-check-fill"></i>
+                        </div>
+                        <h5 class="fw-bold font-heading text-dark mb-2">3. Compareça ao SENAC</h5>
+                        <p class="text-muted small mb-0">Dirija-se à unidade na hora marcada e desfrute do atendimento supervisionado pelo professor.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vitrine de Cursos Abertos -->
+    <main class="container py-5 flex-grow-1" id="vitrine">
+        <div class="section-header-custom mb-4">
+            <div>
+                <h3 class="section-title">
+                    <i class="bi bi-stars text-warning"></i> Cursos e Procedimentos Disponíveis
+                </h3>
+                <p class="text-muted small mb-0 mt-1">Selecione o procedimento desejado para visualizar detalhes e agendar sua participação.</p>
+            </div>
+        </div>
+
+        <!-- Filtros & Busca -->
+        <div class="mb-4 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-md-center">
+            <div class="input-group search-bar-premium" style="max-width: 360px;">
+                <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                <input type="text" class="form-control border-start-0 ps-0" id="filtroTextoPublico" placeholder="Buscar por serviço ou docente...">
+            </div>
+            <div class="category-pills-container d-flex gap-2 overflow-auto py-1" id="containerCategoriasPublico">
+                <button type="button" class="btn btn-category-pill active" data-categoria="todos">Todos</button>
+                <button type="button" class="btn btn-category-pill" data-categoria="cabelo">Cabelo & Barba</button>
+                <button type="button" class="btn btn-category-pill" data-categoria="facial">Estética Facial</button>
+                <button type="button" class="btn btn-category-pill" data-categoria="massoterapia">Massoterapia</button>
+                <button type="button" class="btn btn-category-pill" data-categoria="unhas">Unhas & Manicure</button>
+            </div>
+        </div>
+
+        <div class="row g-4" id="catalogoPublico">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="text-muted small mt-2">Carregando catálogo de atendimentos do SENAC...</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-custom mt-auto">
+        <div class="container text-center text-md-start">
+            <div class="row align-items-center">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
+                        <img src="assets/logo-connect-senac.png" alt="SENAC" style="height: 32px;">
+                        <span class="fw-bold text-white font-heading">Connect Senac</span>
+                    </div>
+                    <p class="text-white-50 small mb-0 mt-1">Plataforma Oficial de Agendamento Prático Supervisionado.</p>
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <span class="text-white-50 small d-block"><i class="bi bi-shield-lock-fill text-warning me-1"></i> Seus dados protegidos conforme a LGPD.</span>
+                    <span class="text-white-50 small">© 2026 SENAC — Todos os direitos reservados.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const token = localStorage.getItem('token');
+        const authButtons = document.getElementById('authNavButtons');
+
+        // Se já estiver logado, altera botões da navbar para ir direto ao painel
+        if (token) {
+            authButtons.innerHTML = `
+                <a href="painel.html" class="btn btn-sm btn-orange px-3 fw-bold">
+                    <i class="bi bi-speedometer2 me-1"></i> Meu Painel
+                </a>
+            `;
+        }
+
+        let cursosPublicos = [];
+        let categoriaPublica = 'todos';
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        async function carregarVitrinePublica() {
+            const div = document.getElementById('catalogoPublico');
+            try {
+                const res = await fetch('/api/cursos/ativos');
+                cursosPublicos = await res.json();
+                if (!Array.isArray(cursosPublicos)) cursosPublicos = [];
+                renderizarCardsPublicos();
+            } catch (e) {
+                div.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Erro ao carregar catálogo. Tente novamente mais tarde.</div>';
+            }
+        }
+
+        function renderizarCardsPublicos() {
+            const div = document.getElementById('catalogoPublico');
+            div.innerHTML = '';
+
+            const termo = (document.getElementById('filtroTextoPublico')?.value || '').toLowerCase().trim();
+
+            const filtrados = cursosPublicos.filter(c => {
+                const texto = `${c.nome} ${c.descricao || ''} ${c.usuarios?.nome || ''}`.toLowerCase();
+                const matchTexto = !termo || texto.includes(termo);
+
+                let matchCat = true;
+                if (categoriaPublica !== 'todos') {
+                    if (categoriaPublica === 'cabelo') matchCat = texto.includes('cabelo') || texto.includes('barba') || texto.includes('corte');
+                    else if (categoriaPublica === 'facial') matchCat = texto.includes('facial') || texto.includes('pele') || texto.includes('limpeza');
+                    else if (categoriaPublica === 'massoterapia') matchCat = texto.includes('mass') || texto.includes('relax');
+                    else if (categoriaPublica === 'unhas') matchCat = texto.includes('unha') || texto.includes('manicure');
+                }
+                return matchTexto && matchCat;
+            });
+
+            if (filtrados.length === 0) {
+                div.innerHTML = `
+                    <div class="col-12">
+                        <div class="empty-state-card">
+                            <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+                            <h5 class="empty-state-title">Nenhum curso encontrado</h5>
+                            <p class="empty-state-desc">Tente ajustar o termo de busca ou selecionar outra categoria.</p>
                         </div>
                     </div>
-                    <div id="mensagemErro" class="alert alert-danger d-none small py-2 px-3 mb-3 rounded-3" role="alert"></div>
-                    <button type="submit" class="btn login-submit w-100" id="btnSubmitLogin"><span>Entrar na plataforma</span><i class="bi bi-arrow-right"></i></button>
-                </form>
-                <div class="login-register"><span>Ainda não possui uma conta?</span><a href="cadastro.html" id="linkCadastro">Criar conta grátis <i class="bi bi-arrow-up-right"></i></a></div>
-                <p class="login-legal"><i class="bi bi-lock-fill"></i> Seus dados estão protegidos conforme a LGPD.</p>
-            </div>
-        </section>
-    </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/ui-effects.js"></script>
+                `;
+                return;
+            }
+
+            filtrados.forEach(c => {
+                const img = escapeHTML(c.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60');
+                const nome = escapeHTML(c.nome);
+                const desc = escapeHTML(c.descricao || 'Atendimento prático supervisionado.');
+                const prof = escapeHTML(c.usuarios?.nome || 'Docente SENAC');
+                const local = escapeHTML(c.localizacao || 'SENAC');
+
+                const urlDestino = token ? `painel.html?curso=${c.id}` : `login.html?curso=${c.id}`;
+
+                div.innerHTML += `
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card-premium card-course-interactive h-100 d-flex flex-column" onclick="window.location.href='${urlDestino}'">
+                            <div class="card-img-container">
+                                <img src="${img}" alt="${nome}" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
+                                <span class="course-badge"><i class="bi bi-check-circle-fill me-1"></i> Vagas Abertas</span>
+                            </div>
+                            <div class="card-body p-4 d-flex flex-column flex-grow-1">
+                                <h5 class="fw-bold font-heading text-dark mb-2">${nome}</h5>
+                                <div class="d-flex align-items-center text-muted small mb-2">
+                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}
+                                </div>
+                                <p class="card-text small text-secondary flex-grow-1 mb-3">${desc}</p>
+                                <div class="pt-3 border-top d-flex align-items-center justify-content-between">
+                                    <span class="small text-muted"><i class="bi bi-person-badge me-1"></i> Prof. ${prof}</span>
+                                    <a href="${urlDestino}" class="btn btn-outline-brand btn-sm px-3" onclick="event.stopPropagation();">
+                                        Agendar Vaga <i class="bi bi-arrow-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarVitrinePublica();
+
+            const inputBusca = document.getElementById('filtroTextoPublico');
+            if (inputBusca) inputBusca.addEventListener('input', renderizarCardsPublicos);
+
+            const containerCats = document.getElementById('containerCategoriasPublico');
+            if (containerCats) {
+                containerCats.addEventListener('click', (e) => {
+                    const btn = e.target.closest('.btn-category-pill');
+                    if (!btn) return;
+                    containerCats.querySelectorAll('.btn-category-pill').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    categoriaPublica = btn.getAttribute('data-categoria') || 'todos';
+                    renderizarCardsPublicos();
+                });
+            }
+        });
+    </script>
 </body>
 </html>
+
