@@ -1923,61 +1923,173 @@ html {
   color: #ffffff;
 }
 
-/* Modo Escuro */
+/* ==========================================================================
+   CONNECT SENAC - DARK MODE PREMIUM (SLATE NAVY - DESIGN SYSTEM UI/UX)
+   Ativado via: <html data-theme="dark"> ou <body class="dark-mode">
+   ========================================================================== */
+[data-theme="dark"],
 body.dark-mode {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
+  /* Superfícies & Fundos Profissionais */
+  --bg-main: #0b1120;
+  --bg-surface: #131e33;
+  --bg-surface-secondary: #18243e;
+  
+  /* Textos de Alto Contraste */
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  /* Bordas Sutis Translúcidas */
+  --border-color: rgba(255, 255, 255, 0.09);
+  --border-light: rgba(255, 255, 255, 0.05);
+  --border-focus: #3b82f6;
+
+  /* Cores Institucionais no Escuro */
+  --senac-blue: #2563eb;
+  --senac-blue-hover: #1d4ed8;
+  --senac-blue-light: rgba(37, 99, 235, 0.15);
+  --senac-blue-glow: rgba(37, 99, 235, 0.35);
+
+  --senac-orange: #f7941d;
+  --senac-orange-hover: #ff8500;
+  --senac-orange-light: rgba(247, 148, 29, 0.15);
+  --senac-orange-glow: rgba(247, 148, 29, 0.4);
+
+  /* Sombras Luminosas (Glow e elevação no escuro) */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --elevation-card: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --elevation-hover: 0 16px 32px -4px rgba(0, 0, 0, 0.6), 0 0 20px rgba(37, 99, 235, 0.15);
+  --elevation-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
 }
 
-body.dark-mode .card-premium,
-body.dark-mode .card,
+[data-theme="dark"] .bg-main,
+body.dark-mode.bg-main,
+[data-theme="dark"] .bg-white,
 body.dark-mode .bg-white,
+[data-theme="dark"] .bg-light,
+body.dark-mode .bg-light {
+  background-color: #0b1120 !important;
+  color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .card-premium,
+body.dark-mode .card-premium,
+[data-theme="dark"] .card,
+body.dark-mode .card,
+[data-theme="dark"] .course-detail-card,
+body.dark-mode .course-detail-card,
+[data-theme="dark"] .testimonial-card,
+body.dark-mode .testimonial-card,
+[data-theme="dark"] .accordion-item,
 body.dark-mode .accordion-item,
-body.dark-mode .modal-content {
-  background-color: #1e293b !important;
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+[data-theme="dark"] .modal-content,
+body.dark-mode .modal-content,
+[data-theme="dark"] .modal-content-custom,
+body.dark-mode .modal-content-custom,
+[data-theme="dark"] .modal-confirmation-card,
+body.dark-mode .modal-confirmation-card {
+  background-color: #131e33 !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  color: #f1f5f9 !important;
 }
 
-body.dark-mode #accessibility-toolbar {
-  background-color: #1e293b !important;
-  border-color: #38bdf8 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+[data-theme="dark"] .course-syllabus-box,
+body.dark-mode .course-syllabus-box,
+[data-theme="dark"] .notice-box-20min,
+body.dark-mode .notice-box-20min,
+[data-theme="dark"] .empty-state-card,
+body.dark-mode .empty-state-card {
+  background-color: #18243e !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
 }
 
-body.dark-mode #accessibility-toolbar .accessibility-btn {
-  border-color: #38bdf8;
-  color: #38bdf8;
-  background-color: #1e293b;
-}
-
-body.dark-mode #accessibility-toolbar .accessibility-btn:hover,
-body.dark-mode #accessibility-toolbar .accessibility-btn.active {
-  background-color: #38bdf8;
-  color: #0f172a;
-}
-
+[data-theme="dark"] .text-dark,
 body.dark-mode .text-dark,
-body.dark-mode h1, body.dark-mode h2, body.dark-mode h3, 
-body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
-  color: #f8fafc !important;
+[data-theme="dark"] h1, body.dark-mode h1,
+[data-theme="dark"] h2, body.dark-mode h2,
+[data-theme="dark"] h3, body.dark-mode h3, 
+[data-theme="dark"] h4, body.dark-mode h4,
+[data-theme="dark"] h5, body.dark-mode h5,
+[data-theme="dark"] h6, body.dark-mode h6,
+[data-theme="dark"] strong, body.dark-mode strong {
+  color: #f1f5f9 !important;
 }
 
+[data-theme="dark"] .text-muted,
 body.dark-mode .text-muted,
+[data-theme="dark"] .text-secondary,
 body.dark-mode .text-secondary {
   color: #94a3b8 !important;
 }
 
-body.dark-mode .form-control, 
+[data-theme="dark"] .form-control,
+body.dark-mode .form-control,
+[data-theme="dark"] .form-select,
 body.dark-mode .form-select {
-  background-color: #0f172a !important;
-  color: #f8fafc !important;
-  border-color: #475569 !important;
+  background-color: #18243e !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  color: #f1f5f9 !important;
 }
 
-body.dark-mode .table {
-  color: #f8fafc !important;
-  border-color: #334155 !important;
+[data-theme="dark"] .form-control:focus,
+body.dark-mode .form-control:focus,
+[data-theme="dark"] .form-select:focus,
+body.dark-mode .form-select:focus {
+  background-color: #1a2742 !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.35) !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .table,
+body.dark-mode .table,
+[data-theme="dark"] .table-custom,
+body.dark-mode .table-custom {
+  color: #f1f5f9 !important;
+  border-color: #24334e !important;
+}
+
+[data-theme="dark"] .table-custom thead th,
+body.dark-mode .table-custom thead th {
+  background-color: #0f182c !important;
+  color: #94a3b8 !important;
+  border-color: rgba(255, 255, 255, 0.09) !important;
+}
+
+[data-theme="dark"] .table-custom tbody tr:hover,
+body.dark-mode .table-custom tbody tr:hover {
+  background-color: rgba(37, 99, 235, 0.08) !important;
+}
+
+[data-theme="dark"] #accessibility-toolbar,
+body.dark-mode #accessibility-toolbar {
+  background-color: #131e33 !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] #accessibility-toolbar .accessibility-btn,
+body.dark-mode #accessibility-toolbar .accessibility-btn {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background-color: #131e33;
+}
+
+[data-theme="dark"] #accessibility-toolbar .accessibility-btn:hover,
+body.dark-mode #accessibility-toolbar .accessibility-btn:hover,
+[data-theme="dark"] #accessibility-toolbar .accessibility-btn.active,
+body.dark-mode #accessibility-toolbar .accessibility-btn.active {
+  background-color: #38bdf8;
+  color: #0b1120;
+}
+
+/* Transição Fluida entre os Modos */
+body, .card-premium, .navbar-custom, .form-control, .course-detail-card {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 /* Alto Contraste (WCAG AAA - Contraste Superior a 7:1) */

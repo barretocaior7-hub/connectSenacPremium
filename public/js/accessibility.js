@@ -85,6 +85,12 @@
 
     const isContrast = document.body.classList.contains('high-contrast');
     localStorage.setItem('themeMode', isContrast ? 'contrast' : 'normal');
+    
+    if (isContrast) {
+      document.documentElement.setAttribute('data-theme', 'contrast');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
 
     const btnContrast = document.getElementById('btn-contrast');
     if (btnContrast) {
@@ -110,6 +116,13 @@
 
     const isDark = document.body.classList.contains('dark-mode');
     localStorage.setItem('themeMode', isDark ? 'dark' : 'normal');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
 
     const btnDark = document.getElementById('btn-dark');
     if (btnDark) {
@@ -317,7 +330,7 @@
     });
 
     // Restaura preferências persistidas
-    const savedTheme = localStorage.getItem('themeMode');
+    const savedTheme = localStorage.getItem('themeMode') || localStorage.getItem('theme');
     if (savedTheme === 'contrast') {
       toggleContrast(true);
     } else if (savedTheme === 'dark') {
