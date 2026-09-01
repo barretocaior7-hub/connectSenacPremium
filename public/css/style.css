@@ -1859,3 +1859,23 @@ body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease for
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+.dark-mode {
+  background-color: #121212 !important;
+  color: #e0e0e0 !important;
+}
+.dark-mode a,
+.dark-mode .navbar,
+.dark-mode .card {
+  background-color: #1e1e1e !important;
+  color: #e0e0e0 !important;
+}
+.high-contrast {
+  filter: contrast(150%) brightness(110%);
+}
+#accessibility-toolbar button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
