@@ -1,4 +1,4 @@
-﻿/* ==========================================================================
+/* ==========================================================================
    CONNECT SENAC - DESIGN SYSTEM & ESTILOS PREMIUM
    Paleta Oficial: Azul Senac (#004a8d), Laranja (#f7941d) e derivações
    ========================================================================== */
@@ -1862,34 +1862,65 @@ body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease for
 /* ==========================================================================
    ACESSIBILIDADE: BARRA FLUTUANTE, MODO ESCURO E ALTO CONTRASTE
    ========================================================================== */
+html {
+  transition: font-size 0.2s ease-in-out;
+}
+
 #accessibility-toolbar {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
+  bottom: 24px;
+  left: 24px;
   z-index: 1050;
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 6px;
   background: #ffffff;
   padding: 6px 10px;
   border-radius: 9999px;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.2), 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 1.5px solid #004a8d;
+  user-select: none;
 }
 
-#accessibility-toolbar button {
-  width: 38px;
-  height: 38px;
+#accessibility-toolbar .accessibility-btn {
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 1rem;
-  transition: transform 0.15s ease;
+  font-size: 0.95rem;
+  border: 1px solid #004a8d;
+  color: #004a8d;
+  background-color: #ffffff;
+  transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
+  cursor: pointer;
+  outline: none;
 }
 
-#accessibility-toolbar button:hover {
-  transform: scale(1.1);
+#accessibility-toolbar .accessibility-btn-label {
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  font-family: inherit;
+}
+
+#accessibility-toolbar .accessibility-btn:hover {
+  transform: scale(1.12);
+  background-color: #004a8d;
+  color: #ffffff;
+}
+
+#accessibility-toolbar .accessibility-btn:focus-visible {
+  outline: 2px solid #f7941d;
+  outline-offset: 2px;
+}
+
+#accessibility-toolbar .accessibility-btn.active,
+#accessibility-toolbar .accessibility-btn[aria-pressed="true"] {
+  background-color: #004a8d;
+  color: #ffffff;
 }
 
 /* Modo Escuro */
@@ -1902,11 +1933,28 @@ body.dark-mode .card-premium,
 body.dark-mode .card,
 body.dark-mode .bg-white,
 body.dark-mode .accordion-item,
-body.dark-mode .modal-content,
-body.dark-mode #accessibility-toolbar {
+body.dark-mode .modal-content {
   background-color: #1e293b !important;
   color: #f8fafc !important;
   border-color: #334155 !important;
+}
+
+body.dark-mode #accessibility-toolbar {
+  background-color: #1e293b !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode #accessibility-toolbar .accessibility-btn {
+  border-color: #38bdf8;
+  color: #38bdf8;
+  background-color: #1e293b;
+}
+
+body.dark-mode #accessibility-toolbar .accessibility-btn:hover,
+body.dark-mode #accessibility-toolbar .accessibility-btn.active {
+  background-color: #38bdf8;
+  color: #0f172a;
 }
 
 body.dark-mode .text-dark,
@@ -1932,7 +1980,7 @@ body.dark-mode .table {
   border-color: #334155 !important;
 }
 
-/* Alto Contraste (WCAG AAA - Contraste > 7:1) */
+/* Alto Contraste (WCAG AAA - Contraste Superior a 7:1) */
 body.high-contrast {
   background-color: #000000 !important;
   color: #ffffff !important;
@@ -1943,19 +1991,76 @@ body.high-contrast * {
   color: #ffff00 !important;
   border-color: #ffff00 !important;
   box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+body.high-contrast h1,
+body.high-contrast h2,
+body.high-contrast h3,
+body.high-contrast h4,
+body.high-contrast h5,
+body.high-contrast h6,
+body.high-contrast strong,
+body.high-contrast b {
+  color: #ffffff !important;
 }
 
 body.high-contrast a, 
-body.high-contrast button {
+body.high-contrast a * {
   color: #00ffff !important;
   text-decoration: underline !important;
 }
 
+body.high-contrast button,
 body.high-contrast .btn {
+  background-color: #000000 !important;
+  color: #00ffff !important;
+  border: 2px solid #ffff00 !important;
+  text-decoration: none !important;
+}
+
+body.high-contrast button:hover,
+body.high-contrast .btn:hover,
+body.high-contrast button:focus,
+body.high-contrast .btn:focus {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+  outline: 3px solid #00ffff !important;
+}
+
+body.high-contrast input,
+body.high-contrast textarea,
+body.high-contrast select {
+  background-color: #000000 !important;
+  color: #ffffff !important;
   border: 2px solid #ffff00 !important;
 }
 
-body.high-contrast img {
-  filter: grayscale(100%) contrast(140%);
+body.high-contrast input:focus,
+body.high-contrast textarea:focus,
+body.high-contrast select:focus {
+  outline: 3px solid #00ffff !important;
+}
+
+body.high-contrast #accessibility-toolbar {
+  background-color: #000000 !important;
+  border: 2px solid #ffff00 !important;
+}
+
+body.high-contrast #accessibility-toolbar .accessibility-btn {
+  border: 2px solid #ffff00 !important;
+  color: #ffff00 !important;
+  background-color: #000000 !important;
+}
+
+body.high-contrast #accessibility-toolbar .accessibility-btn:hover,
+body.high-contrast #accessibility-toolbar .accessibility-btn.active {
+  background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+body.high-contrast img,
+body.high-contrast svg {
+  filter: grayscale(100%) contrast(150%) !important;
 }
 
