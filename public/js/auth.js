@@ -340,22 +340,18 @@ function initPhoneMask() {
 
   function formatBRPhone(value) {
     let digits = value.replace(/\D/g, "");
-    if (digits.length > 11) {
-      digits = digits.substring(0, 11);
-    }
+    if (digits.length === 0) return { formatted: "", digits: "" };
+    if (digits.length > 11) digits = digits.substring(0, 11);
 
     let formatted = "";
-    if (digits.length > 0) {
-      formatted = "(" + digits.substring(0, 2);
-    }
-    if (digits.length >= 2) {
-      formatted += ") ";
-    }
-    if (digits.length >= 3) {
-      formatted += digits.substring(2, 7);
-    }
-    if (digits.length >= 8) {
-      formatted += "-" + digits.substring(7, 11);
+    if (digits.length === 1) {
+      formatted = "(" + digits;
+    } else if (digits.length === 2) {
+      formatted = "(" + digits + ") ";
+    } else if (digits.length > 2 && digits.length <= 7) {
+      formatted = "(" + digits.substring(0, 2) + ") " + digits.substring(2);
+    } else if (digits.length > 7) {
+      formatted = "(" + digits.substring(0, 2) + ") " + digits.substring(2, 7) + "-" + digits.substring(7, 11);
     }
 
     return { formatted, digits };
@@ -363,7 +359,9 @@ function initPhoneMask() {
 
   function formatUSPhone(value) {
     let digits = value.replace(/\D/g, "");
+    if (digits.length === 0) return { formatted: "", digits: "" };
     if (digits.length > 10) digits = digits.substring(0, 10);
+
     let formatted = "";
     if (digits.length > 0) formatted = "(" + digits.substring(0, 3);
     if (digits.length >= 3) formatted += ") ";
@@ -372,20 +370,18 @@ function initPhoneMask() {
     return { formatted, digits };
   }
 
-  // Preenche ou adapta o campo quando o País (DDI) for alterado
+  // Adapta o campo quando o País (DDI) for alterado
   if (ddiSelect) {
     ddiSelect.addEventListener("change", () => {
+      telInput.value = "";
       const ddi = ddiSelect.value;
       if (ddi === "+55") {
-        telInput.value = "(75) ";
-        telInput.placeholder = "(75) 98888-7777";
+        telInput.placeholder = "(DDD) 9XXXX-XXXX";
         telInput.maxLength = 15;
       } else if (ddi === "+1") {
-        telInput.value = "";
         telInput.placeholder = "(555) 000-0000";
         telInput.maxLength = 14;
       } else {
-        telInput.value = "";
         telInput.placeholder = "Número de telefone";
         telInput.maxLength = 16;
       }
@@ -408,10 +404,7 @@ function initPhoneMask() {
     }
   });
 
-  // Preenchimento inicial para Brasil
-  if (ddiSelect && ddiSelect.value === "+55" && !telInput.value) {
-    telInput.value = "(75) ";
-  } else if (telInput.value) {
+  if (telInput.value) {
     const { formatted } = formatBRPhone(telInput.value);
     telInput.value = formatted;
   }
