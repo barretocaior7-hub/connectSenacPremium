@@ -612,6 +612,24 @@ a:hover {
   font-weight: 500;
 }
 
+.input-group > .form-floating:not(:last-child) > .form-control,
+.input-group > .form-floating:not(:last-child) > .form-select {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.input-group > .form-floating:not(:first-child) > .form-control,
+.input-group > .form-floating:not(:first-child) > .form-select {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  margin-left: -1px;
+}
+
+.input-group > .form-floating > .form-control:focus,
+.input-group > .form-floating > .form-select:focus {
+  z-index: 3;
+}
+
 .input-password-wrapper {
   position: relative;
 }

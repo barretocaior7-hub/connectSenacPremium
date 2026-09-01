@@ -159,7 +159,6 @@ if (formCadastro) {
 
     const nome = document.getElementById("nome").value;
     const email = document.getElementById("email").value;
-    const ddi = document.getElementById("ddiPais")?.value || "+55";
     const telefoneRaw = document.getElementById("telefone").value.trim();
     const apenasDigitos = telefoneRaw.replace(/\D/g, "");
     const senha = document.getElementById("senha").value;
@@ -173,19 +172,13 @@ if (formCadastro) {
     const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Finalizar Cadastro";
 
     // Validação estrita de WhatsApp: Exatamente 11 dígitos (DDD + 9 dígitos)
-    if (ddi === "+55") {
-      if (apenasDigitos.length !== 11) {
-        msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> O WhatsApp deve conter exatamente 11 dígitos (DDD da região + 9 dígitos). Exemplo: (75) 98888-7777.</div>`;
-        document.getElementById("telefone").focus();
-        return;
-      }
-    } else if (apenasDigitos.length < 8 || apenasDigitos.length > 15) {
-      msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> Por favor, informe um número internacional válido com código de área.</div>`;
+    if (apenasDigitos.length !== 11) {
+      msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> O WhatsApp deve conter o DDD da região e os 9 dígitos do celular (exatos 11 dígitos). Exemplo: (75) 98888-7777.</div>`;
       document.getElementById("telefone").focus();
       return;
     }
 
-    const telefone = ddi === "+55" ? telefoneRaw : `${ddi} ${telefoneRaw}`;
+    const telefone = telefoneRaw;
 
     if (senha !== confirmar_senha) {
       msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As senhas não coincidem. Verifique a digitação.</div>`;
@@ -331,12 +324,10 @@ if (formRedefinir) {
   });
 }
 
-// Máscara e Validação de Telefone / WhatsApp com Seleção de País e Regra de 11 Dígitos
+// Máscara e Sincronização de Região/DDD com o Campo de WhatsApp
 function initPhoneMask() {
   const telInput = document.getElementById("telefone");
-  const ddiSelect = document.getElementById("ddiPais");
-  const counterBadge = document.getElementById("phoneDigitsCounter");
-  const helpText = document.getElementById("telefoneHelp");
+  const regiaoSelect = document.getElementById("regiaoDDD");
 
   if (!telInput) return;
 
@@ -350,67 +341,60 @@ function initPhoneMask() {
     if (digits.length > 0) {
       formatted = "(" + digits.substring(0, 2);
     }
+    if (digits.length >= 2) {
+      formatted += ") ";
+    }
     if (digits.length >= 3) {
-      formatted += ") " + digits.substring(2, 7);
+      formatted += digits.substring(2, 7);
     }
     if (digits.length >= 8) {
       formatted += "-" + digits.substring(7, 11);
     }
 
-    return { formatted, count: digits.length };
+    return { formatted, digits };
   }
 
-  function updateCounter(count, max = 11) {
-    if (!counterBadge) return;
-    if (count === max) {
-      counterBadge.className = "badge bg-success text-white font-monospace px-2 py-1";
-      counterBadge.textContent = `${count}/${max} (Completo)`;
-    } else if (count > 0) {
-      counterBadge.className = "badge bg-warning text-dark font-monospace px-2 py-1";
-      counterBadge.textContent = `${count}/${max} dígitos`;
-    } else {
-      counterBadge.className = "badge bg-light text-secondary border font-monospace px-2 py-1";
-      counterBadge.textContent = `0/${max} dígitos`;
-    }
-  }
-
-  telInput.addEventListener("input", () => {
-    const ddi = ddiSelect ? ddiSelect.value : "+55";
-    if (ddi === "+55") {
-      const { formatted, count } = formatBRPhone(telInput.value);
-      telInput.value = formatted;
-      updateCounter(count, 11);
-    } else {
-      let digits = telInput.value.replace(/[^\d\s]/g, "");
-      if (digits.length > 15) digits = digits.substring(0, 15);
-      telInput.value = digits;
-      const count = digits.replace(/\D/g, "").length;
-      updateCounter(count, 15);
-    }
-  });
-
-  if (ddiSelect) {
-    ddiSelect.addEventListener("change", () => {
-      telInput.value = "";
-      if (ddiSelect.value === "+55") {
-        telInput.placeholder = "(75) 98888-7777";
-        telInput.maxLength = 15;
-        if (helpText) helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i> DDD da região + 9 dígitos (exatos 11 dígitos).';
-        updateCounter(0, 11);
+  // Preenche ou atualiza o DDD quando a região for selecionada
+  if (regiaoSelect) {
+    regiaoSelect.addEventListener("change", () => {
+      const ddd = regiaoSelect.value;
+      if (ddd === "outro") {
+        telInput.value = "";
+        telInput.placeholder = "(DDD) 9XXXX-XXXX";
       } else {
-        telInput.placeholder = "Número com código de área";
-        telInput.maxLength = 16;
-        if (helpText) helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i> Digite o código de área e o número de telefone.';
-        updateCounter(0, 15);
+        // Preserva os 9 dígitos já digitados caso existam
+        let currentDigits = telInput.value.replace(/\D/g, "");
+        let restDigits = currentDigits.length > 2 ? currentDigits.substring(2) : "";
+        let newRaw = ddd + restDigits;
+        const { formatted } = formatBRPhone(newRaw);
+        telInput.value = formatted;
       }
       telInput.focus();
     });
   }
 
-  if (telInput.value) {
-    const { formatted, count } = formatBRPhone(telInput.value);
+  telInput.addEventListener("input", () => {
+    const { formatted, digits } = formatBRPhone(telInput.value);
     telInput.value = formatted;
-    updateCounter(count, 11);
+
+    // Sincroniza o select de região automaticamente se o usuário alterar o DDD
+    if (regiaoSelect && digits.length >= 2) {
+      const dddDigitado = digits.substring(0, 2);
+      const optionExists = Array.from(regiaoSelect.options).some(opt => opt.value === dddDigitado);
+      if (optionExists) {
+        regiaoSelect.value = dddDigitado;
+      } else {
+        regiaoSelect.value = "outro";
+      }
+    }
+  });
+
+  // Garante valor inicial preenchido com o DDD da região padrão selecionada
+  if (!telInput.value && regiaoSelect && regiaoSelect.value !== "outro") {
+    telInput.value = `(${regiaoSelect.value}) `;
+  } else if (telInput.value) {
+    const { formatted } = formatBRPhone(telInput.value);
+    telInput.value = formatted;
   }
 }
 
