@@ -12,6 +12,7 @@ const autorizarPerfis = require('../middlewares/rbacMiddleware');
 router.post('/', authMiddleware, agendamentoController.criar);
 router.get('/meus', authMiddleware, agendamentoController.listarMeus);
 router.put('/:id/cancelar', authMiddleware, agendamentoController.cancelar);
+router.delete('/:id', authMiddleware, agendamentoController.excluirMeu);
 
 // ----------------------------------------------------------------------
 // Rotas Administrativas (Apenas Admin e Coordenador)

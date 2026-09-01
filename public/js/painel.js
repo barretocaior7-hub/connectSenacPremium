@@ -514,8 +514,53 @@ async function realizarAgendamento(disponibilidadeId){
 }
 
 // ==========================================
-// 3. CARREGAR E CANCELAR OS MEUS AGENDAMENTOS
+// 3. CARREGAR E CANCELAR OS MEUS AGENDAMENTOS (REGRA DE 1 HORA DE EXPIRAÇÃO)
 // ==========================================
+const PRAZO_EXPIRACAO_MS = 60 * 60 * 1000; // 1 hora de tolerância visual após cancelar ou concluir
+const STORAGE_FINALIZADOS = 'connect_senac_agendamentos_finalizados';
+
+function obterFinalizados() {
+    try {
+        return JSON.parse(localStorage.getItem(STORAGE_FINALIZADOS) || '{}');
+    } catch (e) {
+        return {};
+    }
+}
+
+function salvarTimestampFinalizado(id, status, timestamp = Date.now()) {
+    try {
+        const finalizados = obterFinalizados();
+        finalizados[id] = {
+            timestamp: timestamp,
+            status: status
+        };
+        localStorage.setItem(STORAGE_FINALIZADOS, JSON.stringify(finalizados));
+    } catch (e) {}
+}
+
+async function ocultarAgendamentoAgora(agendamentoId) {
+    salvarTimestampFinalizado(agendamentoId, 'oculto', Date.now() - (PRAZO_EXPIRACAO_MS + 5000));
+    try {
+        await fetchAuth(`${API_URL}/agendamentos/${agendamentoId}`, {
+            method: 'DELETE'
+        }).catch(() => {});
+    } catch (e) {}
+    carregarMeusAgendamentos();
+}
+window.ocultarAgendamentoAgora = ocultarAgendamentoAgora;
+
+function exibirEstadoVazioAgendamentos(container) {
+    container.innerHTML = `
+        <div class="col-12">
+            <div class="empty-state-card py-4">
+                <div class="empty-state-icon" style="width: 50px; height: 50px; font-size: 1.4rem;"><i class="bi bi-calendar-x"></i></div>
+                <h6 class="empty-state-title mb-1">Sem agendamentos ativos</h6>
+                <p class="empty-state-desc small mb-0">Você não possui nenhum horário marcado. Escolha um dos cursos abaixo para agendar a sua participação!</p>
+            </div>
+        </div>
+    `;
+}
+
 async function carregarMeusAgendamentos(){
     const divAgendamentos = document.getElementById('listaMeusAgendamentos');
     if (!divAgendamentos) return;
@@ -526,24 +571,51 @@ async function carregarMeusAgendamentos(){
 
         divAgendamentos.innerHTML = '';
         if (!Array.isArray(agendamentos) || agendamentos.length === 0) {
-            divAgendamentos.innerHTML = `
-                <div class="col-12">
-                    <div class="empty-state-card py-4">
-                        <div class="empty-state-icon" style="width: 50px; height: 50px; font-size: 1.4rem;"><i class="bi bi-calendar-x"></i></div>
-                        <h6 class="empty-state-title mb-1">Sem agendamentos ativos</h6>
-                        <p class="empty-state-desc small mb-0">Você não possui nenhum horário marcado. Escolha um dos cursos abaixo para agendar a sua participação!</p>
-                    </div>
-                </div>
-            `;
+            exibirEstadoVazioAgendamentos(divAgendamentos);
             return;
         }
 
+        const agora = Date.now();
+        const finalizados = obterFinalizados();
+        let itensExibidos = 0;
+
         agendamentos.forEach(ag => {
+            // Regra de 1 Hora: Cancelado ou Concluído sai de 'Meus Agendamentos' após 1 hora
+            if (ag.status === 'cancelado' || ag.status === 'concluido') {
+                let info = finalizados[ag.id];
+
+                if (!info) {
+                    // Se for concluído com horário no passado há mais de 1h, não exibe
+                    if (ag.status === 'concluido' && ag.disponibilidades?.data_hora) {
+                        const dataCursoMs = new Date(ag.disponibilidades.data_hora).getTime();
+                        if (agora - dataCursoMs >= PRAZO_EXPIRACAO_MS) {
+                            return;
+                        }
+                        info = { timestamp: dataCursoMs, status: ag.status };
+                    } else {
+                        info = { timestamp: agora, status: ag.status };
+                    }
+                    salvarTimestampFinalizado(ag.id, ag.status, info.timestamp);
+                }
+
+                const decorridoMs = agora - info.timestamp;
+                if (decorridoMs >= PRAZO_EXPIRACAO_MS) {
+                    // Ultrapassou o prazo de 1 hora: exclui da visão
+                    fetchAuth(`${API_URL}/agendamentos/${ag.id}`, { method: 'DELETE' }).catch(() => {});
+                    return;
+                }
+
+                ag._minutosRestantes = Math.max(1, Math.ceil((PRAZO_EXPIRACAO_MS - decorridoMs) / 60000));
+            }
+
+            itensExibidos++;
+
             const rawCursoNome = ag.disponibilidades && ag.disponibilidades.cursos ? ag.disponibilidades.cursos.nome : 'Curso Senac';
             const cursoNome = escapeHTML(rawCursoNome);
             const dataHora = ag.disponibilidades && ag.disponibilidades.data_hora ? new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
             let badge = '';
             let acoesHTML = '';
+            let avisoExpiracaoHTML = '';
 
             const isPassado = ag.disponibilidades && ag.disponibilidades.data_hora && new Date(ag.disponibilidades.data_hora) < new Date();
 
@@ -566,13 +638,29 @@ async function carregarMeusAgendamentos(){
                 }
             } else if (ag.status === 'cancelado') {
                 badge = '<span class="badge-custom badge-status-cancelado"><i class="bi bi-slash-circle"></i> Cancelado</span>';
+                avisoExpiracaoHTML = `
+                    <div class="small text-muted mt-2 d-flex justify-content-between align-items-center" style="font-size: 0.76rem;">
+                        <span><i class="bi bi-clock-history text-warning me-1"></i> Sai da lista em ${ag._minutosRestantes} min</span>
+                        <button class="btn btn-link p-0 text-danger text-decoration-none" style="font-size: 0.76rem;" onclick="ocultarAgendamentoAgora('${ag.id}')" title="Ocultar agora">
+                            <i class="bi bi-x-circle me-1"></i> Ocultar
+                        </button>
+                    </div>
+                `;
             } else if (ag.status === 'concluido') {
                 badge = '<span class="badge-custom badge-status-concluido"><i class="bi bi-patch-check-fill"></i> Concluído</span>';
                 acoesHTML = `<button class="btn btn-sm btn-orange w-100 mt-2" onclick="abrirModalFeedback('${ag.id}')"><i class="bi bi-star-fill me-1"></i> Avaliar Atendimento</button>`;
+                avisoExpiracaoHTML = `
+                    <div class="small text-muted mt-2 d-flex justify-content-between align-items-center" style="font-size: 0.76rem;">
+                        <span><i class="bi bi-clock-history text-warning me-1"></i> Sai da lista em ${ag._minutosRestantes} min</span>
+                        <button class="btn btn-link p-0 text-secondary text-decoration-none" style="font-size: 0.76rem;" onclick="ocultarAgendamentoAgora('${ag.id}')" title="Ocultar agora">
+                            <i class="bi bi-x-circle me-1"></i> Ocultar
+                        </button>
+                    </div>
+                `;
             }
 
             const card = `
-                <div class="col-12 col-md-6 col-xl-4">
+                <div class="col-12 col-md-6 col-xl-4" id="card-agendamento-${ag.id}">
                     <div class="card-premium h-100 p-3">
                         <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
                             <h6 class="fw-bold text-dark mb-0 font-heading text-truncate">${cursoNome}</h6>
@@ -583,6 +671,7 @@ async function carregarMeusAgendamentos(){
                         </div>
                         <div class="mt-auto">
                             ${acoesHTML}
+                            ${avisoExpiracaoHTML}
                             <div id="msg-canc-${ag.id}" class="small text-center mt-2"></div>
                         </div>
                     </div>
@@ -590,6 +679,10 @@ async function carregarMeusAgendamentos(){
             `;
             divAgendamentos.innerHTML += card;
         });
+
+        if (itensExibidos === 0) {
+            exibirEstadoVazioAgendamentos(divAgendamentos);
+        }
     } catch (error) {
         divAgendamentos.innerHTML = `
             <div class="col-12">
@@ -615,6 +708,7 @@ async function cancelarAgendamento(agendamentoId){
         const data = await response.json();
 
         if (response.ok) {
+            salvarTimestampFinalizado(agendamentoId, 'cancelado', Date.now());
             carregarMeusAgendamentos();
         } else {
             if (msgDiv) msgDiv.innerHTML = `<span class="text-danger fw-bold small"><i class="bi bi-exclamation-circle-fill me-1"></i> ${escapeHTML(data.erro)}</span>`;
@@ -623,6 +717,17 @@ async function cancelarAgendamento(agendamentoId){
         if (msgDiv) msgDiv.innerHTML = '<span class="text-danger small">Erro ao processar cancelamento.</span>';
     }
 }
+
+// Timer automático para atualizar e remover agendamentos expirados a cada 60 segundos
+if (!window._timerExpiracaoAgendamentos) {
+    window._timerExpiracaoAgendamentos = setInterval(() => {
+        const divAg = document.getElementById('listaMeusAgendamentos');
+        if (divAg && document.visibilityState === 'visible') {
+            carregarMeusAgendamentos();
+        }
+    }, 60000);
+}
+
 
 // ==========================================
 // 4. MÓDULO DE FEEDBACK & AVALIAÇÕES

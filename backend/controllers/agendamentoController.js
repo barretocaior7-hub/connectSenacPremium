@@ -175,10 +175,48 @@ exports.cancelar = async (req, res) => {
                 .eq('id', disp.id);
         }
 
-        res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi liberada.' });
+        res.json({
+            mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi liberada.',
+            cancelado_em: new Date().toISOString()
+        });
     } catch (error) {
         console.error('Erro ao cancelar:', error.message);
         res.status(500).json({ erro: 'Erro interno ao cancelar o agendamento.' });
+    }
+};
+
+// [Funcionalidade] Candidato: Excluir/Limpar agendamento cancelado ou concluído da sua lista (após expiração de 1 hora ou sob demanda)
+exports.excluirMeu = async (req, res) => {
+    const { id } = req.params;
+    const usuario_id = req.usuario.id;
+
+    try {
+        const { data: agendamento, error: erroBusca } = await supabase
+            .from('agendamentos')
+            .select('id, status, usuario_id')
+            .eq('id', id)
+            .eq('usuario_id', usuario_id)
+            .single();
+
+        if (erroBusca || !agendamento) {
+            return res.status(404).json({ erro: 'Agendamento não encontrado ou não pertence a você.' });
+        }
+
+        if (agendamento.status === 'agendado') {
+            return res.status(400).json({ erro: 'Inscrições confirmadas não podem ser excluídas diretamente. Cancele primeiro.' });
+        }
+
+        const { error: erroDelete } = await supabase
+            .from('agendamentos')
+            .delete()
+            .eq('id', id);
+
+        if (erroDelete) throw erroDelete;
+
+        res.json({ mensagem: 'Agendamento removido da sua lista com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao excluir agendamento:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao remover agendamento.' });
     }
 };
 
