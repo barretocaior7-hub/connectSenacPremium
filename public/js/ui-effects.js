@@ -57,7 +57,7 @@
   const initDraggableModal = (modalEl) => {
     if (!modalEl || modalEl.dataset.draggableReady === "true") return;
     const dialog = modalEl.querySelector(".modal-dialog");
-    const header = modalEl.querySelector(".modal-header");
+    const header = modalEl.querySelector(".modal-header, .modal-header-custom, .modal-drag-handle, [data-drag-handle]");
     if (!dialog || !header) return;
 
     modalEl.dataset.draggableReady = "true";
@@ -82,6 +82,7 @@
 
       header.style.cursor = "grabbing";
       document.body.style.userSelect = "none";
+      dialog.classList.add("is-dragging");
 
       const onPointerMove = (moveEvt) => {
         if (!isDragging) return;
@@ -94,6 +95,7 @@
         isDragging = false;
         header.style.cursor = "grab";
         document.body.style.userSelect = "";
+        dialog.classList.remove("is-dragging");
         document.removeEventListener("pointermove", onPointerMove);
         document.removeEventListener("pointerup", onPointerUp);
         document.removeEventListener("pointercancel", onPointerUp);

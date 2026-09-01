@@ -342,6 +342,12 @@ function abrirModalDetalhesCurso(cursoParam){
             divAvaliacoes.innerHTML = '<div class="text-muted small text-center py-2">Não foi possível carregar as avaliações deste serviço.</div>';
         });
 
+    const dialog = modalDetalhesCursoEl.querySelector('.modal-dialog');
+    if (dialog) dialog.style.transform = '';
+    if (typeof window.makeModalDraggable === 'function') {
+        window.makeModalDraggable(modalDetalhesCursoEl);
+    }
+
     modalDetalhesCurso.show();
 }
 

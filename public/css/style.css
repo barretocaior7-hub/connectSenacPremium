@@ -1000,6 +1000,66 @@ a:hover {
   background: var(--bg-surface-secondary);
 }
 
+/* Modal Detalhes do Curso: Flexível, Rolável e Arrastável */
+#modalDetalhesCurso .modal-dialog {
+  max-height: 92vh;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+#modalDetalhesCurso .modal-content {
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#modalDetalhesCurso .modal-body {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  flex: 1 1 auto;
+  overscroll-behavior: contain;
+}
+
+.modal-draggable-sheet {
+  transition: transform 0.05s ease-out;
+}
+
+.modal-draggable-sheet.is-dragging {
+  transition: none !important;
+}
+
+.modal-drag-handle {
+  cursor: grab !important;
+  user-select: none;
+  touch-action: none;
+}
+
+.modal-drag-handle:active,
+.is-dragging .modal-drag-handle {
+  cursor: grabbing !important;
+}
+
+.modal-sheet-pill-indicator {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 54px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  border-radius: 9999px;
+  z-index: 10;
+  pointer-events: none;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.modal-drag-handle:hover .modal-sheet-pill-indicator {
+  background: #ffffff;
+  transform: translateX(-50%) scale(1.15);
+}
+
 /* ==========================================================================
    AUTH PAGES (LOGIN, CADASTRO, RECUPERAÇÃO)
    ========================================================================== */

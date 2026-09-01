@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -211,7 +211,7 @@
 
     <!-- Modal 1: Agendamento e Horários -->
     <div class="modal fade" id="modalAgendamento" tabindex="-1" aria-labelledby="modalCursoNome" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom">
                     <h5 class="modal-title" id="modalCursoNome">Escolher Horário</h5>
@@ -291,11 +291,12 @@
 
     <!-- Modal 3: Detalhes do Curso e Avaliações -->
     <div class="modal fade" id="modalDetalhesCurso" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg modal-draggable-sheet">
             <div class="modal-content modal-content-custom">
                 
-                <!-- Capa do Modal -->
-                <div class="position-relative" style="height: 240px; background-color: var(--senac-blue-light);">
+                <!-- Capa do Modal e Alça de Arraste Superior -->
+                <div class="position-relative modal-drag-handle" data-drag-handle style="height: 200px; min-height: 180px; max-height: 26vh; background-color: var(--senac-blue-light); cursor: grab;" title="Clique e arraste para mover para cima ou para baixo">
+                    <div class="modal-sheet-pill-indicator"></div>
                     <img id="detalheCursoImagem" src="" class="w-100 h-100" style="object-fit: cover;" alt="Capa do Curso">
                     <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-dark rounded-circle shadow" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
