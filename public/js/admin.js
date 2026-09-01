@@ -530,8 +530,10 @@ async function carregarCursosAdmin(){
                 : '<span class="badge-custom badge-status-arquivado"><i class="bi bi-archive"></i> Arquivado</span>';
 
             const btnArquivar = curso.status === 'ativo'
-        ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
+        ? `<button class="btn btn-sm btn-outline-warning p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
         : `<button class="btn btn-sm btn-outline-success p-1 px-2" onclick="desarquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Reativar curso"><i class="bi bi-arrow-counterclockwise"></i> Reativar</button>`;
+
+            const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Excluir curso"><i class="bi bi-trash3"></i> Excluir</button>`;
 
             const row = `
                 <tr>
@@ -548,6 +550,7 @@ async function carregarCursosAdmin(){
                                 <i class="bi bi-pencil-square"></i> Editar
                             </button>
                             ${btnArquivar}
+                            ${btnExcluir}
                         </div>
                     </td>
                 </tr>
@@ -563,8 +566,8 @@ async function arquivarCurso(id, nome){
     if(!confirm(`Deseja arquivar o curso "${nome}"? Ele sairá da vitrine dos alunos, mas o histórico será mantido.`)) return;
 
     try {
-        const response = await fetch(`${API_URL}/cursos/${id}`, {
-            method: 'DELETE',
+        const response = await fetch(`${API_URL}/cursos/${id}/arquivar`, {
+            method: 'PUT',
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -576,6 +579,29 @@ async function arquivarCurso(id, nome){
         }
     } catch (error) {
         alert('Erro de conexão.');
+    }
+}
+
+async function excluirCurso(id, nome) {
+    if (!confirm(`ATENÇÃO: Deseja realmente EXCLUIR DEFINITIVAMENTE o curso "${nome}"?\n\nEsta ação removerá o curso e todas as suas turmas. Não poderá ser desfeita.`)) return;
+
+    try {
+        const response = await fetch(`${API_URL}/cursos/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            alert(`Curso "${nome}" excluído com sucesso!`);
+            carregarCursosAdmin();
+            carregarCursosNoSelect();
+            if (typeof carregarMetricas === 'function') carregarMetricas();
+        } else {
+            const data = await response.json();
+            alert(data.erro || 'Erro ao excluir curso.');
+        }
+    } catch (error) {
+        alert('Erro de conexão ao excluir o curso.');
     }
 }
 

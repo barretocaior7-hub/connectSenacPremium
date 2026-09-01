@@ -279,8 +279,10 @@ async function carregarCursosAdmin() {
 
       const btnArquivar =
         curso.status === "ativo"
-          ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')"><i class="bi bi-archive"></i> Arquivar</button>`
-          : "";
+          ? `<button class="btn btn-sm btn-outline-warning p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
+          : `<button class="btn btn-sm btn-outline-success p-1 px-2" onclick="desarquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Reativar curso"><i class="bi bi-arrow-counterclockwise"></i> Reativar</button>`;
+
+      const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Excluir curso"><i class="bi bi-trash3"></i> Excluir</button>`;
 
       tbody.innerHTML += `
         <tr>
@@ -293,10 +295,11 @@ async function carregarCursosAdmin() {
           <td>${statusBadge}</td>
           <td class="text-end">
             <div class="d-inline-flex gap-1">
-              <button class="btn btn-sm btn-outline-brand p-1 px-2" onclick="abrirModalEdicao('${curso.id}')">
+              <button class="btn btn-sm btn-outline-brand p-1 px-2" onclick="abrirModalEdicao('${curso.id}')" title="Editar curso">
                 <i class="bi bi-pencil-square"></i> Editar
               </button>
               ${btnArquivar}
+              ${btnExcluir}
             </div>
           </td>
         </tr>`;
@@ -310,7 +313,32 @@ async function carregarCursosAdmin() {
 async function arquivarCurso(id, nome) {
   if (
     !confirm(
-      `Deseja arquivar o curso "${nome}"? Ele saira da vitrine dos alunos, mas o historico sera mantido.`
+      `Deseja arquivar o curso "${nome}"? Ele sairá da vitrine dos alunos, mas o histórico será mantido.`
+    )
+  )
+    return;
+  try {
+    const response = await fetch(`${API_URL}/cursos/${id}/arquivar`, {
+      method: "PUT",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (response.ok) {
+      alert(`Curso "${nome}" arquivado com sucesso!`);
+      carregarCursosAdmin();
+      carregarCursosNoSelect();
+    } else {
+      const data = await response.json();
+      alert(data.erro || "Erro ao arquivar curso.");
+    }
+  } catch (error) {
+    alert("Erro de conexão ao arquivar curso.");
+  }
+}
+
+async function excluirCurso(id, nome) {
+  if (
+    !confirm(
+      `ATENÇÃO: Deseja realmente EXCLUIR DEFINITIVAMENTE o curso "${nome}"?\n\nEsta ação removerá o curso e todas as suas turmas associadas. Não poderá ser desfeita.`
     )
   )
     return;
@@ -320,13 +348,16 @@ async function arquivarCurso(id, nome) {
       headers: { Authorization: `Bearer ${token}` },
     });
     if (response.ok) {
+      alert(`Curso "${nome}" excluído com sucesso!`);
       carregarCursosAdmin();
       carregarCursosNoSelect();
+      if (typeof carregarMetricas === 'function') carregarMetricas();
     } else {
-      alert("Erro ao arquivar curso.");
+      const data = await response.json();
+      alert(data.erro || "Erro ao excluir curso.");
     }
   } catch (error) {
-    alert("Erro de conexao.");
+    alert("Erro de conexão ao excluir o curso.");
   }
 }
 

@@ -123,3 +123,55 @@ exports.desarquivar = async (req, res) => {
         res.status(500).json({ erro: 'Erro ao reativar o curso.' });
     }
 };
+
+// 7. [ADMIN/COORDENADOR] Excluir Curso Definitivamente
+exports.excluir = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        // 1. Buscar disponibilidades vinculadas ao curso para cascata manual segura
+        const { data: disponibilidades, error: erroDisp } = await supabase
+            .from('disponibilidades')
+            .select('id')
+            .eq('curso_id', id);
+
+        if (!erroDisp && disponibilidades && disponibilidades.length > 0) {
+            const dispIds = disponibilidades.map(d => d.id);
+
+            // Remover agendamentos dessas disponibilidades
+            await supabase
+                .from('agendamentos')
+                .delete()
+                .in('disponibilidade_id', dispIds);
+
+            // Remover as disponibilidades
+            await supabase
+                .from('disponibilidades')
+                .delete()
+                .eq('curso_id', id);
+        }
+
+        // 2. Remover feedbacks do curso se houver
+        try {
+            await supabase
+                .from('feedbacks')
+                .delete()
+                .eq('curso_id', id);
+        } catch (e) {
+            // Ignora se não houver coluna curso_id na tabela
+        }
+
+        // 3. Excluir o registro do curso
+        const { error: erroCurso } = await supabase
+            .from('cursos')
+            .delete()
+            .eq('id', id);
+
+        if (erroCurso) throw erroCurso;
+
+        res.json({ mensagem: 'Curso excluído definitivamente com sucesso!' });
+    } catch (error) {
+        console.error('Erro ao excluir curso:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao excluir o curso.' });
+    }
+};
