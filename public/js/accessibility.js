@@ -1,4 +1,4 @@
-﻿// public/js/accessibility.js
+// public/js/accessibility.js
 // Módulo Central de Acessibilidade: VLibras, Alto Contraste, Modo Escuro e TTS
 
 (() => {
@@ -64,15 +64,21 @@
     const btnContrast = createBtn('btn-contrast', 'bi bi-circle-half', 'Alto Contraste', toggleContrast);
     const btnDark = createBtn('btn-dark', 'bi bi-moon-stars-fill', 'Modo Escuro', toggleDarkMode);
     const btnSpeak = createBtn('btn-speak', 'bi bi-volume-up-fill', 'Ouvir Página', toggleSpeakPage);
+    const btnFontInc = createBtn('btn-font-inc', 'bi bi-plus-lg', 'Aumentar Fonte', increaseFontSize);
+    const btnFontDec = createBtn('btn-font-dec', 'bi bi-dash-lg', 'Diminuir Fonte', decreaseFontSize);
 
     toolbar.appendChild(btnDark);
     toolbar.appendChild(btnContrast);
     toolbar.appendChild(btnSpeak);
+    toolbar.appendChild(btnFontInc);
+    toolbar.appendChild(btnFontDec);
     document.body.appendChild(toolbar);
 
     // Restaura preferências salvas
     if (localStorage.getItem('themeMode') === 'dark') toggleDarkMode(true);
     if (localStorage.getItem('themeMode') === 'contrast') toggleContrast(true);
+    const savedFont = localStorage.getItem('fontSize');
+    if (savedFont) setFontSize(parseInt(savedFont, 10));
   }
 
   // 3. Alternância mútua entre Modo Escuro e Alto Contraste
