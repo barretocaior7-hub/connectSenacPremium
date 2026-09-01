@@ -159,7 +159,9 @@ if (formCadastro) {
 
     const nome = document.getElementById("nome").value;
     const email = document.getElementById("email").value;
-    const telefone = document.getElementById("telefone").value;
+    const ddi = document.getElementById("ddiPais")?.value || "+55";
+    const telefoneRaw = document.getElementById("telefone").value.trim();
+    const apenasDigitos = telefoneRaw.replace(/\D/g, "");
     const senha = document.getElementById("senha").value;
     const confirmar_senha = document.getElementById("confirmar_senha").value;
 
@@ -169,6 +171,21 @@ if (formCadastro) {
     const msgDiv = document.getElementById("mensagemCadastro");
     const submitBtn = document.getElementById("btnSubmitCadastro");
     const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Finalizar Cadastro";
+
+    // Validação estrita de WhatsApp: Exatamente 11 dígitos (DDD + 9 dígitos)
+    if (ddi === "+55") {
+      if (apenasDigitos.length !== 11) {
+        msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> O WhatsApp deve conter exatamente 11 dígitos (DDD da região + 9 dígitos). Exemplo: (75) 98888-7777.</div>`;
+        document.getElementById("telefone").focus();
+        return;
+      }
+    } else if (apenasDigitos.length < 8 || apenasDigitos.length > 15) {
+      msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> Por favor, informe um número internacional válido com código de área.</div>`;
+      document.getElementById("telefone").focus();
+      return;
+    }
+
+    const telefone = ddi === "+55" ? telefoneRaw : `${ddi} ${telefoneRaw}`;
 
     if (senha !== confirmar_senha) {
       msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As senhas não coincidem. Verifique a digitação.</div>`;
@@ -314,8 +331,93 @@ if (formRedefinir) {
   });
 }
 
-// Validador de Força de Senha e Confirmação em Tempo Real
+// Máscara e Validação de Telefone / WhatsApp com Seleção de País e Regra de 11 Dígitos
+function initPhoneMask() {
+  const telInput = document.getElementById("telefone");
+  const ddiSelect = document.getElementById("ddiPais");
+  const counterBadge = document.getElementById("phoneDigitsCounter");
+  const helpText = document.getElementById("telefoneHelp");
+
+  if (!telInput) return;
+
+  function formatBRPhone(value) {
+    let digits = value.replace(/\D/g, "");
+    if (digits.length > 11) {
+      digits = digits.substring(0, 11);
+    }
+
+    let formatted = "";
+    if (digits.length > 0) {
+      formatted = "(" + digits.substring(0, 2);
+    }
+    if (digits.length >= 3) {
+      formatted += ") " + digits.substring(2, 7);
+    }
+    if (digits.length >= 8) {
+      formatted += "-" + digits.substring(7, 11);
+    }
+
+    return { formatted, count: digits.length };
+  }
+
+  function updateCounter(count, max = 11) {
+    if (!counterBadge) return;
+    if (count === max) {
+      counterBadge.className = "badge bg-success text-white font-monospace px-2 py-1";
+      counterBadge.textContent = `${count}/${max} (Completo)`;
+    } else if (count > 0) {
+      counterBadge.className = "badge bg-warning text-dark font-monospace px-2 py-1";
+      counterBadge.textContent = `${count}/${max} dígitos`;
+    } else {
+      counterBadge.className = "badge bg-light text-secondary border font-monospace px-2 py-1";
+      counterBadge.textContent = `0/${max} dígitos`;
+    }
+  }
+
+  telInput.addEventListener("input", () => {
+    const ddi = ddiSelect ? ddiSelect.value : "+55";
+    if (ddi === "+55") {
+      const { formatted, count } = formatBRPhone(telInput.value);
+      telInput.value = formatted;
+      updateCounter(count, 11);
+    } else {
+      let digits = telInput.value.replace(/[^\d\s]/g, "");
+      if (digits.length > 15) digits = digits.substring(0, 15);
+      telInput.value = digits;
+      const count = digits.replace(/\D/g, "").length;
+      updateCounter(count, 15);
+    }
+  });
+
+  if (ddiSelect) {
+    ddiSelect.addEventListener("change", () => {
+      telInput.value = "";
+      if (ddiSelect.value === "+55") {
+        telInput.placeholder = "(75) 98888-7777";
+        telInput.maxLength = 15;
+        if (helpText) helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i> DDD da região + 9 dígitos (exatos 11 dígitos).';
+        updateCounter(0, 11);
+      } else {
+        telInput.placeholder = "Número com código de área";
+        telInput.maxLength = 16;
+        if (helpText) helpText.innerHTML = '<i class="bi bi-info-circle me-1"></i> Digite o código de área e o número de telefone.';
+        updateCounter(0, 15);
+      }
+      telInput.focus();
+    });
+  }
+
+  if (telInput.value) {
+    const { formatted, count } = formatBRPhone(telInput.value);
+    telInput.value = formatted;
+    updateCounter(count, 11);
+  }
+}
+
+// Inicializações em Tempo Real
 document.addEventListener('DOMContentLoaded', () => {
+  initPhoneMask();
+
   const cadSenha = document.getElementById('senha');
   const cadConfSenha = document.getElementById('confirmar_senha');
   const strengthBar = document.getElementById('passwordStrengthBar');

@@ -38,6 +38,14 @@ exports.registrar = async (req, res) => {
         return res.status(400).json({ erro: 'O consentimento dos termos de uso é obrigatório (LGPD).' });
     }
 
+    // Validação de Telefone / WhatsApp (mínimo de 10 a 11 dígitos para DDD + Celular)
+    if (telefone) {
+        const digitos = String(telefone).replace(/\D/g, '');
+        if (digitos.length < 10 || digitos.length > 15) {
+            return res.status(400).json({ erro: 'O número de WhatsApp deve conter o DDD da região e os dígitos válidos (mínimo 10 a 11 dígitos).' });
+        }
+    }
+
     try {
         // Verificar se o e-mail já existe no Supabase
         const { data: usuárioExistente } = await supabase

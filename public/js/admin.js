@@ -605,6 +605,37 @@ async function excluirCurso(id, nome) {
     }
 }
 
+async function excluirCursoDoModal() {
+    const id = document.getElementById('editCursoId').value;
+    const nome = document.getElementById('editNome').value || 'Curso';
+    if (!id) return;
+
+    if (confirm(`ATENÇÃO: Deseja realmente EXCLUIR DEFINITIVAMENTE o curso "${nome}"?\n\nEsta ação removerá o curso e todas as suas turmas. Não poderá ser desfeita.`)) {
+        try {
+            const response = await fetch(`${API_URL}/cursos/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                alert(`Curso "${nome}" excluído com sucesso!`);
+                if (modalEditarCursoInstance) modalEditarCursoInstance.hide();
+                carregarCursosAdmin();
+                carregarCursosNoSelect();
+                if (typeof carregarMetricas === 'function') carregarMetricas();
+            } else {
+                const data = await response.json();
+                alert(data.erro || 'Erro ao excluir curso.');
+            }
+        } catch (error) {
+            alert('Erro de conexão ao excluir o curso.');
+        }
+    }
+}
+
+window.excluirCurso = excluirCurso;
+window.excluirCursoDoModal = excluirCursoDoModal;
+
 function abrirModalEdicao(cursoParam){
     if (!modalEditarCursoInstance) return;
 
@@ -827,4 +858,17 @@ async function desarquivarCurso(id, nome) {
     } catch (error) {
         alert('Erro ao conectar com o servidor.');
     }
+}
+
+// Máscara de Telefone do Colaborador
+const colabTelInput = document.getElementById('colabTelefone');
+if (colabTelInput) {
+    colabTelInput.addEventListener('input', () => {
+        let digits = colabTelInput.value.replace(/\D/g, '').substring(0, 11);
+        let formatted = '';
+        if (digits.length > 0) formatted = '(' + digits.substring(0, 2);
+        if (digits.length >= 3) formatted += ') ' + digits.substring(2, 7);
+        if (digits.length >= 8) formatted += '-' + digits.substring(7, 11);
+        colabTelInput.value = formatted;
+    });
 }

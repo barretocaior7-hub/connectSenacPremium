@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -78,17 +78,36 @@
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-floating">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label for="telefone" class="small fw-semibold text-muted mb-0">
+                                                <i class="bi bi-whatsapp text-success me-1"></i> WhatsApp
+                                            </label>
+                                            <span class="badge bg-light text-secondary border font-monospace px-2 py-1" id="phoneDigitsCounter" style="font-size: 0.72rem;">0/11 dígitos</span>
+                                        </div>
+                                        <div class="input-group">
+                                            <select class="form-select flex-grow-0" id="ddiPais" style="max-width: 110px; font-size: 0.88rem;" aria-label="País DDI">
+                                                <option value="+55" selected>🇧🇷 +55</option>
+                                                <option value="+351">🇵🇹 +351</option>
+                                                <option value="+1">🇺🇸 +1</option>
+                                                <option value="+34">🇪🇸 +34</option>
+                                                <option value="+54">🇦🇷 +54</option>
+                                                <option value="+44">🇬🇧 +44</option>
+                                                <option value="+598">🇺🇾 +598</option>
+                                                <option value="+595">🇵🇾 +595</option>
+                                            </select>
                                             <input 
                                                 type="tel" 
                                                 class="form-control" 
                                                 id="telefone" 
-                                                placeholder="Telefone (WhatsApp)" 
+                                                placeholder="(75) 98888-7777" 
                                                 required
+                                                maxlength="15"
                                                 autocomplete="tel"
                                                 aria-label="Telefone WhatsApp"
                                             >
-                                            <label for="telefone"><i class="bi bi-whatsapp me-1"></i> WhatsApp</label>
+                                        </div>
+                                        <div class="form-text small text-muted mt-1" id="telefoneHelp" style="font-size: 0.76rem;">
+                                            <i class="bi bi-info-circle me-1"></i> DDD da região + 9 dígitos (exatos 11 dígitos).
                                         </div>
                                     </div>
                                 </div>
