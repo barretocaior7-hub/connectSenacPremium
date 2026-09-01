@@ -970,10 +970,18 @@ a:hover {
   overflow: hidden;
 }
 
-.modal-header-custom {
+.modal-header-custom,
+.modal-header {
   border-bottom: 1px solid var(--border-color);
   padding: 1.25rem 1.75rem;
   background: var(--bg-surface-secondary);
+  cursor: grab;
+  user-select: none;
+}
+
+.modal-header-custom:active,
+.modal-header:active {
+  cursor: grabbing;
 }
 
 .modal-header-custom .modal-title {
@@ -1349,16 +1357,16 @@ a:hover {
 }
 
 /* Efeitos globais de interação e transição entre telas */
-body.ui-page-ready { animation: uiPageEnter .42s cubic-bezier(.2,.75,.25,1) both; }
-body.ui-page-leaving { pointer-events: none; animation: uiPageExit .23s ease forwards; }
+body.ui-page-ready { animation: uiPageEnter .35s ease-out forwards; }
+body.ui-page-leaving { pointer-events: none; opacity: 0; transition: opacity .2s ease; }
 .ui-clickable { position: relative; isolation: isolate; overflow: hidden; transform: translateZ(0); transition: transform .18s ease, box-shadow .22s ease, filter .22s ease; }
 .ui-clickable.ui-pressing { transform: translateY(1px) scale(.97) !important; filter: brightness(.96); }
 .ui-ripple { position: absolute; z-index: 20; border-radius: 50%; background: rgba(255,255,255,.42); pointer-events: none; transform: scale(0); animation: uiRipple .58s ease-out forwards; }
 .btn-light .ui-ripple, .btn-outline-primary .ui-ripple, .btn-outline-secondary .ui-ripple,
 .dropdown-item .ui-ripple { background: rgba(0,90,159,.2); }
 @keyframes uiRipple { 65% { opacity: .7; } 100% { opacity: 0; transform: scale(1); } }
-@keyframes uiPageEnter { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes uiPageExit { to { opacity: 0; transform: translateY(-7px) scale(.995); } }
+@keyframes uiPageEnter { from { opacity: 0; } to { opacity: 1; } }
+@keyframes uiPageExit { to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
   body.ui-page-ready, body.ui-page-leaving, .ui-ripple { animation: none !important; }
   .ui-clickable { transition: none !important; }
@@ -1884,32 +1892,128 @@ html {
   transition: font-size 0.2s ease-in-out;
 }
 
-#accessibility-toolbar {
-  position: fixed;
-  bottom: 24px;
-  left: 24px;
-  z-index: 1050;
+/* ==========================================================================
+   ACESSIBILIDADE FLUTUANTE (FAB + MENU EXPANSÍVEL)
+   ========================================================================== */
+.accessibility-floating-wrapper {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 24px !important;
+  z-index: 999990 !important;
+}
+
+.accessibility-fab {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #004a8d 0%, #002b53 100%);
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.35);
+  font-size: 1.5rem;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: #ffffff;
-  padding: 6px 10px;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  padding: 0;
+  outline: none;
+}
+
+.accessibility-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 10px 28px rgba(0, 74, 141, 0.45);
+}
+
+.accessibility-fab.active {
+  background: linear-gradient(135deg, #f7941d 0%, #d4780c 100%);
+  border-color: #ffffff;
+}
+
+.accessibility-fab-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background-color: #f7941d;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 5px;
   border-radius: 9999px;
-  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.2), 0 2px 6px rgba(0, 0, 0, 0.08);
+  border: 2px solid #ffffff;
+  line-height: 1;
+}
+
+.accessibility-fab.active .accessibility-fab-badge {
+  background-color: #004a8d;
+}
+
+/* Painel de Opções Flutuante */
+.accessibility-floating-panel {
+  position: absolute;
+  bottom: 64px;
+  left: 0;
+  width: 290px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
   border: 1.5px solid #004a8d;
+  overflow: hidden;
+  animation: fadeInUp 0.2s ease;
   user-select: none;
 }
 
-#accessibility-toolbar .accessibility-btn {
-  width: 36px;
-  height: 36px;
+.accessibility-panel-header {
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.accessibility-panel-title {
+  color: #004a8d;
+  font-size: 0.88rem;
+  letter-spacing: 0.3px;
+}
+
+.btn-close-accessibility {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.btn-close-accessibility:hover {
+  color: #0f172a;
+  background-color: #e2e8f0;
+}
+
+.accessibility-panel-body {
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.accessibility-panel-body .accessibility-btn {
+  width: 38px;
+  height: 38px;
   border-radius: 50%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 0.95rem;
-  border: 1px solid #004a8d;
+  font-size: 1rem;
+  border: 1.5px solid #004a8d;
   color: #004a8d;
   background-color: #ffffff;
   transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease;
@@ -1917,26 +2021,25 @@ html {
   outline: none;
 }
 
-#accessibility-toolbar .accessibility-btn-label {
-  font-size: 0.82rem;
+.accessibility-panel-body .accessibility-btn-label {
+  font-size: 0.85rem;
   font-weight: 800;
   line-height: 1;
-  font-family: inherit;
 }
 
-#accessibility-toolbar .accessibility-btn:hover {
-  transform: scale(1.12);
+.accessibility-panel-body .accessibility-btn:hover {
+  transform: scale(1.1);
   background-color: #004a8d;
   color: #ffffff;
 }
 
-#accessibility-toolbar .accessibility-btn:focus-visible {
+.accessibility-panel-body .accessibility-btn:focus-visible {
   outline: 2px solid #f7941d;
   outline-offset: 2px;
 }
 
-#accessibility-toolbar .accessibility-btn.active,
-#accessibility-toolbar .accessibility-btn[aria-pressed="true"] {
+.accessibility-panel-body .accessibility-btn.active,
+.accessibility-panel-body .accessibility-btn[aria-pressed="true"] {
   background-color: #004a8d;
   color: #ffffff;
 }
@@ -2083,24 +2186,35 @@ body.dark-mode .table-custom tbody tr:hover {
   background-color: rgba(37, 99, 235, 0.08) !important;
 }
 
-[data-theme="dark"] #accessibility-toolbar,
-body.dark-mode #accessibility-toolbar {
+[data-theme="dark"] .accessibility-floating-panel,
+body.dark-mode .accessibility-floating-panel {
   background-color: #131e33 !important;
   border-color: #38bdf8 !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
 }
 
-[data-theme="dark"] #accessibility-toolbar .accessibility-btn,
-body.dark-mode #accessibility-toolbar .accessibility-btn {
+[data-theme="dark"] .accessibility-panel-header,
+body.dark-mode .accessibility-panel-header {
+  background-color: #0b1120 !important;
+  border-color: #1e293b !important;
+}
+
+[data-theme="dark"] .accessibility-panel-title,
+body.dark-mode .accessibility-panel-title {
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .accessibility-panel-body .accessibility-btn,
+body.dark-mode .accessibility-panel-body .accessibility-btn {
   border-color: #38bdf8;
   color: #38bdf8;
   background-color: #131e33;
 }
 
-[data-theme="dark"] #accessibility-toolbar .accessibility-btn:hover,
-body.dark-mode #accessibility-toolbar .accessibility-btn:hover,
-[data-theme="dark"] #accessibility-toolbar .accessibility-btn.active,
-body.dark-mode #accessibility-toolbar .accessibility-btn.active {
+[data-theme="dark"] .accessibility-panel-body .accessibility-btn:hover,
+body.dark-mode .accessibility-panel-body .accessibility-btn:hover,
+[data-theme="dark"] .accessibility-panel-body .accessibility-btn.active,
+body.dark-mode .accessibility-panel-body .accessibility-btn.active {
   background-color: #38bdf8;
   color: #0b1120;
 }
@@ -2172,19 +2286,30 @@ body.high-contrast select:focus {
   outline: 3px solid #00ffff !important;
 }
 
-body.high-contrast #accessibility-toolbar {
+body.high-contrast .accessibility-fab {
+  background: #000000 !important;
+  border: 2px solid #ffff00 !important;
+  color: #ffff00 !important;
+}
+
+body.high-contrast .accessibility-floating-panel {
   background-color: #000000 !important;
   border: 2px solid #ffff00 !important;
 }
 
-body.high-contrast #accessibility-toolbar .accessibility-btn {
+body.high-contrast .accessibility-panel-header {
+  background-color: #000000 !important;
+  border-color: #ffff00 !important;
+}
+
+body.high-contrast .accessibility-panel-body .accessibility-btn {
   border: 2px solid #ffff00 !important;
   color: #ffff00 !important;
   background-color: #000000 !important;
 }
 
-body.high-contrast #accessibility-toolbar .accessibility-btn:hover,
-body.high-contrast #accessibility-toolbar .accessibility-btn.active {
+body.high-contrast .accessibility-panel-body .accessibility-btn:hover,
+body.high-contrast .accessibility-panel-body .accessibility-btn.active {
   background-color: #ffff00 !important;
   color: #000000 !important;
 }
@@ -2219,15 +2344,16 @@ body.high-contrast .accessibility-speaking-highlight {
 
 
 /* ==========================================================================
-   WIDGETS FLUTUANTES, PWA, COOKIES, WHATSAPP E ASSISTENTE I.A.
+   WIDGETS FLUTUANTES, PWA, COOKIES, WHATSAPP, VLIBRAS E ASSISTENTE I.A.
    ========================================================================== */
 
 /* 1. Botão Flutuante do WhatsApp */
-.whatsapp-floating-btn {
-  position: fixed;
-  bottom: 84px;
-  right: 20px;
-  z-index: 1040;
+.whatsapp-floating-btn,
+#whatsapp-floating-btn {
+  position: fixed !important;
+  bottom: 84px !important;
+  right: 24px !important;
+  z-index: 999990 !important;
   background-color: #25D366;
   color: #ffffff !important;
   border-radius: 9999px;
@@ -2242,21 +2368,24 @@ body.high-contrast .accessibility-speaking-highlight {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.whatsapp-floating-btn i {
+.whatsapp-floating-btn i,
+#whatsapp-floating-btn i {
   font-size: 1.35rem;
 }
 
-.whatsapp-floating-btn:hover {
+.whatsapp-floating-btn:hover,
+#whatsapp-floating-btn:hover {
   transform: translateY(-3px) scale(1.03);
   box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45);
 }
 
-/* 2. Assistente Virtual Inteligente (Connect AI) */
-.senac-ai-fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1045;
+/* 2. Assistente Virtual Inteligente (Connect AI / Chatbot) */
+.senac-ai-fab,
+#btnAiToggle {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 24px !important;
+  z-index: 999995 !important;
   width: 54px;
   height: 54px;
   border-radius: 50%;
@@ -2272,7 +2401,8 @@ body.high-contrast .accessibility-speaking-highlight {
   transition: transform 0.2s ease;
 }
 
-.senac-ai-fab:hover {
+.senac-ai-fab:hover,
+#btnAiToggle:hover {
   transform: scale(1.08);
 }
 
@@ -2289,10 +2419,11 @@ body.high-contrast .accessibility-speaking-highlight {
   border: 2px solid #ffffff;
 }
 
-.senac-ai-window {
-  position: fixed;
-  bottom: 84px;
-  right: 20px;
+.senac-ai-window,
+#senacAiChatWindow {
+  position: fixed !important;
+  bottom: 84px !important;
+  right: 24px !important;
   width: 360px;
   max-width: calc(100vw - 32px);
   height: 480px;
@@ -2300,12 +2431,29 @@ body.high-contrast .accessibility-speaking-highlight {
   background: #ffffff;
   border-radius: 18px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
-  z-index: 1050;
+  z-index: 999998 !important;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   border: 1px solid rgba(0, 0, 0, 0.1);
   animation: fadeInUp 0.25s ease;
+}
+
+/* 3. VLibras Flutuante na Lateral Direita Central */
+[vw],
+div[vw],
+div[vw].enabled,
+[vw] [vw-access-button],
+[vw] .vw-plugin-top-wrapper {
+  position: fixed !important;
+  z-index: 999999 !important;
+}
+
+[vw] [vw-access-button] {
+  top: 50% !important;
+  right: 0 !important;
+  transform: translateY(-50%) !important;
+  cursor: pointer;
 }
 
 .senac-ai-header {
@@ -2495,4 +2643,64 @@ body.high-contrast .accessibility-speaking-highlight {
   height: 100%;
   width: 0%;
   transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+/* 7. Dropzone de Upload de Imagens de Cursos */
+.upload-dropzone {
+  border: 2px dashed var(--border-color);
+  border-radius: var(--radius-md);
+  background-color: #f8fafc;
+  padding: 1.25rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.upload-dropzone:hover {
+  border-color: var(--senac-blue);
+  background-color: rgba(0, 75, 141, 0.04);
+}
+
+.upload-dropzone.dragover {
+  border-color: var(--senac-blue);
+  background-color: rgba(0, 75, 141, 0.08);
+  transform: scale(1.01);
+  box-shadow: 0 0 0 4px var(--senac-blue-glow);
+}
+
+.upload-dropzone-icon {
+  font-size: 1.8rem;
+  color: var(--senac-blue);
+  margin-bottom: 0.25rem;
+  display: inline-block;
+  transition: transform var(--transition-fast);
+}
+
+.upload-dropzone:hover .upload-dropzone-icon {
+  transform: translateY(-2px);
+}
+
+.upload-preview-container {
+  position: relative;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--border-color);
+  background-color: #f1f5f9;
+  max-height: 180px;
+}
+
+.upload-preview-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  display: block;
+}
+
+.upload-preview-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 6px;
 }

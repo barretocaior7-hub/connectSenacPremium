@@ -212,7 +212,7 @@
           
           <!-- Métricas KPI -->
           <div class="row g-3 mb-4" id="painelMetricas">
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-md-4">
               <div class="kpi-card kpi-blue">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
@@ -225,7 +225,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-md-4">
               <div class="kpi-card kpi-success">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
@@ -238,20 +238,7 @@
                 </div>
               </div>
             </div>
-            <div class="col-sm-6 col-lg-3">
-              <div class="kpi-card kpi-warning">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <div class="text-muted small fw-bold text-uppercase">Aulas Concluídas</div>
-                    <h3 class="mb-0 fw-bold text-warning mt-1 font-heading" id="metricConcluidos">--</h3>
-                  </div>
-                  <div class="kpi-icon-box">
-                    <i class="bi bi-patch-check-fill"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
+            <div class="col-md-4">
               <div class="kpi-card kpi-danger">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
@@ -315,14 +302,40 @@
                       <label for="localCurso"><i class="bi bi-geo-alt me-1"></i> Localização / Unidade</label>
                     </div>
 
-                    <div class="form-floating mb-3">
-                      <input
-                        type="url"
-                        class="form-control"
-                        id="fotoCurso"
-                        placeholder="https://exemplo.com/imagem.jpg"
-                      />
-                      <label for="fotoCurso"><i class="bi bi-image me-1"></i> URL da Imagem de Capa (Opcional)</label>
+                    <!-- Upload e Imagem de Capa do Curso -->
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-muted mb-1">
+                        <i class="bi bi-image me-1 text-primary"></i> Imagem de Capa do Curso
+                      </label>
+                      
+                      <!-- Dropzone para arrastar ou clicar -->
+                      <div class="upload-dropzone mb-2" id="dropzoneCurso" onclick="document.getElementById('fileInputCurso').click()">
+                        <input type="file" id="fileInputCurso" accept="image/png, image/jpeg, image/webp, image/gif" class="d-none">
+                        <i class="bi bi-cloud-arrow-up-fill upload-dropzone-icon"></i>
+                        <div class="fw-semibold small text-dark">Arraste uma imagem aqui ou <span class="text-primary text-decoration-underline">clique para selecionar do dispositivo</span></div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Suporta PNG, JPG, JPEG, WEBP (Otimização automática)</div>
+                      </div>
+
+                      <!-- Preview da Imagem -->
+                      <div class="upload-preview-container mb-2 d-none" id="previewContainerCurso">
+                        <img src="" alt="Prévia do Curso" id="previewImgCurso" class="upload-preview-img">
+                        <div class="upload-preview-overlay">
+                          <button type="button" class="btn btn-sm btn-danger shadow-sm py-1 px-2" id="btnRemoverFotoCurso" title="Remover Imagem">
+                            <i class="bi bi-trash3 me-1"></i> Remover
+                          </button>
+                        </div>
+                      </div>
+
+                      <!-- Campo URL ou Dado da Imagem -->
+                      <div class="input-group input-group-sm">
+                        <span class="input-group-text bg-light text-muted small"><i class="bi bi-link-45deg"></i> Ou URL</span>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="fotoCurso"
+                          placeholder="https://exemplo.com/imagem.jpg"
+                        />
+                      </div>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -642,8 +655,8 @@
     <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-hidden="true">
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content modal-content-custom">
-          <div class="modal-header modal-header-custom">
-            <h5 class="modal-title" style="color: var(--senac-blue);"><i class="bi bi-pencil-square me-1"></i> Editar Informações do Curso</h5>
+          <div class="modal-header modal-header-custom" style="cursor: grab;" title="Clique e arraste para mover">
+            <h5 class="modal-title" style="color: var(--senac-blue);"><i class="bi bi-arrows-move me-2 text-muted"></i><i class="bi bi-pencil-square me-1"></i> Editar Informações do Curso</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
           </div>
           <div class="modal-body modal-body-custom">
@@ -672,12 +685,55 @@
 
               <div class="form-floating mb-3">
                 <textarea class="form-control" id="editDescricao" style="height: 90px" placeholder="Descrição" required></textarea>
-                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> Descrição</label>
+                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> Descrição do Curso / Serviço</label>
               </div>
 
               <div class="form-floating mb-3">
-                <input type="url" class="form-control" id="editFoto" placeholder="URL da Imagem de Capa">
-                <label for="editFoto"><i class="bi bi-image me-1"></i> URL da Imagem de Capa</label>
+                <textarea
+                  class="form-control"
+                  id="editMotivo"
+                  style="height: 60px"
+                  placeholder="Benefícios para o modelo"
+                ></textarea>
+                <label for="editMotivo"><i class="bi bi-gift me-1"></i> Benefícios para o Modelo</label>
+              </div>
+
+              <div class="form-floating mb-3">
+                <textarea
+                  class="form-control"
+                  id="editRestricoes"
+                  style="height: 60px"
+                  placeholder="Restrições"
+                ></textarea>
+                <label for="editRestricoes"><i class="bi bi-exclamation-triangle me-1"></i> Restrições / Contraindicações</label>
+              </div>
+
+              <!-- Upload e Imagem de Capa do Curso no Modal -->
+              <div class="mb-3">
+                <label class="form-label small fw-bold text-muted mb-1">
+                  <i class="bi bi-image me-1 text-primary"></i> Imagem de Capa do Curso
+                </label>
+                
+                <div class="upload-dropzone mb-2" id="dropzoneEditCurso" onclick="document.getElementById('fileInputEditCurso').click()">
+                  <input type="file" id="fileInputEditCurso" accept="image/png, image/jpeg, image/webp, image/gif" class="d-none">
+                  <i class="bi bi-cloud-arrow-up-fill upload-dropzone-icon"></i>
+                  <div class="fw-semibold small text-dark">Arraste uma imagem ou <span class="text-primary text-decoration-underline">selecione do dispositivo</span></div>
+                  <div class="text-muted" style="font-size: 0.75rem;">Suporta PNG, JPG, JPEG, WEBP</div>
+                </div>
+
+                <div class="upload-preview-container mb-2 d-none" id="previewContainerEditCurso">
+                  <img src="" alt="Prévia do Curso" id="previewImgEditCurso" class="upload-preview-img">
+                  <div class="upload-preview-overlay">
+                    <button type="button" class="btn btn-sm btn-danger shadow-sm py-1 px-2" id="btnRemoverFotoEditCurso" title="Remover Imagem">
+                      <i class="bi bi-trash3 me-1"></i> Remover
+                    </button>
+                  </div>
+                </div>
+
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light text-muted small"><i class="bi bi-link-45deg"></i> Ou URL</span>
+                  <input type="text" class="form-control" id="editFoto" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
               </div>
 
               <div id="msgEditCurso" class="mb-3 text-center small fw-bold"></div>

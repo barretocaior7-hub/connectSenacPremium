@@ -22,7 +22,8 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors()); // Libera o acesso do Front-end
-app.use(express.json()); // Ensina o Express a entender requisições no formato JSON
+app.use(express.json({ limit: '10mb' })); // Suporta envio de imagens base64/arquivos
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // A LINHA MÁGICA DA OPÇÃO 2:
 // Entrega localmente os mesmos arquivos públicos que a Vercel publica via CDN.
@@ -42,6 +43,8 @@ const escaparHtml = (valor = '') => String(valor)
     .replace(/'/g, '&#39;');
 
 const imagemPublicaSegura = (url) => {
+    if (!url) return '';
+    if (url.startsWith('data:image/')) return url;
     try {
         const imagem = new URL(url);
         return ['http:', 'https:'].includes(imagem.protocol) ? imagem.href : '';

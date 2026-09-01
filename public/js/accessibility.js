@@ -273,19 +273,54 @@
     return btn;
   }
 
-  // 6. Inicialização da Barra de Ferramentas Flutuante
+  // 6. Inicialização do Botão Flutuante e Menu de Acessibilidade
   function initAccessibility() {
-    if (document.getElementById('accessibility-toolbar')) return;
+    if (document.getElementById('accessibility-container')) return;
 
     injectVLibrasStructure();
 
-    const toolbar = document.createElement('aside');
-    toolbar.id = 'accessibility-toolbar';
-    toolbar.setAttribute('role', 'region');
-    toolbar.setAttribute('aria-label', 'Barra de Ferramentas de Acessibilidade');
-    toolbar.className = 'accessibility-floating-bar';
+    const container = document.createElement('div');
+    container.id = 'accessibility-container';
+    container.className = 'accessibility-floating-wrapper';
 
-    // Botões de Acessibilidade
+    // 1. Botão Flutuante Único (FAB)
+    const fabBtn = document.createElement('button');
+    fabBtn.id = 'btnAccessibilityFab';
+    fabBtn.className = 'accessibility-fab';
+    fabBtn.type = 'button';
+    fabBtn.title = 'Acessibilidade (Clique para abrir opções)';
+    fabBtn.setAttribute('aria-label', 'Abrir menu de recursos de acessibilidade');
+    fabBtn.setAttribute('aria-expanded', 'false');
+    fabBtn.innerHTML = `
+      <i class="bi bi-universal-access"></i>
+      <span class="accessibility-fab-badge">A11y</span>
+    `;
+
+    // 2. Painel Flutuante Expansível
+    const panel = document.createElement('aside');
+    panel.id = 'accessibility-toolbar';
+    panel.setAttribute('role', 'region');
+    panel.setAttribute('aria-label', 'Menu de Ferramentas de Acessibilidade');
+    panel.className = 'accessibility-floating-panel d-none';
+
+    // Cabeçalho do Painel
+    const header = document.createElement('div');
+    header.className = 'accessibility-panel-header';
+    header.innerHTML = `
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-universal-access fs-5 text-primary"></i>
+        <strong class="accessibility-panel-title">Acessibilidade</strong>
+      </div>
+      <button type="button" id="btnAccessibilityClose" class="btn-close-accessibility" aria-label="Fechar Menu">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    `;
+    panel.appendChild(header);
+
+    // Corpo com os Botões de Ação
+    const body = document.createElement('div');
+    body.className = 'accessibility-panel-body';
+
     const btnContrast = createBtn('btn-contrast', 'bi bi-circle-half', '', 'Alternar Alto Contraste (Alt + C)', toggleContrast);
     const btnFontInc = createBtn('btn-font-inc', 'bi bi-plus-lg', 'A+', 'Aumentar Tamanho da Fonte (Alt + +)', increaseFontSize);
     const btnFontDec = createBtn('btn-font-dec', 'bi bi-dash-lg', 'A-', 'Diminuir Tamanho da Fonte (Alt + -)', decreaseFontSize);
@@ -293,14 +328,54 @@
     const btnDark = createBtn('btn-dark', 'bi bi-moon-stars-fill', '', 'Alternar Modo Escuro', toggleDarkMode);
     const btnSpeak = createBtn('btn-speak', 'bi bi-volume-up-fill', '', 'Ativar Leitor de Voz por Clique (Alt + V)', toggleVoiceReader);
 
-    toolbar.appendChild(btnContrast);
-    toolbar.appendChild(btnFontInc);
-    toolbar.appendChild(btnFontDec);
-    toolbar.appendChild(btnFontReset);
-    toolbar.appendChild(btnDark);
-    toolbar.appendChild(btnSpeak);
+    body.appendChild(btnContrast);
+    body.appendChild(btnFontInc);
+    body.appendChild(btnFontDec);
+    body.appendChild(btnFontReset);
+    body.appendChild(btnDark);
+    body.appendChild(btnSpeak);
 
-    document.body.appendChild(toolbar);
+    panel.appendChild(body);
+
+    container.appendChild(fabBtn);
+    container.appendChild(panel);
+    document.body.appendChild(container);
+
+    // Controle de Abertura / Fechamento
+    function toggleAccessibilityPanel(show) {
+      const isCurrentlyOpen = !panel.classList.contains('d-none');
+      const nextState = typeof show === 'boolean' ? show : !isCurrentlyOpen;
+
+      if (nextState) {
+        panel.classList.remove('d-none');
+        fabBtn.setAttribute('aria-expanded', 'true');
+        fabBtn.classList.add('active');
+      } else {
+        panel.classList.add('d-none');
+        fabBtn.setAttribute('aria-expanded', 'false');
+        fabBtn.classList.remove('active');
+      }
+    }
+
+    fabBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleAccessibilityPanel();
+    });
+
+    const closeBtn = document.getElementById('btnAccessibilityClose');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleAccessibilityPanel(false);
+      });
+    }
+
+    // Fecha ao clicar fora
+    document.addEventListener('click', (e) => {
+      if (!container.contains(e.target) && !panel.classList.contains('d-none')) {
+        toggleAccessibilityPanel(false);
+      }
+    });
 
     // Event listener global para capturar o clique e falar apenas o elemento clicado
     document.addEventListener('click', handleDocumentClick, true);
@@ -324,8 +399,13 @@
       } else if (e.altKey && (e.key === 'v' || e.key === 'V')) {
         e.preventDefault();
         toggleVoiceReader();
-      } else if (e.key === 'Escape' && isVoiceReaderActive) {
-        toggleVoiceReader();
+      } else if (e.key === 'Escape') {
+        if (!panel.classList.contains('d-none')) {
+          toggleAccessibilityPanel(false);
+        }
+        if (isVoiceReaderActive) {
+          toggleVoiceReader();
+        }
       }
     });
 

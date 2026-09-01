@@ -152,6 +152,141 @@ async function carregarCursosNoSelect() {
 }
 
 // ============================================================================
+// COMPONENTE: DRAG & DROP / SELEÇÃO DE IMAGEM DO DISPOSITIVO COM OTIMIZAÇÃO
+// ============================================================================
+function setupImageDropzone(dropzoneId, fileInputId, inputUrlId, previewContainerId, previewImgId, btnRemoveId) {
+  const dropzone = document.getElementById(dropzoneId);
+  const fileInput = document.getElementById(fileInputId);
+  const inputUrl = document.getElementById(inputUrlId);
+  const previewContainer = document.getElementById(previewContainerId);
+  const previewImg = document.getElementById(previewImgId);
+  const btnRemove = document.getElementById(btnRemoveId);
+
+  if (!dropzone || !fileInput || !inputUrl) return { updatePreview: () => {}, clear: () => {} };
+
+  function processImageFile(file) {
+    if (!file || !file.type.startsWith('image/')) {
+      alert('Por favor, selecione um arquivo de imagem válido (PNG, JPG, JPEG, WEBP).');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1200;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        inputUrl.value = optimizedDataUrl;
+        updatePreview(optimizedDataUrl);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function updatePreview(url) {
+    if (url && url.trim() !== '') {
+      previewImg.src = url;
+      previewContainer.classList.remove('d-none');
+      dropzone.classList.add('d-none');
+    } else {
+      previewImg.src = '';
+      previewContainer.classList.add('d-none');
+      dropzone.classList.remove('d-none');
+    }
+  }
+
+  function clear() {
+    inputUrl.value = '';
+    if (fileInput) fileInput.value = '';
+    updatePreview('');
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.add('dragover');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropzone.classList.remove('dragover');
+    }, false);
+  });
+
+  dropzone.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length > 0) {
+      processImageFile(files[0]);
+    }
+  });
+
+  if (fileInput) {
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files && fileInput.files.length > 0) {
+        processImageFile(fileInput.files[0]);
+      }
+    });
+  }
+
+  inputUrl.addEventListener('input', () => {
+    updatePreview(inputUrl.value.trim());
+  });
+
+  if (btnRemove) {
+    btnRemove.addEventListener('click', (e) => {
+      e.stopPropagation();
+      clear();
+    });
+  }
+
+  return { updatePreview, clear };
+}
+
+const dropzoneCursoHandler = setupImageDropzone(
+  'dropzoneCurso',
+  'fileInputCurso',
+  'fotoCurso',
+  'previewContainerCurso',
+  'previewImgCurso',
+  'btnRemoverFotoCurso'
+);
+
+const dropzoneEditCursoHandler = setupImageDropzone(
+  'dropzoneEditCurso',
+  'fileInputEditCurso',
+  'editFoto',
+  'previewContainerEditCurso',
+  'previewImgEditCurso',
+  'btnRemoverFotoEditCurso'
+);
+
+// ============================================================================
 // 4. FORMULARIO: CADASTRAR NOVO CURSO
 // ============================================================================
 const formCurso = document.getElementById("formCurso");
@@ -185,6 +320,7 @@ if (formCurso) {
       if (response.ok) {
         msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check2-circle me-1"></i> ${data.mensagem}</div>`;
         formCurso.reset();
+        dropzoneCursoHandler.clear();
         carregarCursosNoSelect();
         carregarCursosAdmin();
       } else {
@@ -418,8 +554,11 @@ function abrirModalEdicao(cursoParam) {
   document.getElementById("editCursoId").value = curso.id;
   document.getElementById("editNome").value = curso.nome;
   document.getElementById("editDescricao").value = curso.descricao;
+  document.getElementById("editMotivo").value = curso.motivo_modelo || "";
+  document.getElementById("editRestricoes").value = curso.restricoes || "";
   document.getElementById("editLocal").value = curso.localizacao;
   document.getElementById("editFoto").value = curso.foto_url || "";
+  dropzoneEditCursoHandler.updatePreview(curso.foto_url || "");
 
   const selectPrincipal = document.getElementById("selectProfissional");
   const selectEdit = document.getElementById("editProfissional");
@@ -444,6 +583,8 @@ if (formEditarCurso) {
     const payload = {
       nome: document.getElementById("editNome").value,
       descricao: document.getElementById("editDescricao").value,
+      motivo_modelo: document.getElementById("editMotivo").value,
+      restricoes: document.getElementById("editRestricoes").value,
       localizacao: document.getElementById("editLocal").value,
       foto_url: document.getElementById("editFoto").value,
       profissional_id: document.getElementById("editProfissional").value,
