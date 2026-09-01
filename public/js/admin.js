@@ -530,8 +530,8 @@ async function carregarCursosAdmin(){
                 : '<span class="badge-custom badge-status-arquivado"><i class="bi bi-archive"></i> Arquivado</span>';
 
             const btnArquivar = curso.status === 'ativo'
-                ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
-                : '';
+        ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="arquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Arquivar curso"><i class="bi bi-archive"></i> Arquivar</button>`
+        : `<button class="btn btn-sm btn-outline-success p-1 px-2" onclick="desarquivarCurso('${curso.id}', '${curso.nome.replace(/'/g, "\\'")}')" title="Reativar curso"><i class="bi bi-arrow-counterclockwise"></i> Reativar</button>`;
 
             const row = `
                 <tr>
@@ -780,3 +780,25 @@ carregarMetricas();
 carregarCursosNoSelect();
 carregarUsuários();
 carregarPautasGlobais();
+async function desarquivarCurso(id, nome) {
+    if(!confirm(`Deseja reativar o curso "${nome}"? Ele voltará a ser exibido na vitrine pública para os alunos e modelos.`)) return;
+
+    try {
+        const response = await fetch(`${API_URL}/cursos/${id}/desarquivar`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            alert(`Curso "${nome}" reativado com sucesso!`);
+            if (typeof carregarCursosAdmin === 'function') carregarCursosAdmin();
+            if (typeof carregarCursosCoord === 'function') carregarCursosCoord();
+            if (typeof carregarMetricasAdmin === 'function') carregarMetricasAdmin();
+        } else {
+            const data = await response.json();
+            alert(data.erro || 'Erro ao reativar curso.');
+        }
+    } catch (error) {
+        alert('Erro ao conectar com o servidor.');
+    }
+}

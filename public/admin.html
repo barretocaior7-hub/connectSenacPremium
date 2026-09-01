@@ -20,7 +20,13 @@
     />
     <!-- Custom Design System -->
     <link rel="stylesheet" href="css/style.css" />
-  </head>
+      <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#004a8d">
+    <meta property="og:title" content="Connect Senac — Seja Modelo em Cursos Práticos">
+    <meta property="og:description" content="Atendimentos 100% gratuitos e supervisionados por docentes do SENAC. Agende sua vaga online!">
+    <meta property="og:image" content="/assets/logo-connect-senac.png">
+    <meta property="og:type" content="website">
+</head>
   <body class="bg-main d-flex flex-column min-vh-100 dashboard-page admin-page">
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-custom sticky-top">
@@ -711,5 +717,18 @@
     <script src="js/admin.js"></script>
     <script src="js/ui-effects.js"></script>
   <script src="js/accessibility.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        });
+      }
+    </script>
+    <script src="js/cookie-consent.js"></script>
+    <script src="js/whatsapp-widget.js"></script>
+    <script src="js/assistant-ia.js"></script>
+
 </body>
 </html>

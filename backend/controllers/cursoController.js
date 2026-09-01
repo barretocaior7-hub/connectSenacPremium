@@ -28,7 +28,7 @@ exports.listarTodosAdmin = async (req, res) => {
         if (error) throw error;
         res.json(cursos);
     } catch (error) {
-        res.status(500).json({ erro: 'Erro ao listar os cursos para a administração.' });
+        res.status(500).json({ erro: 'Erro ao listar os cursos para a administracao.' });
     }
 };
 
@@ -104,5 +104,22 @@ exports.buscarAtivoPorId = async (req, res) => {
         res.json(curso);
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao buscar o curso.' });
+    }
+};
+
+// 6. [ADMIN/COORDENADOR] Desarquivar Curso
+exports.desarquivar = async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const { error } = await supabase
+            .from('cursos')
+            .update({ status: 'ativo' })
+            .eq('id', id);
+
+        if (error) throw error;
+        res.json({ mensagem: 'Curso desarquivado e reativado na vitrine com sucesso!' });
+    } catch (error) {
+        res.status(500).json({ erro: 'Erro ao reativar o curso.' });
     }
 };

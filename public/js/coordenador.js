@@ -727,3 +727,26 @@ carregarProfissionaisNoSelect();
 carregarCursosNoSelect();
 carregarPautasGlobais();
 carregarCandidatos();
+
+async function desarquivarCurso(id, nome) {
+    if(!confirm(`Deseja reativar o curso "${nome}"? Ele voltará a ser exibido na vitrine pública para os alunos e modelos.`)) return;
+
+    try {
+        const response = await fetch(`${API_URL}/cursos/${id}/desarquivar`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            alert(`Curso "${nome}" reativado com sucesso!`);
+            if (typeof carregarCursosAdmin === 'function') carregarCursosAdmin();
+            if (typeof carregarCursosCoord === 'function') carregarCursosCoord();
+            if (typeof carregarMetricasAdmin === 'function') carregarMetricasAdmin();
+        } else {
+            const data = await response.json();
+            alert(data.erro || 'Erro ao reativar curso.');
+        }
+    } catch (error) {
+        alert('Erro ao conectar com o servidor.');
+    }
+}

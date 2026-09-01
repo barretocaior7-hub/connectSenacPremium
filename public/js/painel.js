@@ -1,3 +1,22 @@
+function gerarLinkGoogleCalendar(cursoNome, dataHoraIso, localizacao) {
+    if (!dataHoraIso) return '#';
+    try {
+        const inicio = new Date(dataHoraIso);
+        const fim = new Date(inicio.getTime() + (2 * 60 * 60 * 1000));
+        const formatarData = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, "");
+        const params = new URLSearchParams({
+            action: "TEMPLATE",
+            text: `Atendimento SENAC: ${cursoNome}`,
+            dates: `${formatarData(inicio)}/${formatarData(fim)}`,
+            details: `Atendimento prático supervisionado como modelo voluntário no SENAC. Em caso de imprevistos, cancele na plataforma com 2 horas de antecedência.`,
+            location: localizacao || "SENAC - Santo Antônio de Jesus, BA",
+        });
+        return `https://calendar.google.com/calendar/render?${params.toString()}`;
+    } catch (e) {
+        return '#';
+    }
+}
+
 // frontend/js/painel.js
 
 const isLocalDev = window.location.protocol === 'file:' || 
@@ -452,7 +471,10 @@ async function realizarAgendamento(disponibilidadeId){
         const response = await fetchAuth(`${API_URL}/agendamentos`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ disponibilidade_id: disponibilidadeId })
+            body: JSON.stringify({ 
+                disponibilidade_id: disponibilidadeId,
+                restricoes_candidato: document.getElementById('inputRestricoesAgendamento') ? document.getElementById('inputRestricoesAgendamento').value.trim() : ''
+            })
         });
 
         const data = await response.json();
@@ -523,9 +545,25 @@ async function carregarMeusAgendamentos(){
             let badge = '';
             let acoesHTML = '';
 
+            const isPassado = ag.disponibilidades && ag.disponibilidades.data_hora && new Date(ag.disponibilidades.data_hora) < new Date();
+
             if (ag.status === 'agendado') {
-                badge = '<span class="badge-custom badge-status-agendado"><i class="bi bi-check2-circle"></i> Confirmado</span>';
-                acoesHTML = `<button class="btn btn-sm btn-outline-danger w-100 mt-2" onclick="cancelarAgendamento('${ag.id}')"><i class="bi bi-x-circle me-1"></i> Cancelar Inscrição</button>`;
+                if (isPassado) {
+                    badge = '<span class="badge-custom badge-status-past"><i class="bi bi-clock-history"></i> Realizado / Passado</span>';
+                    acoesHTML = `<button class="btn btn-sm btn-outline-secondary w-100 mt-2" onclick="abrirModalFeedback('${ag.id}')"><i class="bi bi-star me-1"></i> Avaliar Atendimento</button>`;
+                } else {
+                    const localCurso = ag.disponibilidades && ag.disponibilidades.cursos ? ag.disponibilidades.cursos.localizacao : 'SENAC';
+                    const linkCalendar = gerarLinkGoogleCalendar(cursoNome, ag.disponibilidades.data_hora, localCurso);
+                    badge = '<span class="badge-custom badge-status-agendado"><i class="bi bi-check2-circle"></i> Confirmado</span>';
+                    acoesHTML = `
+                        <a href="${linkCalendar}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary w-100 mt-2">
+                            <i class="bi bi-calendar-plus me-1"></i> Adicionar ao Google Agenda
+                        </a>
+                        <button class="btn btn-sm btn-outline-danger w-100 mt-2" onclick="cancelarAgendamento('${ag.id}')">
+                            <i class="bi bi-x-circle me-1"></i> Cancelar Inscrição
+                        </button>
+                    `;
+                }
             } else if (ag.status === 'cancelado') {
                 badge = '<span class="badge-custom badge-status-cancelado"><i class="bi bi-slash-circle"></i> Cancelado</span>';
             } else if (ag.status === 'concluido') {

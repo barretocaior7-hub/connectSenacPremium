@@ -2,23 +2,23 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 
-// 1. Listar usuários com métricas (consome a nossa nova View)
-exports.listarUsuários = async (req, res) => {
+// 1. Listar usuarios com metricas (consome a nossa nova View)
+exports.listarUsuarios = async (req, res) => {
     try {
-        const { data: usuários, error } = await supabase
+        const { data: usuarios, error } = await supabase
             .from('view_usuarios_estatisticas')
             .select('*')
             .order('nome', { ascending: true });
 
         if (error) throw error;
-        res.json(usuários);
+        res.json(usuarios);
     } catch (error) {
-        console.error('Erro ao listar usuários:', error.message);
-        res.status(500).json({ erro: 'Erro ao carregar a lista de usuários.' });
+        console.error('Erro ao listar usuarios:', error.message);
+        res.status(500).json({ erro: 'Erro ao carregar a lista de usuarios.' });
     }
 };
 
-// 2. Bloquear / Desbloquear usuário (Moderação)
+// 2. Bloquear / Desbloquear usuario (Moderacao)
 exports.alterarStatusBloqueio = async (req, res) => {
     const { id } = req.params;
     const { is_bloqueado } = req.body;
@@ -36,7 +36,7 @@ exports.alterarStatusBloqueio = async (req, res) => {
             .eq('id', id)
             .single();
 
-        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuario não encontrado.' });
 
         if (executorPerfil === 'coordenador' && (alvo.perfil === 'admin' || alvo.perfil === 'coordenador')) {
             return res.status(403).json({ erro: 'Coordenadores não possuem permissão para moderar administradores ou outros coordenadores.' });
@@ -51,10 +51,10 @@ exports.alterarStatusBloqueio = async (req, res) => {
         if (error) throw error;
 
         const acao = is_bloqueado ? 'bloqueado' : 'desbloqueado';
-        res.json({ mensagem: `Usuário ${acao} com sucesso!`, usuário: data[0] });
+        res.json({ mensagem: `Usuario ${acao} com sucesso!`, usuario: data[0] });
     } catch (error) {
-        console.error('Erro ao moderar usuário:', error.message);
-        res.status(500).json({ erro: 'Erro ao alterar o estado do usuário.' });
+        console.error('Erro ao moderar usuario:', error.message);
+        res.status(500).json({ erro: 'Erro ao alterar o estado do usuario.' });
     }
 };
 
@@ -142,7 +142,7 @@ exports.excluirUsuario = async (req, res) => {
     }
 
     try {
-        // 1. Verificar o perfil do usuário alvo
+        // 1. Verificar o perfil do usuario alvo
         const { data: alvo, error: erroBusca } = await supabase
             .from('usuarios')
             .select('perfil')
@@ -150,7 +150,7 @@ exports.excluirUsuario = async (req, res) => {
             .single();
 
         if (erroBusca || !alvo) {
-            return res.status(404).json({ erro: 'Usuário não encontrado.' });
+            return res.status(404).json({ erro: 'Usuario não encontrado.' });
         }
 
         // 2. Aplicar regras restritivas do RBAC para Coordenador
@@ -166,14 +166,14 @@ exports.excluirUsuario = async (req, res) => {
 
         if (erroExclusao) throw erroExclusao;
 
-        res.json({ mensagem: 'Usuário excluído do sistema com sucesso!' });
+        res.json({ mensagem: 'Usuario excluído do sistema com sucesso!' });
     } catch (error) {
-        console.error('Erro ao excluir usuário:', error.message);
+        console.error('Erro ao excluir usuario:', error.message);
         res.status(500).json({ erro: 'Erro interno ao realizar exclusão.' });
     }
 };
 
-// 5. Alterar Perfil do Usuário (Promover/alterar cargo)
+// 5. Alterar Perfil do Usuario (Promover/alterar cargo)
 exports.alterarPerfil = async (req, res) => {
     const { id } = req.params;
     const { perfil } = req.body;
@@ -195,7 +195,7 @@ exports.alterarPerfil = async (req, res) => {
             .eq('id', id)
             .single();
 
-        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuario não encontrado.' });
 
         if (executorPerfil === 'coordenador') {
             if (alvo.perfil === 'admin' || perfil === 'admin' || alvo.perfil === 'coordenador' || perfil === 'coordenador') {
@@ -209,10 +209,10 @@ exports.alterarPerfil = async (req, res) => {
             .eq('id', id);
 
         if (error) throw error;
-        res.json({ mensagem: `Cargo do usuário atualizado para '${perfil}' com sucesso!` });
+        res.json({ mensagem: `Cargo do usuario atualizado para '${perfil}' com sucesso!` });
     } catch (error) {
         console.error('Erro ao alterar cargo:', error.message);
-        res.status(500).json({ erro: 'Erro ao alterar o perfil do usuário.' });
+        res.status(500).json({ erro: 'Erro ao alterar o perfil do usuario.' });
     }
 };
 
@@ -236,3 +236,5 @@ exports.listarPautasGlobais = async (req, res) => {
         res.status(500).json({ erro: 'Erro ao carregar as pautas globais.' });
     }
 };
+
+

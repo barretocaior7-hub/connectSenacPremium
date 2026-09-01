@@ -2199,3 +2199,282 @@ body.high-contrast .accessibility-speaking-highlight {
 }
 
 
+
+/* ==========================================================================
+   WIDGETS FLUTUANTES, PWA, COOKIES, WHATSAPP E ASSISTENTE I.A.
+   ========================================================================== */
+
+/* 1. Botão Flutuante do WhatsApp */
+.whatsapp-floating-btn {
+  position: fixed;
+  bottom: 84px;
+  right: 20px;
+  z-index: 1040;
+  background-color: #25D366;
+  color: #ffffff !important;
+  border-radius: 9999px;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none !important;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.35);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.whatsapp-floating-btn i {
+  font-size: 1.35rem;
+}
+
+.whatsapp-floating-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 25px rgba(37, 211, 102, 0.45);
+}
+
+/* 2. Assistente Virtual Inteligente (Connect AI) */
+.senac-ai-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1045;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #004a8d 0%, #002b53 100%);
+  color: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.35);
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.senac-ai-fab:hover {
+  transform: scale(1.08);
+}
+
+.senac-ai-fab-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background-color: #f7941d;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 9999px;
+  border: 2px solid #ffffff;
+}
+
+.senac-ai-window {
+  position: fixed;
+  bottom: 84px;
+  right: 20px;
+  width: 360px;
+  max-width: calc(100vw - 32px);
+  height: 480px;
+  max-height: calc(100vh - 120px);
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.2);
+  z-index: 1050;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  animation: fadeInUp 0.25s ease;
+}
+
+.senac-ai-header {
+  background: linear-gradient(135deg, #004a8d 0%, #002e5b 100%);
+  color: #ffffff;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.senac-ai-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f7941d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+}
+
+.senac-ai-body {
+  flex: 1;
+  padding: 14px;
+  overflow-y: auto;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.senac-ai-msg {
+  max-width: 85%;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.senac-ai-msg.bot {
+  background: #ffffff;
+  color: #1e293b;
+  align-self: flex-start;
+  border: 1px solid #e2e8f0;
+  border-bottom-left-radius: 4px;
+}
+
+.senac-ai-msg.user {
+  background: #004a8d;
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.senac-ai-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.ai-chip {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  color: #004a8d;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ai-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.senac-ai-footer {
+  padding: 8px 12px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  gap: 8px;
+}
+
+.senac-ai-footer input {
+  flex: 1;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.senac-ai-footer input:focus {
+  border-color: #004a8d;
+}
+
+.btn-ai-send {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #004a8d;
+  color: #ffffff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* 3. Banner de Cookies e LGPD */
+.senac-cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #0f172a;
+  color: #f8fafc;
+  z-index: 1060;
+  border-top: 2px solid #f7941d;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* 4. Badges de Vagas nos Cards de Cursos */
+.badge-spots-live {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-spots-empty {
+  background-color: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* 5. Agendamentos Passados / Expirados */
+.card-past-appointment {
+  opacity: 0.78;
+  background: #f8fafc !important;
+  border-color: #cbd5e1 !important;
+  filter: grayscale(15%);
+}
+
+.badge-status-past {
+  background-color: #e2e8f0;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+/* 6. Indicador de Força de Senha */
+.password-strength-wrap {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.password-strength-bar {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}

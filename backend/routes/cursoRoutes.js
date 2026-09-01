@@ -16,6 +16,8 @@ router.get('/:id', cursoController.buscarAtivoPorId);
 // Rotas de Criação e Edição
 router.post('/', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.criar);
 router.put('/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.atualizar);
+router.put('/:id/desarquivar', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.desarquivar);
 router.delete('/:id', authMiddleware, autorizarPerfis('admin', 'coordenador'), cursoController.arquivar);
 
 module.exports = router;
+
