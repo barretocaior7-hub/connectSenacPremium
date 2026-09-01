@@ -2064,3 +2064,26 @@ body.high-contrast svg {
   filter: grayscale(100%) contrast(150%) !important;
 }
 
+/* Indicador de Leitura de Voz e Destaque Visual */
+body.accessibility-voice-reader-on * {
+  cursor: help !important;
+}
+
+body.accessibility-voice-reader-on #accessibility-toolbar * {
+  cursor: pointer !important;
+}
+
+.accessibility-speaking-highlight {
+  outline: 3px solid #f7941d !important;
+  outline-offset: 3px !important;
+  box-shadow: 0 0 12px rgba(247, 148, 29, 0.4) !important;
+  border-radius: 4px;
+  transition: outline 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.high-contrast .accessibility-speaking-highlight {
+  outline: 4px solid #00ffff !important;
+  outline-offset: 4px !important;
+}
+
+

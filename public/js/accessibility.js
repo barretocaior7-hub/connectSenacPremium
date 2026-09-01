@@ -1,5 +1,5 @@
 // public/js/accessibility.js
-// Módulo Central de Acessibilidade: Alto Contraste, Tamanho de Fonte, Modo Escuro, VLibras e Leitor de Voz (TTS)
+// Módulo Central de Acessibilidade: Alto Contraste, Tamanho de Fonte, Modo Escuro, VLibras e Leitor de Voz por Clique
 
 (() => {
   'use strict';
@@ -14,6 +14,8 @@
   };
 
   let currentFontSize = FONT_CONFIG.default;
+  let isVoiceReaderActive = false;
+  let currentHighlightedEl = null;
 
   // 1. Injeta a estrutura HTML oficial do VLibras
   function injectVLibrasStructure() {
@@ -52,7 +54,6 @@
     document.documentElement.style.fontSize = `${percent}%`;
     localStorage.setItem(FONT_CONFIG.storageKey, percent.toString());
 
-    // Atualiza o estado visual do botão reset se aplicável
     const btnReset = document.getElementById('btn-font-reset');
     if (btnReset) {
       btnReset.title = `Tamanho atual: ${percent}% (Clique para restaurar 100%)`;
@@ -123,56 +124,120 @@
     }
   }
 
-  // 4. Sintetizador de Voz (Text-to-Speech)
-  let isSpeaking = false;
-  function toggleSpeakPage() {
+  // 4. Sintetizador de Voz por Clique (Click-to-Speak)
+  function speakText(text, targetElement) {
+    if (!('speechSynthesis' in window) || !text) return;
+
+    window.speechSynthesis.cancel();
+
+    if (currentHighlightedEl) {
+      currentHighlightedEl.classList.remove('accessibility-speaking-highlight');
+      currentHighlightedEl = null;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 1.05;
+
+    if (targetElement && targetElement !== document.body) {
+      targetElement.classList.add('accessibility-speaking-highlight');
+      currentHighlightedEl = targetElement;
+    }
+
+    utterance.onend = utterance.onerror = () => {
+      if (currentHighlightedEl) {
+        currentHighlightedEl.classList.remove('accessibility-speaking-highlight');
+        currentHighlightedEl = null;
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function extractReadableText(el) {
+    if (!el || el === document.body) return '';
+
+    // 1. Textos acessíveis explícitos
+    const ariaLabel = el.getAttribute('aria-label');
+    if (ariaLabel) return ariaLabel.trim();
+
+    // 2. Imagens com texto alternativo
+    if (el.tagName === 'IMG') {
+      return el.alt ? `Imagem: ${el.alt}` : el.title || 'Imagem';
+    }
+
+    // 3. Inputs, selects e textareas
+    if (['INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName)) {
+      const label = document.querySelector(`label[for="${el.id}"]`);
+      const labelText = label ? label.innerText.trim() : '';
+      const placeholder = el.placeholder ? `Campo ${el.placeholder}` : '';
+      const value = el.value ? `Valor: ${el.value}` : '';
+      return [labelText, placeholder, value].filter(Boolean).join('. ') || el.title || 'Campo de formulário';
+    }
+
+    // 4. Botões e links
+    if (el.tagName === 'BUTTON' || el.closest('button')) {
+      const btn = el.tagName === 'BUTTON' ? el : el.closest('button');
+      return btn.getAttribute('aria-label') || btn.innerText.trim() || btn.title || 'Botão';
+    }
+
+    if (el.tagName === 'A' || el.closest('a')) {
+      const link = el.tagName === 'A' ? el : el.closest('a');
+      return link.getAttribute('aria-label') || link.innerText.trim() || link.title || 'Link';
+    }
+
+    // 5. Textos diretos de elementos de conteúdo
+    const text = el.innerText || el.textContent;
+    return text ? text.trim() : '';
+  }
+
+  function handleDocumentClick(e) {
+    if (!isVoiceReaderActive) return;
+
+    // Ignora cliques dentro da toolbar de acessibilidade e do VLibras
+    if (e.target.closest('#accessibility-toolbar') || e.target.closest('[vw]')) {
+      return;
+    }
+
+    const clickedEl = e.target;
+    const textToSpeak = extractReadableText(clickedEl);
+
+    if (textToSpeak) {
+      speakText(textToSpeak, clickedEl);
+    }
+  }
+
+  function toggleVoiceReader() {
     const btnSpeak = document.getElementById('btn-speak');
+
     if (!('speechSynthesis' in window)) {
       alert('Seu navegador não possui suporte para síntese de voz.');
       return;
     }
 
-    if (isSpeaking) {
-      window.speechSynthesis.cancel();
-      isSpeaking = false;
+    isVoiceReaderActive = !isVoiceReaderActive;
+
+    if (isVoiceReaderActive) {
+      document.body.classList.add('accessibility-voice-reader-on');
       if (btnSpeak) {
-        btnSpeak.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
-        btnSpeak.setAttribute('aria-pressed', 'false');
-        btnSpeak.classList.remove('active');
-      }
-      return;
-    }
-
-    const selectedText = window.getSelection().toString().trim();
-    const mainContent = document.querySelector('main') || document.querySelector('#vitrine') || document.body;
-    const textToSpeak = selectedText || mainContent.innerText;
-
-    if (!textToSpeak) return;
-
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    utterance.lang = 'pt-BR';
-    utterance.rate = 1.0;
-
-    utterance.onstart = () => {
-      isSpeaking = true;
-      if (btnSpeak) {
-        btnSpeak.innerHTML = '<i class="bi bi-stop-circle-fill text-danger"></i>';
-        btnSpeak.setAttribute('aria-pressed', 'true');
         btnSpeak.classList.add('active');
+        btnSpeak.setAttribute('aria-pressed', 'true');
+        btnSpeak.title = 'Leitor de Voz por Clique Ativado (Clique em qualquer texto para ouvir. Clique aqui para desativar)';
       }
-    };
-
-    utterance.onend = utterance.onerror = () => {
-      isSpeaking = false;
+      speakText('Leitor de voz ativado. Clique em qualquer elemento para ouvir.');
+    } else {
+      document.body.classList.remove('accessibility-voice-reader-on');
+      window.speechSynthesis.cancel();
+      if (currentHighlightedEl) {
+        currentHighlightedEl.classList.remove('accessibility-speaking-highlight');
+        currentHighlightedEl = null;
+      }
       if (btnSpeak) {
-        btnSpeak.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
-        btnSpeak.setAttribute('aria-pressed', 'false');
         btnSpeak.classList.remove('active');
+        btnSpeak.setAttribute('aria-pressed', 'false');
+        btnSpeak.title = 'Ativar Leitor de Voz por Clique (Alt + V)';
       }
-    };
-
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(utterance);
+    }
   }
 
   // 5. Fábrica de Botões de Acessibilidade
@@ -199,23 +264,21 @@
   function initAccessibility() {
     if (document.getElementById('accessibility-toolbar')) return;
 
-    // Inicializa VLibras
     injectVLibrasStructure();
 
-    // Cria Barra Flutuante de Acessibilidade
     const toolbar = document.createElement('aside');
     toolbar.id = 'accessibility-toolbar';
     toolbar.setAttribute('role', 'region');
     toolbar.setAttribute('aria-label', 'Barra de Ferramentas de Acessibilidade');
     toolbar.className = 'accessibility-floating-bar';
 
-    // Botões de Alto Contraste e Fonte
+    // Botões de Acessibilidade
     const btnContrast = createBtn('btn-contrast', 'bi bi-circle-half', '', 'Alternar Alto Contraste (Alt + C)', toggleContrast);
     const btnFontInc = createBtn('btn-font-inc', 'bi bi-plus-lg', 'A+', 'Aumentar Tamanho da Fonte (Alt + +)', increaseFontSize);
     const btnFontDec = createBtn('btn-font-dec', 'bi bi-dash-lg', 'A-', 'Diminuir Tamanho da Fonte (Alt + -)', decreaseFontSize);
     const btnFontReset = createBtn('btn-font-reset', 'bi bi-arrow-counterclockwise', 'A', 'Restaurar Tamanho da Fonte (Alt + 0)', resetFontSize);
     const btnDark = createBtn('btn-dark', 'bi bi-moon-stars-fill', '', 'Alternar Modo Escuro', toggleDarkMode);
-    const btnSpeak = createBtn('btn-speak', 'bi bi-volume-up-fill', '', 'Ouvir Conteúdo da Página', toggleSpeakPage);
+    const btnSpeak = createBtn('btn-speak', 'bi bi-volume-up-fill', '', 'Ativar Leitor de Voz por Clique (Alt + V)', toggleVoiceReader);
 
     toolbar.appendChild(btnContrast);
     toolbar.appendChild(btnFontInc);
@@ -226,12 +289,12 @@
 
     document.body.appendChild(toolbar);
 
+    // Event listener global para capturar o clique e falar apenas o elemento clicado
+    document.addEventListener('click', handleDocumentClick, true);
+
     // Atalhos Globais de Teclado
     window.addEventListener('keydown', (e) => {
-      // Ignora atalhos quando digitando em inputs ou textarea
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
-        return;
-      }
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) return;
 
       if (e.altKey && (e.key === 'c' || e.key === 'C')) {
         e.preventDefault();
@@ -245,6 +308,11 @@
       } else if (e.altKey && (e.key === '0')) {
         e.preventDefault();
         resetFontSize();
+      } else if (e.altKey && (e.key === 'v' || e.key === 'V')) {
+        e.preventDefault();
+        toggleVoiceReader();
+      } else if (e.key === 'Escape' && isVoiceReaderActive) {
+        toggleVoiceReader();
       }
     });
 
