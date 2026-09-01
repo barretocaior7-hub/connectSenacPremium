@@ -11,7 +11,7 @@ const autorizarPerfis = (...perfisPermitidos) => {
         // Verifica se o perfil do usuário logado está dentro do array de perfis autorizados para a rota
         if (!perfisPermitidos.includes(req.usuario.perfil)) {
             return res.status(403).json({
-                erro: 'Acesso restrito. O seu perfil não tem permissão para realizar esta ação.'
+                erro: 'Acesso restrito. Seu perfil não tem permissão para realizar esta ação.'
             });
         }
 

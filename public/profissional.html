@@ -125,7 +125,7 @@
       <div class="section-header-custom workspace-section-header mb-4">
         <div>
           <h4 class="section-title">
-            <i class="bi bi-journal-text text-primary"></i> As Minhas Turmas e Listas de Modelos
+            <i class="bi bi-journal-text text-primary"></i> Minhas Turmas e Listas de Modelos
           </h4>
           <p class="text-muted small mb-0 mt-1">
             Gerencie os horários de aula, confirme a presença dos modelos participantes ou acione via WhatsApp.
@@ -137,8 +137,8 @@
       <div class="accordion accordion-custom" id="accordionTurmas">
         <div class="empty-state-card py-5">
           <div class="spinner-border text-primary mb-3" role="status"></div>
-          <h6 class="empty-state-title">A carregar a pauta de presenças...</h6>
-          <p class="empty-state-desc">Buscando as turmas e alunos vinculados ao seu perfil.</p>
+          <h6 class="empty-state-title">Carregando a pauta de presenças...</h6>
+          <p class="empty-state-desc">Buscando as turmas e alunos vinculados aseu perfil.</p>
         </div>
       </div>
     </main>
@@ -291,7 +291,7 @@
                       }
 
                       const telLimpo = (ag.usuarios?.telefone || '').replace(/\D/g, '');
-                      const msgProf = encodeURIComponent(`Olá, ${ag.usuarios?.nome || ''}! Aqui é a equipe do curso ${curso.nome} no SENAC referente ao seu agendamento.`);
+                      const msgProf = encodeURIComponent(`Olá, ${ag.usuarios?.nome || ''}! Aqui é a equipe do curso ${curso.nome} no SENAC referente aseu agendamento.`);
                       const btnZap = telLimpo
                         ? `<a href="https://wa.me/55${telLimpo}?text=${msgProf}" target="_blank" class="btn btn-sm btn-outline-success border-0 px-2 py-1">
                              <i class="bi bi-whatsapp text-success me-1"></i> ${telFormatado}

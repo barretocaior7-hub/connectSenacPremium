@@ -26,9 +26,9 @@ function getSafeReturnUrl() {
   }
 }
 
-function redirectAfterAuthentication(utilizador) {
+function redirectAfterAuthentication(usuário) {
   const returnUrl = getSafeReturnUrl();
-  const perfil = utilizador?.perfil;
+  const perfil = usuário?.perfil;
 
   if (perfil === "admin") return window.location.assign("admin.html");
   if (perfil === "coordenador") return window.location.assign("coordenador.html");
@@ -111,7 +111,7 @@ if (formLogin) {
       if (msgErro) msgErro.classList.add("d-none");
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>A autenticar...`;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Autenticando...`;
       }
 
       const response = await fetch(`${API_URL}/login`, {
@@ -124,10 +124,10 @@ if (formLogin) {
 
       if (response.ok) {
         localStorage.setItem("token", data.token);
-        redirectAfterAuthentication(data.utilizador);
+        redirectAfterAuthentication(data.usuário);
       } else {
         if (msgErro) {
-          msgErro.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro || "Falha na autenticação. Verifique os seus dados."}`;
+          msgErro.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro || "Falha na autenticação. Verifique seus dados."}`;
           msgErro.classList.remove("d-none");
         }
         animateLoginError();
@@ -151,7 +151,7 @@ if (formLogin) {
   });
 }
 
-// Lógica de Registo
+// Lógica de Cadastro
 const formCadastro = document.getElementById("formCadastro");
 if (formCadastro) {
   formCadastro.addEventListener("submit", async (e) => {
@@ -168,17 +168,17 @@ if (formCadastro) {
 
     const msgDiv = document.getElementById("mensagemCadastro");
     const submitBtn = document.getElementById("btnSubmitCadastro");
-    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Finalizar Registo";
+    const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Finalizar Cadastro";
 
     if (senha !== confirmar_senha) {
-      msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As palavras-passe não coincidem. Verifique a digitação.</div>`;
+      msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As senhas não coincidem. Verifique a digitação.</div>`;
       return;
     }
 
     try {
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>A processar registo...`;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Processando cadastro...`;
       }
 
       const response = await fetch(`${API_URL}/registrar`, {
@@ -201,7 +201,7 @@ if (formCadastro) {
         localStorage.setItem("token", data.token);
         msgDiv.innerHTML = `<div class="alert alert-success py-2 mb-0"><i class="bi bi-check-circle-fill me-1"></i> Conta criada! A preparar a sua área...</div>`;
         setTimeout(() => {
-          redirectAfterAuthentication(data.utilizador);
+          redirectAfterAuthentication(data.usuário);
         }, 700);
       } else {
         msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
@@ -231,7 +231,7 @@ if (formEsqueci) {
     const submitBtn = document.getElementById("btnSubmitEsqueci");
     const originalBtnHTML = submitBtn ? submitBtn.innerHTML : "Enviar";
 
-    msgDiv.innerHTML = '<span class="text-primary"><span class="spinner-border spinner-border-sm me-1"></span>A processar pedido...</span>';
+    msgDiv.innerHTML = '<span class="text-primary"><span class="spinner-border spinner-border-sm me-1"></span>Processando pedido...</span>';
     if (submitBtn) submitBtn.disabled = true;
 
     try {
@@ -276,7 +276,7 @@ if (formRedefinir) {
     }
 
     if (nova_senha !== confirmar_senha) {
-      msgDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As palavras-passe não coincidem.</div>';
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> As senhas não coincidem.</div>';
       return;
     }
 

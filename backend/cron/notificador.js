@@ -7,7 +7,7 @@ const notificacoesEnviadas = new Set();
 
 // Expressão CRON: '* * * * *' significa "Executar a cada minuto"
 cron.schedule('* * * * *', async () => {
-    console.log('🤖 [CRON] A executar varredura de notificações de agendamentos...');
+    console.log('🤖 [CRON] Executando varredura de notificações de agendamentos...');
 
     try {
         const agora = new Date();
@@ -56,7 +56,7 @@ cron.schedule('* * * * *', async () => {
             if (diferencaEmMinutos >= 1430 && diferencaEmMinutos <= 1445 && !notificacoesEnviadas.has(chave24h)) {
                 notificacoesEnviadas.add(chave24h);
                 console.log(`\n📧 [EMAIL 24H ENVIADO] Para: ${ag.usuarios?.email || 'Sem e-mail'}`);
-                console.log(`Olá, ${cliente}! Lembramos que o seu agendamento para "${curso}" será amanhã (${dataFormatada}) às ${horaFormatada}.`);
+                console.log(`Olá, ${cliente}! Lembramos que seu agendamento para "${curso}" será amanhã (${dataFormatada}) às ${horaFormatada}.`);
                 console.log(`Em caso de imprevistos, cancele na plataforma com no mínimo 2 horas de antecedência.\n`);
             }
 

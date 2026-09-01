@@ -28,7 +28,7 @@ if (document.getElementById('userPerfil')) {
     document.getElementById('userPerfil').textContent = (payloadToken.perfil || '').toUpperCase();
 }
 
-// Se o utilizador for Coordenador, limitamos os cargos que ele pode cadastrar (não pode criar Admin nem Coordenador)
+// Se o usuário for Coordenador, limitamos os cargos que ele pode cadastrar (não pode criar Admin nem Coordenador)
 if (payloadToken.perfil === 'coordenador') {
     const colabSelect = document.getElementById('colabPerfil');
     if (colabSelect) {
@@ -85,11 +85,11 @@ async function carregarMetricas(){
 }
 
 // ============================================================================
-// 2. GESTÃO DE UTILIZADORES & HISTÓRICO (MODERAÇÃO)
+// 2. GESTÃO DE usuários & HISTÓRICO (MODERAÇÃO)
 // ============================================================================
-let baseUtilizadores = [];
+let baseUsuários = [];
 
-async function carregarUtilizadores(){
+async function carregarUsuários(){
     const tbody = document.getElementById('tabelaUsuariosBody');
     if (!tbody) return;
 
@@ -97,8 +97,8 @@ async function carregarUtilizadores(){
         const response = await fetch(`${API_URL}/admin/usuarios`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        baseUtilizadores = await response.json();
-        renderizarTabelaUtilizadores(baseUtilizadores);
+        baseUsuários = await response.json();
+        renderizarTabelaUsuários(baseUsuários);
     } catch (error) {
         tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao ligar ao servidor.</td></tr>';
     }
@@ -117,13 +117,13 @@ function escapeHTML(str) {
 
 window.cursosAdminMap = new Map();
 
-function renderizarTabelaUtilizadores(lista){
+function renderizarTabelaUsuários(lista){
     const tbody = document.getElementById('tabelaUsuariosBody');
     if (!tbody) return;
     tbody.innerHTML = '';
 
     if (!Array.isArray(lista) || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum utilizador encontrado com os filtros selecionados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum usuário encontrado com os filtros selecionados.</td></tr>';
         return;
     }
 
@@ -217,13 +217,13 @@ function aplicarFiltrosUsuarios(){
     const termo = (document.getElementById('filtroTextoUser')?.value || '').toLowerCase();
     const perfil = document.getElementById('filtroPerfilUser')?.value || '';
 
-    const listaFiltrada = baseUtilizadores.filter(user => {
+    const listaFiltrada = baseUsuários.filter(user => {
         const matchTexto = (user.nome || '').toLowerCase().includes(termo) || (user.email || '').toLowerCase().includes(termo);
         const matchPerfil = perfil === "" || user.perfil === perfil;
         return matchTexto && matchPerfil;
     });
 
-    renderizarTabelaUtilizadores(listaFiltrada);
+    renderizarTabelaUsuários(listaFiltrada);
 }
 
 const inputBusca = document.getElementById('filtroTextoUser');
@@ -236,13 +236,13 @@ if(btnLimpar) {
     btnLimpar.addEventListener('click', () => {
         if (inputBusca) inputBusca.value = '';
         if (selectPerfil) selectPerfil.value = '';
-        renderizarTabelaUtilizadores(baseUtilizadores);
+        renderizarTabelaUsuários(baseUsuários);
     });
 }
 
 async function alterarPerfil(idUsuario, novoPerfil){
-    if (!confirm(`Deseja alterar o perfil deste utilizador para ${novoPerfil.toUpperCase()}?`)) {
-        carregarUtilizadores();
+    if (!confirm(`Deseja alterar o perfil deste usuário para ${novoPerfil.toUpperCase()}?`)) {
+        carregarUsuários();
         return;
     }
 
@@ -254,21 +254,21 @@ async function alterarPerfil(idUsuario, novoPerfil){
         });
 
         if (response.ok) {
-            carregarUtilizadores();
+            carregarUsuários();
         } else {
             const data = await response.json();
             alert(data.erro || 'Erro ao alterar perfil.');
-            carregarUtilizadores();
+            carregarUsuários();
         }
     } catch (error) {
         alert("Erro ao alterar o perfil.");
-        carregarUtilizadores();
+        carregarUsuários();
     }
 }
 
 async function toggleBloqueio(id, statusAtual){
     const acao = statusAtual ? 'desbloquear' : 'bloquear';
-    if (!confirm(`Tem a certeza que deseja ${acao} este utilizador?`)) return;
+    if (!confirm(`Tem a certeza que deseja ${acao} este usuário?`)) return;
 
     try {
         const response = await fetch(`${API_URL}/admin/usuarios/${id}/bloquear`, {
@@ -281,7 +281,7 @@ async function toggleBloqueio(id, statusAtual){
         });
 
         if (response.ok) {
-            carregarUtilizadores();
+            carregarUsuários();
             carregarMetricas();
         } else {
             const err = await response.json();
@@ -300,7 +300,7 @@ if(formColaborador) {
     formColaborador.addEventListener('submit', async (e) => {
         e.preventDefault();
         const msgDiv = document.getElementById('msgColab');
-        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A registar colaborador...</span>';
+        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A cadastrar colaborador...</span>';
 
         const payload = {
             nome: document.getElementById('colabNome').value,
@@ -325,7 +325,7 @@ if(formColaborador) {
             if (response.ok) {
                 msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check2-circle me-1"></i> ${data.mensagem}</div>`;
                 formColaborador.reset();
-                carregarUtilizadores();
+                carregarUsuários();
             } else {
                 msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
             }
@@ -343,7 +343,7 @@ if (formCurso) {
     formCurso.addEventListener('submit', async (e) => {
         e.preventDefault();
         const msgDiv = document.getElementById('msgCurso');
-        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A guardar curso...</span>';
+        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> Salvando curso...</span>';
 
         const payload = {
             nome: document.getElementById('nomeCurso').value,
@@ -468,7 +468,7 @@ async function carregarProfissionaisNoSelect(){
 }
 
 async function excluirUsuario(id, nome){
-    if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja remover a conta de ${nome}? Todos os seus agendamentos serão excluídos.`)) return;
+    if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja remover a conta de ${nome}? Todos seus agendamentos serão excluídos.`)) return;
 
     try {
         const response = await fetch(`${API_URL}/admin/usuarios/${id}`, {
@@ -477,7 +477,7 @@ async function excluirUsuario(id, nome){
         });
 
         if (response.ok) {
-            carregarUtilizadores();
+            carregarUsuários();
             carregarMetricas();
         } else {
             const err = await response.json();
@@ -778,5 +778,5 @@ if (pautasTab) {
 carregarProfissionaisNoSelect();
 carregarMetricas();
 carregarCursosNoSelect();
-carregarUtilizadores();
+carregarUsuários();
 carregarPautasGlobais();

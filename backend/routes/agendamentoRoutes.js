@@ -7,7 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
 // ----------------------------------------------------------------------
-// Rotas do Candidato (Qualquer utilizador autenticado)
+// Rotas do Candidato (Qualquer usuário autenticado)
 // ----------------------------------------------------------------------
 router.post('/', authMiddleware, agendamentoController.criar);
 router.get('/meus', authMiddleware, agendamentoController.listarMeus);

@@ -25,22 +25,22 @@
                     <div class="auth-card p-4 p-md-5 fade-in-up">
                         <img class="auth-page-logo" src="assets/logo-connect-senac.png" alt="Connect Senac">
                         
-                        <!-- CabeÃ§alho -->
+                        <!-- Cabeçalho -->
                         <div class="text-center mb-4">
                             <div class="auth-brand-badge mb-3">
                                 <i class="bi bi-person-plus-fill"></i> Novo Cadastro
                             </div>
                             <h2 class="fw-bold mb-1" style="color: var(--senac-blue);">Criar Nova Conta</h2>
-                            <p class="text-muted small">Preencha os dados abaixo para participar como modelo em nossas aulas prÃ¡ticas</p>
+                            <p class="text-muted small">Preencha os dados abaixo para participar como modelo em nossas aulas práticas</p>
                         </div>
 
-                        <!-- FormulÃ¡rio -->
+                        <!-- Formulário -->
                         <form id="formCadastro" novalidate>
                             
                             <!-- Bloco 1: Dados Pessoais -->
                             <div class="mb-4">
                                 <h6 class="fw-bold text-uppercase small text-muted mb-3" style="letter-spacing: 0.5px;">
-                                    <i class="bi bi-person-lines-fill me-1 text-primary"></i> 1. InformaÃ§Ãµes Pessoais
+                                    <i class="bi bi-person-lines-fill me-1 text-primary"></i> 1. Informações Pessoais
                                 </h6>
                                 
                                 <div class="form-floating mb-3">
@@ -88,10 +88,10 @@
                                 </div>
                             </div>
 
-                            <!-- Bloco 2: SeguranÃ§a -->
+                            <!-- Bloco 2: Segurança -->
                             <div class="mb-4">
                                 <h6 class="fw-bold text-uppercase small text-muted mb-3" style="letter-spacing: 0.5px;">
-                                    <i class="bi bi-shield-lock me-1 text-primary"></i> 2. SeguranÃ§a e Palavra-passe
+                                    <i class="bi bi-shield-lock me-1 text-primary"></i> 2. Segurança e Senha
                                 </h6>
 
                                 <div class="row g-3">
@@ -101,13 +101,13 @@
                                                 type="password" 
                                                 class="form-control pe-5" 
                                                 id="senha" 
-                                                placeholder="Palavra-passe" 
+                                                placeholder="Senha" 
                                                 required
                                                 autocomplete="new-password"
-                                                aria-label="Palavra-passe"
+                                                aria-label="Senha"
                                             >
-                                            <label for="senha"><i class="bi bi-lock me-1"></i> Palavra-passe</label>
-                                            <button type="button" class="btn-toggle-password" id="btnToggleSenhaCad" aria-label="Mostrar ou ocultar palavra-passe">
+                                            <label for="senha"><i class="bi bi-lock me-1"></i> Senha</label>
+                                            <button type="button" class="btn-toggle-password" id="btnToggleSenhaCad" aria-label="Mostrar ou ocultar senha">
                                                 <i class="bi bi-eye" id="iconToggleSenhaCad"></i>
                                             </button>
                                         </div>
@@ -118,13 +118,13 @@
                                                 type="password" 
                                                 class="form-control pe-5" 
                                                 id="confirmar_senha" 
-                                                placeholder="Confirmar Palavra-passe" 
+                                                placeholder="Confirmar Senha" 
                                                 required
                                                 autocomplete="new-password"
-                                                aria-label="Confirmar Palavra-passe"
+                                                aria-label="Confirmar Senha"
                                             >
                                             <label for="confirmar_senha"><i class="bi bi-shield-check me-1"></i> Confirmar</label>
-                                            <button type="button" class="btn-toggle-password" id="btnToggleConfirmarCad" aria-label="Mostrar ou ocultar confirmaÃ§Ã£o de palavra-passe">
+                                            <button type="button" class="btn-toggle-password" id="btnToggleConfirmarCad" aria-label="Mostrar ou ocultar confirmação de senha">
                                                 <i class="bi bi-eye" id="iconToggleConfirmarCad"></i>
                                             </button>
                                         </div>
@@ -141,13 +141,13 @@
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" id="termoUso" required>
                                     <label class="form-check-label small" for="termoUso">
-                                        Li e aceito os <a href="#" class="text-decoration-none fw-semibold">Termos de Uso</a> e a <a href="#" class="text-decoration-none fw-semibold">PolÃ­tica de Privacidade</a> do SENAC.*
+                                        Li e aceito os <a href="#" class="text-decoration-none fw-semibold">Termos de Uso</a> e a <a href="#" class="text-decoration-none fw-semibold">Política de Privacidade</a> do SENAC.*
                                     </label>
                                 </div>
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="termoImagem">
                                     <label class="form-check-label small text-muted" for="termoImagem">
-                                        Autorizo o uso de imagens dos procedimentos para fins acadÃªmicos e portfÃ³lio da turma (Opcional).
+                                        Autorizo o uso de imagens dos procedimentos para fins acadêmicos e portfólio da turma (Opcional).
                                     </label>
                                 </div>
                             </div>
@@ -155,23 +155,23 @@
                             <!-- Mensagens de Feedback -->
                             <div id="mensagemCadastro" class="mb-3 text-center small fw-bold"></div>
 
-                            <!-- BotÃ£o de AÃ§Ã£o -->
+                            <!-- Botão de Ação -->
                             <button type="submit" class="btn btn-brand w-100 py-3 mb-3 shadow-sm" id="btnSubmitCadastro">
-                                <i class="bi bi-check2-circle me-1"></i> Finalizar Registo
+                                <i class="bi bi-check2-circle me-1"></i> Finalizar Cadastro
                             </button>
                         </form>
 
-                        <!-- RodapÃ© do Card -->
+                        <!-- Rodapé do Card -->
                         <div class="text-center pt-3 border-top">
                             <a href="login.html" id="linkLogin" class="text-decoration-none text-muted small">
-                                JÃ¡ tem uma conta? <span class="fw-bold" style="color: var(--senac-blue);">FaÃ§a Login <i class="bi bi-arrow-right-short"></i></span>
+                                Já tem uma conta? <span class="fw-bold" style="color: var(--senac-blue);">Faça Login <i class="bi bi-arrow-right-short"></i></span>
                             </a>
                         </div>
 
                     </div>
 
                     <div class="text-center mt-4 text-muted small">
-                        <span>&copy; Senac - ServiÃ§o Nacional de Aprendizagem Comercial</span>
+                        <span>&copy; Senac - Serviço Nacional de Aprendizagem Comercial</span>
                     </div>
 
                 </div>

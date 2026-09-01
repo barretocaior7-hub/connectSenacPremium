@@ -2,7 +2,7 @@
 const supabase = require('../config/database');
 
 exports.minhasTurmas = async (req, res) => {
-    // O authMiddleware pendurou o ID do utilizador (Professor) na requisição
+    // O authMiddleware pendurou o ID do usuário (Professor) na requisição
     const profissional_id = req.usuario.id;
 
     try {
@@ -27,7 +27,7 @@ exports.minhasTurmas = async (req, res) => {
         res.json(cursos);
     } catch (error) {
         console.error('Erro ao buscar turmas do professor:', error.message);
-        res.status(500).json({ erro: 'Erro ao carregar as suas listas de modelos.' });
+        res.status(500).json({ erro: 'Erro ao carregar suas listas de modelos.' });
     }
 };
 
@@ -111,7 +111,7 @@ exports.cancelarInscricao = async (req, res) => {
                 .eq('id', disp.id);
         }
 
-        res.json({ mensagem: 'Inscrição cancelada. A vaga foi libertada no sistema.' });
+        res.json({ mensagem: 'Inscrição cancelada. A vaga foi liberada no sistema.' });
     } catch (error) {
         console.error('Erro ao cancelar inscrição:', error.message);
         res.status(500).json({ erro: 'Erro ao cancelar a inscrição.' });

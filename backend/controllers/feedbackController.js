@@ -15,7 +15,7 @@ exports.criar = async (req, res) => {
     }
 
     try {
-        // 1. Validar se o agendamento pertence ao utilizador e se está CONCLUÍDO
+        // 1. Validar se o agendamento pertence ao usuário e se está CONCLUÍDO
         const { data: agendamento, error: erroBusca } = await supabase
             .from('agendamentos')
             .select('status, usuario_id')
@@ -48,7 +48,7 @@ exports.criar = async (req, res) => {
             throw erroInsert;
         }
 
-        res.status(201).json({ mensagem: 'Obrigado! A sua avaliação foi registada.', feedback: novoFeedback[0] });
+        res.status(201).json({ mensagem: 'Obrigado! Sua avaliação foi cadastrada.', feedback: novoFeedback[0] });
 
     } catch (error) {
         console.error('Erro ao enviar feedback:', error.message);
@@ -86,6 +86,6 @@ exports.meusFeedbacks = async (req, res) => {
         if (error) throw error;
         res.json(data);
     } catch (error) {
-        res.status(500).json({ erro: 'Erro ao carregar o seu histórico de avaliações.' });
+        res.status(500).json({ erro: 'Erro ao carregar seu histórico de avaliações.' });
     }
 };

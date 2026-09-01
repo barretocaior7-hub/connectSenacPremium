@@ -7,7 +7,7 @@ const usuarioController = require('../controllers/usuarioController');
 router.post('/registrar', usuarioController.registrar);
 router.post('/login', usuarioController.login);
 
-// Rotas públicas (não precisam de authMiddleware porque o utilizador esqueceu a senha)
+// Rotas públicas (não precisam de authMiddleware porque o usuário esqueceu a senha)
 router.post('/esqueci-senha', usuarioController.solicitarRecuperacao);
 router.post('/redefinir-senha', usuarioController.redefinirSenha);
 

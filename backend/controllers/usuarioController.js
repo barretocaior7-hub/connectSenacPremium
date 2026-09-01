@@ -5,18 +5,18 @@ const jwt = require('jsonwebtoken');
 const { jwtSecret } = require('../config/auth');
 const crypto = require('crypto'); // Biblioteca nativa do Node.js para criptografia
 
-const gerarToken = (utilizador) => jwt.sign(
-    { id: utilizador.id, email: utilizador.email, perfil: utilizador.perfil },
+const gerarToken = (usuário) => jwt.sign(
+    { id: usuário.id, email: usuário.email, perfil: usuário.perfil },
     jwtSecret,
     { expiresIn: '24h' }
 );
 
-// 1. LÓGICA DE REGISTO (CADASTRO)
+// 1. LÓGICA DE cadastro (CADASTRO)
 exports.registrar = async (req, res) => {
     const { nome, email, telefone, senha, confirmar_senha, consentimento_termos, consentimento_imagem } = req.body;
 
     if (!nome || !email || !senha || !confirmar_senha) {
-        return res.status(400).json({ erro: 'Nome, e-mail e palavra-passe são obrigatórios.' });
+        return res.status(400).json({ erro: 'Nome, e-mail e senha são obrigatórios.' });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -25,12 +25,12 @@ exports.registrar = async (req, res) => {
     }
 
     if (senha.length < 6) {
-        return res.status(400).json({ erro: 'A palavra-passe deve ter no mínimo 6 caracteres.' });
+        return res.status(400).json({ erro: 'A senha deve ter no mínimo 6 caracteres.' });
     }
 
-    // [Funcionalidade 1.2] Validação de Confirmação de Palavra-passe
+    // [Funcionalidade 1.2] Validação de Confirmação de Senha
     if (senha !== confirmar_senha) {
-        return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });
+        return res.status(400).json({ erro: 'As senhas não coincidem.' });
     }
 
     // Validação de LGPD
@@ -40,23 +40,23 @@ exports.registrar = async (req, res) => {
 
     try {
         // Verificar se o e-mail já existe no Supabase
-        const { data: utilizadorExistente } = await supabase
+        const { data: usuárioExistente } = await supabase
             .from('usuarios')
             .select('id')
             .eq('email', email)
-            .maybeSingle(); // Devolve o registo ou nulo se não encontrar
+            .maybeSingle(); // Devolve o cadastro ou nulo se não encontrar
 
-        if (utilizadorExistente) {
+        if (usuárioExistente) {
             return res.status(400).json({ erro: 'Este e-mail já está em uso.' });
         }
 
-        // Criptografia da palavra-passe
+        // Criptografia da senha
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(senha, salt);
 
         // Inserção de dados no Supabase
         // Nota: O UUID, a data de criação e o perfil 'candidato' são gerados automaticamente pelo Postgres!
-        const { data: novoUtilizador, error: erroInsercao } = await supabase
+        const { data: novoUsuário, error: erroInsercao } = await supabase
             .from('usuarios')
             .insert([
                 {
@@ -72,21 +72,21 @@ exports.registrar = async (req, res) => {
 
         if (erroInsercao) throw erroInsercao;
 
-        const utilizadorCriado = novoUtilizador[0];
-        const token = gerarToken(utilizadorCriado);
+        const usuárioCriado = novoUsuário[0];
+        const token = gerarToken(usuárioCriado);
 
         res.status(201).json({
-            mensagem: 'Utilizador registado e autenticado com sucesso!',
+            mensagem: 'Usuário cadastrado e autenticado com sucesso!',
             token,
-            utilizador: {
-                nome: utilizadorCriado.nome,
-                email: utilizadorCriado.email,
-                perfil: utilizadorCriado.perfil
+            usuário: {
+                nome: usuárioCriado.nome,
+                email: usuárioCriado.email,
+                perfil: usuárioCriado.perfil
             }
         });
     } catch (error) {
-        console.error('Erro no registo:', error.message);
-        res.status(500).json({ erro: 'Erro interno ao processar o registo.' });
+        console.error('Erro no cadastro:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao processar o cadastro.' });
     }
 };
 
@@ -95,33 +95,33 @@ exports.login = async (req, res) => {
     const { email, senha } = req.body;
 
     try {
-        // Procurar o utilizador pelo e-mail no Supabase
-        const { data: utilizador, error: erroBusca } = await supabase
+        // Procurar o usuário pelo e-mail no Supabase
+        const { data: usuário, error: erroBusca } = await supabase
             .from('usuarios')
             .select('*')
             .eq('email', email)
             .maybeSingle();
 
         if (erroBusca) throw erroBusca;
-        if (!utilizador) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
+        if (!usuário) return res.status(404).json({ erro: 'Usuário não encontrado.' });
 
-        // [Funcionalidade 2.2] Verificar se o utilizador está bloqueado pela administração
-        if (utilizador.is_bloqueado) {
-            return res.status(403).json({ erro: 'A sua conta está temporariamente suspensa. Contacte a coordenação.' });
+        // [Funcionalidade 2.2] Verificar se o usuário está bloqueado pela administração
+        if (usuário.is_bloqueado) {
+            return res.status(403).json({ erro: 'Sua conta está temporariamente suspensa. Entre em contato com a coordenação.' });
         }
 
-        // Comparar a palavra-passe digitada com o Hash do banco
-        const senhaValida = await bcrypt.compare(senha, utilizador.senha);
-        if (!senhaValida) return res.status(401).json({ erro: 'Palavra-passe incorreta.' });
+        // Comparar a senha digitada com o Hash do banco
+        const senhaValida = await bcrypt.compare(senha, usuário.senha);
+        if (!senhaValida) return res.status(401).json({ erro: 'Senha incorreta.' });
 
         // Gerar o Token de Autenticação (JWT)
         // Guardamos o 'id' e o 'perfil' (role) dentro do token para o sistema de permissões (RBAC)
-        const token = gerarToken(utilizador);
+        const token = gerarToken(usuário);
 
         res.json({
             mensagem: 'Login realizado com sucesso!',
             token: token,
-            utilizador: { nome: utilizador.nome, email: utilizador.email, perfil: utilizador.perfil }
+            usuário: { nome: usuário.nome, email: usuário.email, perfil: usuário.perfil }
         });
     } catch (error) {
         console.error('Erro no login:', error.message);
@@ -129,22 +129,22 @@ exports.login = async (req, res) => {
     }
 };
 
-// 3. SOLICITAR RECUPERAÇÃO DE PALAVRA-PASSE
+// 3. SOLICITAR RECUPERAÇÃO DE senha
 exports.solicitarRecuperacao = async (req, res) => {
     const { email } = req.body;
 
     try {
-        // 1. Verificar se o utilizador existe
-        const { data: utilizador, error: erroBusca } = await supabase
+        // 1. Verificar se o usuário existe
+        const { data: usuário, error: erroBusca } = await supabase
             .from('usuarios')
             .select('id, nome')
             .eq('email', email)
             .maybeSingle();
 
         if (erroBusca) throw erroBusca;
-        if (!utilizador) {
+        if (!usuário) {
             // Por segurança, não dizemos se o e-mail existe ou não. Devolvemos sucesso sempre.
-            return res.json({ mensagem: 'Se o e-mail existir, receberá um link de recuperação.' });
+            return res.json({ mensagem: 'Se o e-mail existir, você receberá um link de recuperação.' });
         }
 
         // 2. Gerar Token Aleatório (64 caracteres Hexadecimais)
@@ -161,7 +161,7 @@ exports.solicitarRecuperacao = async (req, res) => {
                 reset_token: resetToken,
                 reset_token_expires: expiraEm.toISOString()
             })
-            .eq('id', utilizador.id);
+            .eq('id', usuário.id);
 
         // 5. Simular o envio de E-mail (No mundo real, usaríamos o Nodemailer aqui)
         // Como o Front-end e Back-end dividem a mesma origem, montamos o link dinamicamente
@@ -169,10 +169,10 @@ exports.solicitarRecuperacao = async (req, res) => {
 
         console.log(`\n📧 [SIMULAÇÃO DE E-MAIL]`);
         console.log(`Para: ${email}`);
-        console.log(`Assunto: Recuperação de Palavra-passe - Connect Senac`);
+        console.log(`Assunto: Recuperação de Senha - Connect Senac`);
         console.log(`Link: ${linkRecuperacao}\n`);
 
-        res.json({ mensagem: 'Se o e-mail existir, receberá um link de recuperação.' });
+        res.json({ mensagem: 'Se o e-mail existir, você receberá um link de recuperação.' });
 
     } catch (error) {
         console.error('Erro na solicitação de recuperação:', error.message);
@@ -180,33 +180,33 @@ exports.solicitarRecuperacao = async (req, res) => {
     }
 };
 
-// 4. REDEFINIR A PALAVRA-PASSE
+// 4. REDEFINIR A senha
 exports.redefinirSenha = async (req, res) => {
     const { token, nova_senha, confirmar_senha } = req.body;
 
     if (nova_senha !== confirmar_senha) {
-        return res.status(400).json({ erro: 'As palavras-passe não coincidem.' });
+        return res.status(400).json({ erro: 'As senhas não coincidem.' });
     }
 
     try {
-        // 1. Procurar o utilizador que tem este token e verificar se ainda é válido (data > agora)
+        // 1. Procurar o usuário que tem este token e verificar se ainda é válido (data > agora)
         const agora = new Date().toISOString();
-        const { data: utilizador, error: erroBusca } = await supabase
+        const { data: usuário, error: erroBusca } = await supabase
             .from('usuarios')
             .select('id')
             .eq('reset_token', token)
             .gt('reset_token_expires', agora) // Valida se ainda não expirou
             .maybeSingle();
 
-        if (erroBusca || !utilizador) {
+        if (erroBusca || !usuário) {
             return res.status(400).json({ erro: 'O link de recuperação é inválido ou já expirou.' });
         }
 
-        // 2. Gerar o Hash da nova palavra-passe
+        // 2. Gerar o Hash da nova senha
         const salt = await bcrypt.genSalt(10);
         const senhaHash = await bcrypt.hash(nova_senha, salt);
 
-        // 3. Atualizar a palavra-passe e limpar os tokens de recuperação
+        // 3. Atualizar a senha e limpar os tokens de recuperação
         await supabase
             .from('usuarios')
             .update({
@@ -214,12 +214,12 @@ exports.redefinirSenha = async (req, res) => {
                 reset_token: null,
                 reset_token_expires: null
             })
-            .eq('id', utilizador.id);
+            .eq('id', usuário.id);
 
-        res.json({ mensagem: 'Palavra-passe alterada com sucesso! Já pode fazer login.' });
+        res.json({ mensagem: 'Senha alterada com sucesso! Já pode fazer login.' });
 
     } catch (error) {
-        console.error('Erro ao redefinir palavra-passe:', error.message);
-        res.status(500).json({ erro: 'Erro interno ao redefinir a palavra-passe.' });
+        console.error('Erro ao redefinir senha:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao redefinir a senha.' });
     }
 };

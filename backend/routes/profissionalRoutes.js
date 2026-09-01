@@ -7,7 +7,7 @@ const authMiddleware = require('../middlewares/authMiddleware');
 const autorizarPerfis = require('../middlewares/rbacMiddleware');
 
 
-// A "catraca" RBAC: Apenas utilizadores com o cargo 'profissional' passam por aqui
+// A "catraca" RBAC: Apenas usuários com o cargo 'profissional' passam por aqui
 router.get(
     '/minhas-turmas',
     authMiddleware,

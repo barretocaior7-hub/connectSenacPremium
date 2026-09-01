@@ -17,7 +17,7 @@ const API_URL = isLocalDev
 const token = localStorage.getItem("token");
 if (!token) window.location.href = "index.html";
 
-// Decodificar JWT para verificar o perfil do utilizador
+// Decodificar JWT para verificar o perfil do usuário
 let payloadToken = null;
 try {
   payloadToken = JSON.parse(atob(token.split(".")[1]));
@@ -160,7 +160,7 @@ if (formCurso) {
     e.preventDefault();
     const msgDiv = document.getElementById("msgCurso");
     msgDiv.innerHTML =
-      '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A guardar curso...</span>';
+      '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> Salvando curso...</span>';
 
     const payload = {
       nome: document.getElementById("nomeCurso").value,
@@ -683,7 +683,7 @@ function aplicarFiltroCandidatos() {
 async function excluirCandidato(id, nome) {
   if (
     !confirm(
-      `ATENCAO: Tem certeza que deseja remover a conta de ${nome}? Todos os seus agendamentos serao excluidos.`
+      `ATENCAO: Tem certeza que deseja remover a conta de ${nome}? Todos seus agendamentos serao excluidos.`
     )
   )
     return;

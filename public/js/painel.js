@@ -282,7 +282,7 @@ function abrirModalDetalhesCurso(cursoParam){
     };
 
     const divAvaliacoes = document.getElementById('detalheCursoAvaliacoes');
-    divAvaliacoes.innerHTML = '<div class="text-center text-muted small py-3"><div class="spinner-border spinner-border-sm me-1 text-primary"></div> A carregar avaliações...</div>';
+    divAvaliacoes.innerHTML = '<div class="text-center text-muted small py-3"><div class="spinner-border spinner-border-sm me-1 text-primary"></div> Carregando avaliações...</div>';
 
     fetchAuth(`${API_URL}/feedbacks/curso/${curso.id}`)
         .then(res => res.json())
@@ -445,7 +445,7 @@ async function realizarAgendamento(disponibilidadeId){
         return;
     }
 
-    msgDiv.innerHTML = '<div class="text-primary py-2"><span class="spinner-border spinner-border-sm me-1"></span> Confirmando o seu agendamento...</div>';
+    msgDiv.innerHTML = '<div class="text-primary py-2"><span class="spinner-border spinner-border-sm me-1"></span> Confirmando seu agendamento...</div>';
     btnConfirmar.disabled = true;
 
     try {
@@ -556,7 +556,7 @@ async function carregarMeusAgendamentos(){
         divAgendamentos.innerHTML = `
             <div class="col-12">
                 <div class="alert alert-danger py-3 text-center small rounded-3">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Erro ao carregar os seus agendamentos.
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i> Erro ao carregar seus agendamentos.
                 </div>
             </div>
         `;
@@ -564,7 +564,7 @@ async function carregarMeusAgendamentos(){
 }
 
 async function cancelarAgendamento(agendamentoId){
-    if (!confirm("Tem certeza de que deseja cancelar a sua inscrição neste horário? A vaga será liberada para outro modelo.")) return;
+    if (!confirm("Tem certeza de que deseja cancelar sua inscrição neste horário? A vaga será liberada para outro modelo.")) return;
 
     const msgDiv = document.getElementById(`msg-canc-${agendamentoId}`);
     if (msgDiv) msgDiv.innerHTML = '<span class="text-muted small"><span class="spinner-border spinner-border-sm me-1"></span> Cancelando...</span>';
@@ -606,7 +606,7 @@ if (formFeedback) {
         const btnSubmit = document.getElementById('btnEnviarFeedback');
         const originalBtn = btnSubmit ? btnSubmit.innerHTML : "Enviar Avaliação";
 
-        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A registrar a sua avaliação...</span>';
+        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A registrar sua avaliação...</span>';
         if (btnSubmit) btnSubmit.disabled = true;
 
         const payload = {

@@ -20,17 +20,17 @@
         <a class="navbar-brand" href="coordenador.html">
           <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
           <span>Connect Senac</span>
-          <span class="navbar-role-badge"><i class="bi bi-person-gear-fill"></i> CoordenaÃ§Ã£o</span>
+          <span class="navbar-role-badge"><i class="bi bi-person-gear-fill"></i> Coordenação</span>
         </a>
 
-        <!-- BotÃ£o HambÃºrguer Mobile -->
+        <!-- Botão Hambúrguer Mobile -->
         <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#coordMobileSidebar" aria-controls="coordMobileSidebar" aria-label="Abrir Menu">
           <i class="bi bi-list fs-2 text-white"></i>
         </button>
 
         <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
           <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
-            <i class="bi bi-eye me-1"></i> VisÃ£o do Modelo
+            <i class="bi bi-eye me-1"></i> Visão do Modelo
           </a>
           <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
             <i class="bi bi-box-arrow-right"></i> Sair
@@ -57,27 +57,27 @@
             </div>
             <div class="overflow-hidden">
               <div class="text-white fw-bold small text-truncate" id="drawerCoordName">Coordenador</div>
-              <span class="badge bg-primary text-white" style="font-size: 0.7rem;">CoordenaÃ§Ã£o da Unidade</span>
+              <span class="badge bg-primary text-white" style="font-size: 0.7rem;">Coordenação da Unidade</span>
             </div>
           </div>
 
-          <!-- Links de NavegaÃ§Ã£o pelas Abas no Mobile -->
+          <!-- Links de Navegação pelas Abas no Mobile -->
           <nav class="drawer-nav-list">
             <a class="drawer-link active" href="#" onclick="ativarTabCoordMobile('tab-operacoes')" data-bs-dismiss="offcanvas">
               <i class="bi bi-grid-fill"></i> Cursos & Vagas
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-catalogo')" data-bs-dismiss="offcanvas">
-              <i class="bi bi-tags-fill"></i> CatÃ¡logo de Cursos
+              <i class="bi bi-tags-fill"></i> Catálogo de Cursos
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-pautas')" data-bs-dismiss="offcanvas">
               <i class="bi bi-journal-album"></i> Pautas Globais
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-candidatos')" data-bs-dismiss="offcanvas">
-              <i class="bi bi-people-fill"></i> ModeraÃ§Ã£o de Candidatos
+              <i class="bi bi-people-fill"></i> Moderação de Candidatos
             </a>
             <hr class="border-white border-opacity-15 my-2">
             <a class="drawer-link text-warning fw-semibold" href="painel.html">
-              <i class="bi bi-eye text-warning"></i> VisÃ£o do Modelo
+              <i class="bi bi-eye text-warning"></i> Visão do Modelo
             </a>
           </nav>
         </div>
@@ -88,7 +88,7 @@
             <i class="bi bi-box-arrow-right"></i> Sair da Conta
           </button>
           <div class="text-center text-white-50 small" style="font-size: 0.75rem;">
-            Connect Senac â€¢ CoordenaÃ§Ã£o
+            Connect Senac • Coordenação
           </div>
         </div>
       </div>
@@ -264,7 +264,7 @@
                   <form id="formVagas" novalidate>
                     <div class="form-floating mb-3">
                       <select class="form-select" id="selectCurso" required aria-label="Vincular ao Curso">
-                        <option value="" disabled selected>A carregar cursos...</option>
+                        <option value="" disabled selected>Carregando cursos...</option>
                       </select>
                       <label for="selectCurso"><i class="bi bi-journal-bookmark me-1"></i> Vincular ao Curso</label>
                     </div>
@@ -327,7 +327,7 @@
                   <tr>
                     <td colspan="5" class="text-center text-muted py-4">
                       <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-                      A carregar catalogo...
+                      Carregando catalogo...
                     </td>
                   </tr>
                 </tbody>
@@ -350,7 +350,7 @@
             <div class="accordion accordion-custom" id="accordionPautasGlobais">
               <div class="empty-state-card py-5">
                 <div class="spinner-border text-primary mb-3" role="status"></div>
-                <h6 class="empty-state-title">A carregar a visao global de pautas...</h6>
+                <h6 class="empty-state-title">Carregando a visao global de pautas...</h6>
               </div>
             </div>
           </div>
@@ -362,7 +362,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
-                  <i class="bi bi-people-fill me-1"></i> Candidatos (Modelos) Registados
+                  <i class="bi bi-people-fill me-1"></i> Candidatos (Modelos) Cadastrados
                 </h5>
                 <p class="text-muted small mb-0 mt-1">Pesquise, filtre e modere candidatos da plataforma.</p>
               </div>
@@ -409,7 +409,7 @@
                   <tr>
                     <td colspan="7" class="text-center text-muted py-4">
                       <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-                      A carregar candidatos...
+                      Carregando candidatos...
                     </td>
                   </tr>
                 </tbody>

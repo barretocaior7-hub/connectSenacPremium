@@ -126,7 +126,7 @@ exports.listarMeus = async (req, res) => {
         res.json(meusAgendamentos);
     } catch (error) {
         console.error('Erro ao buscar agendamentos:', error.message);
-        res.status(500).json({ erro: 'Erro ao carregar os seus agendamentos.' });
+        res.status(500).json({ erro: 'Erro ao carregar seus agendamentos.' });
     }
 };
 
@@ -159,7 +159,7 @@ exports.cancelar = async (req, res) => {
 
         if (diferencaEmHoras < 2) {
             return res.status(403).json({
-                erro: 'Não é possível cancelar com menos de 2 horas de antecedência. Em caso de emergência, contacte a coordenação.'
+                erro: 'Não é possível cancelar com menos de 2 horas de antecedência. Em caso de emergência, entre em contato com a coordenação.'
             });
         }
 
@@ -175,7 +175,7 @@ exports.cancelar = async (req, res) => {
                 .eq('id', disp.id);
         }
 
-        res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi libertada.' });
+        res.json({ mensagem: 'Agendamento cancelado com sucesso. A sua vaga foi liberada.' });
     } catch (error) {
         console.error('Erro ao cancelar:', error.message);
         res.status(500).json({ erro: 'Erro interno ao cancelar o agendamento.' });

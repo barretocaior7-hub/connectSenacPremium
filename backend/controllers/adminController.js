@@ -2,23 +2,23 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 
-// 1. Listar utilizadores com métricas (consome a nossa nova View)
-exports.listarUtilizadores = async (req, res) => {
+// 1. Listar usuários com métricas (consome a nossa nova View)
+exports.listarUsuários = async (req, res) => {
     try {
-        const { data: utilizadores, error } = await supabase
+        const { data: usuários, error } = await supabase
             .from('view_usuarios_estatisticas')
             .select('*')
             .order('nome', { ascending: true });
 
         if (error) throw error;
-        res.json(utilizadores);
+        res.json(usuários);
     } catch (error) {
-        console.error('Erro ao listar utilizadores:', error.message);
-        res.status(500).json({ erro: 'Erro ao carregar a lista de utilizadores.' });
+        console.error('Erro ao listar usuários:', error.message);
+        res.status(500).json({ erro: 'Erro ao carregar a lista de usuários.' });
     }
 };
 
-// 2. Bloquear / Desbloquear utilizador (Moderação)
+// 2. Bloquear / Desbloquear usuário (Moderação)
 exports.alterarStatusBloqueio = async (req, res) => {
     const { id } = req.params;
     const { is_bloqueado } = req.body;
@@ -36,7 +36,7 @@ exports.alterarStatusBloqueio = async (req, res) => {
             .eq('id', id)
             .single();
 
-        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Utilizador não encontrado.' });
+        if (erroBusca || !alvo) return res.status(404).json({ erro: 'Usuário não encontrado.' });
 
         if (executorPerfil === 'coordenador' && (alvo.perfil === 'admin' || alvo.perfil === 'coordenador')) {
             return res.status(403).json({ erro: 'Coordenadores não possuem permissão para moderar administradores ou outros coordenadores.' });
@@ -51,10 +51,10 @@ exports.alterarStatusBloqueio = async (req, res) => {
         if (error) throw error;
 
         const acao = is_bloqueado ? 'bloqueado' : 'desbloqueado';
-        res.json({ mensagem: `Utilizador ${acao} com sucesso!`, utilizador: data[0] });
+        res.json({ mensagem: `Usuário ${acao} com sucesso!`, usuário: data[0] });
     } catch (error) {
-        console.error('Erro ao moderar utilizador:', error.message);
-        res.status(500).json({ erro: 'Erro ao alterar o estado do utilizador.' });
+        console.error('Erro ao moderar usuário:', error.message);
+        res.status(500).json({ erro: 'Erro ao alterar o estado do usuário.' });
     }
 };
 
@@ -85,7 +85,7 @@ exports.criarColaborador = async (req, res) => {
             .maybeSingle();
 
         if (existente) {
-            return res.status(400).json({ erro: 'Este e-mail já está registado.' });
+            return res.status(400).json({ erro: 'Este e-mail já está cadastrado.' });
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -116,7 +116,7 @@ exports.criarColaborador = async (req, res) => {
     }
 };
 
-// Buscar profissionais (professores) ativos para carregar no dropdown do formulário de curso
+// Buscar profissionais (professores) ativos parcarregando no dropdown do formulário de curso
 exports.listarProfissionais = async (req, res) => {
     try {
         const { data, error } = await supabase
@@ -173,7 +173,7 @@ exports.excluirUsuario = async (req, res) => {
     }
 };
 
-// 5. Alterar Perfil do Utilizador (Promover/Despromover)
+// 5. Alterar Perfil do Usuário (Promover/alterar cargo)
 exports.alterarPerfil = async (req, res) => {
     const { id } = req.params;
     const { perfil } = req.body;
@@ -209,10 +209,10 @@ exports.alterarPerfil = async (req, res) => {
             .eq('id', id);
 
         if (error) throw error;
-        res.json({ mensagem: `Cargo do utilizador atualizado para '${perfil}' com sucesso!` });
+        res.json({ mensagem: `Cargo do usuário atualizado para '${perfil}' com sucesso!` });
     } catch (error) {
         console.error('Erro ao alterar cargo:', error.message);
-        res.status(500).json({ erro: 'Erro ao alterar o perfil do utilizador.' });
+        res.status(500).json({ erro: 'Erro ao alterar o perfil do usuário.' });
     }
 };
 
