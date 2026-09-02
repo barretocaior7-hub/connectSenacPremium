@@ -1,5 +1,5 @@
 // js/coordenador.js
-// Logica exclusiva da pagina da Coordenacao — Connect Senac V2.0
+// Logica exclusiva da pagina da Coordenacao — Connect Senac
 
 // ============================================================================
 // SETUP: API, TOKEN e AUTENTICACAO
