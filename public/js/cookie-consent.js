@@ -1,4 +1,4 @@
-﻿// public/js/cookie-consent.js - Gerenciador de Consentimento e Cookies (Conformidade LGPD)
+// public/js/cookie-consent.js - Gerenciador de Consentimento e Cookies (Conformidade LGPD)
 
 (() => {
   'use strict';
@@ -42,7 +42,7 @@
         <div class="modal-content">
           <div class="modal-header bg-senac-blue text-white">
             <h5 class="modal-title font-heading" id="modalLGPDTitle"><i class="bi bi-shield-check me-2"></i> Termos de Uso e LGPD</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="modal-body text-secondary small p-4">
             <h6 class="fw-bold text-dark">1. Finalidade do Tratamento de Dados (Lei 13.709/2018 - LGPD)</h6>

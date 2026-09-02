@@ -94,7 +94,7 @@
               <small class="text-white-50" style="font-size: 0.72rem;"><i class="bi bi-cpu me-1"></i>Gemini Flash Lite</small>
             </div>
           </div>
-          <button id="btnAiClose" class="btn-close btn-close-white" aria-label="Fechar"></button>
+          <button id="btnAiClose" class="btn-close btn-close-white" aria-label="Fechar" title="Fechar Assistente"><i class="bi bi-x-lg"></i></button>
         </div>
 
         <div class="senac-ai-body" id="senacAiMessages">

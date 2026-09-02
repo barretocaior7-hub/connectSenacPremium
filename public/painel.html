@@ -74,7 +74,7 @@
                 <img src="assets/logo-connect-senac.png" alt="Connect Senac" style="height: 32px;">
                 <span class="fw-bold text-white font-heading fs-6">Connect Senac</span>
             </div>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"></button>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
         </div>
         <div class="offcanvas-body d-flex flex-column justify-content-between p-3">
             <div>
@@ -223,7 +223,7 @@
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom">
                     <h5 class="modal-title" id="modalCursoNome">Escolher Horário</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
                 </div>
                 <div class="modal-body modal-body-custom">
                     <div class="schedule-intro">
@@ -262,7 +262,7 @@
             <div class="modal-content modal-content-custom">
                 <div class="modal-header modal-header-custom">
                     <h5 class="modal-title"><i class="bi bi-star-fill text-warning me-1"></i> Avaliar Serviço</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
                 </div>
                 <div class="modal-body modal-body-custom">
                     <p class="small text-muted mb-4">Como foi a sua experiência? A sua opinião é fundamental para aprimorar as aulas práticas de nossos alunos!</p>
@@ -306,7 +306,9 @@
                 <div class="position-relative modal-drag-handle" data-drag-handle style="height: 200px; min-height: 180px; max-height: 26vh; background-color: var(--senac-blue-light); cursor: grab;" title="Clique e arraste para mover para cima ou para baixo">
                     <div class="modal-sheet-pill-indicator"></div>
                     <img id="detalheCursoImagem" src="" class="w-100 h-100" style="object-fit: cover;" alt="Capa do Curso">
-                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-3 p-2 bg-dark rounded-circle shadow" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                    <button type="button" class="modal-btn-close-floating" data-bs-dismiss="modal" aria-label="Fechar" title="Fechar visualização">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                 </div>
 
                 <div class="modal-body modal-body-custom pt-3">
@@ -383,7 +385,10 @@
             <div class="modal-content modal-confirmation-card">
                 
                 <!-- Topo do Sucesso -->
-                <div class="modal-success-header">
+                <div class="modal-success-header position-relative">
+                    <button type="button" class="modal-btn-close-floating" data-bs-dismiss="modal" aria-label="Fechar" title="Fechar visualização">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
                     <div class="success-check-badge">
                         <i class="bi bi-check-lg"></i>
                     </div>

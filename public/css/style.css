@@ -1083,6 +1083,131 @@ a:hover {
 }
 
 /* ==========================================================================
+   BOTÕES DE FECHAR MODAIS E POPUPS (ALTA VISIBILIDADE E CONTRASTE)
+   ========================================================================== */
+
+/* Botão "X" Flutuante sobre Capas e Banners de Modais */
+.modal-btn-close-floating {
+  position: absolute !important;
+  top: 14px !important;
+  right: 14px !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  border-radius: 50% !important;
+  background: rgba(15, 23, 42, 0.85) !important;
+  color: #ffffff !important;
+  border: 2px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.2rem !important;
+  line-height: 1 !important;
+  z-index: 1065 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  text-decoration: none !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.modal-btn-close-floating i {
+  display: block !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  color: #ffffff !important;
+}
+
+.modal-btn-close-floating:hover {
+  background: #dc2626 !important;
+  border-color: #ffffff !important;
+  color: #ffffff !important;
+  transform: scale(1.12) rotate(90deg) !important;
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
+}
+
+/* Botões de Fechar Padrão em Cabeçalhos de Modais e Offcanvas */
+.modal-header .btn-close,
+.offcanvas-header .btn-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  border-radius: 50% !important;
+  background-color: #e2e8f0 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #1e293b !important;
+  opacity: 1 !important;
+  padding: 0 !important;
+  background-image: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+}
+
+.modal-header .btn-close::before,
+.offcanvas-header .btn-close::before {
+  content: "✕" !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  display: block !important;
+  color: #1e293b !important;
+}
+
+.modal-header .btn-close:hover,
+.offcanvas-header .btn-close:hover {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+  transform: scale(1.1) !important;
+}
+
+.modal-header .btn-close:hover::before,
+.offcanvas-header .btn-close:hover::before {
+  color: #dc2626 !important;
+}
+
+/* Botão Fechar do Chatbot IA */
+#btnAiClose {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  border-radius: 50% !important;
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  color: #ffffff !important;
+  opacity: 1 !important;
+  background-image: none !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  padding: 0 !important;
+}
+
+#btnAiClose::before {
+  content: "✕" !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-weight: 900 !important;
+  font-size: 14px !important;
+  line-height: 1 !important;
+  color: #ffffff !important;
+}
+
+#btnAiClose:hover {
+  background-color: #dc2626 !important;
+  border-color: #ffffff !important;
+  transform: scale(1.1) rotate(90deg) !important;
+}
+
+/* ==========================================================================
    AUTH PAGES (LOGIN, CADASTRO, RECUPERAÇÃO)
    ========================================================================== */
 .auth-wrapper {
