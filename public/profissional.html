@@ -39,12 +39,20 @@
           </span>
         </a>
 
-        <!-- Botão Hambúrguer Mobile -->
-        <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#profMobileSidebar" aria-controls="profMobileSidebar" aria-label="Abrir Menu">
-          <i class="bi bi-list fs-2 text-white"></i>
-        </button>
+        <!-- Controles Mobile (Alternador de Tema + Hambúrguer) -->
+        <div class="d-flex align-items-center gap-2 d-lg-none">
+          <button class="btn btn-theme-toggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+            <i class="bi bi-moon-stars-fill"></i>
+          </button>
+          <button class="navbar-toggler text-white border-0 p-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#profMobileSidebar" aria-controls="profMobileSidebar" aria-label="Abrir Menu">
+            <i class="bi bi-list fs-2 text-white"></i>
+          </button>
+        </div>
 
         <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
+          <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+            <i class="bi bi-moon-stars-fill"></i>
+          </button>
           <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
             <i class="bi bi-eye me-1"></i> Visão do Modelo
           </a>

@@ -32,10 +32,15 @@
                 <span class="navbar-role-badge"><i class="bi bi-person-heart"></i> Modelo</span>
             </a>
             
-            <!-- Botão Menu Hambúrguer (Mobile) - Abre Drawer da Esquerda -->
-            <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Abrir menu de navegação">
-                <i class="bi bi-list fs-2 text-white"></i>
-            </button>
+            <!-- Controles Mobile (Alternador de Tema + Hambúrguer) -->
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                <button class="btn btn-theme-toggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
+                <button class="navbar-toggler text-white border-0 p-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar" aria-label="Abrir menu de navegação">
+                    <i class="bi bi-list fs-2 text-white"></i>
+                </button>
+            </div>
 
             <!-- Menu Desktop Horizontal -->
             <div class="collapse navbar-collapse justify-content-between d-none d-lg-flex" id="navbarNav">
@@ -51,6 +56,9 @@
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                    <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                     <button class="btn btn-sm btn-outline-light px-3 py-1" id="btnSair">
                         <i class="bi bi-box-arrow-right"></i> Sair
                     </button>

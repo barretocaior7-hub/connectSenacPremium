@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
@@ -32,10 +32,15 @@
                 <span>Connect Senac</span>
             </a>
 
-            <!-- Botão Hambúrguer Mobile -->
-            <button class="navbar-toggler d-lg-none text-white border-0" type="button" data-bs-toggle="offcanvas" data-bs-target="#publicMobileSidebar" aria-controls="publicMobileSidebar" aria-label="Abrir Menu">
-                <i class="bi bi-list fs-2 text-white"></i>
-            </button>
+            <!-- Controles Mobile (Alternador de Tema + Hambúrguer) -->
+            <div class="d-flex align-items-center gap-2 d-lg-none">
+                <button class="btn btn-theme-toggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+                    <i class="bi bi-moon-stars-fill"></i>
+                </button>
+                <button class="navbar-toggler text-white border-0 p-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#publicMobileSidebar" aria-controls="publicMobileSidebar" aria-label="Abrir Menu">
+                    <i class="bi bi-list fs-2 text-white"></i>
+                </button>
+            </div>
 
             <div class="collapse navbar-collapse d-none d-lg-flex" id="navPublica">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3">
@@ -46,13 +51,16 @@
                         <a class="nav-link" href="#como-funciona"><i class="bi bi-info-circle me-1"></i> Como Funciona</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#depoimentos"><i class="bi bi-chat-heart me-1"></i> Avaliações (5.0 ⭐)</a>
+                        <a class="nav-link" href="#depoimentos"><i class="bi bi-chat-heart me-1"></i> Avaliações (5.0 ⭐ )</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#localizacao"><i class="bi bi-geo-alt me-1"></i> Localização</a>
                     </li>
                 </ul>
                 <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0" id="authNavButtons">
+                    <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                     <a href="login.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
                         <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
                     </a>

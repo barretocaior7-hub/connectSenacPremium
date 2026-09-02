@@ -135,6 +135,16 @@
       btnContrast.classList.remove('active');
       btnContrast.setAttribute('aria-pressed', 'false');
     }
+
+    // Sincroniza todos os botões de alternância de tema no cabeçalho ou menu lateral
+    document.querySelectorAll('.btn-theme-toggle, #btnThemeToggle, [data-action="toggle-theme"]').forEach((btn) => {
+      btn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
+      btn.setAttribute('title', isDark ? 'Mudar para Modo Claro' : 'Mudar para Modo Escuro');
+      const icon = btn.querySelector('i');
+      if (icon) {
+        icon.className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill';
+      }
+    });
   }
 
   // 4. Sintetizador de Voz por Clique (Click-to-Speak)
@@ -421,6 +431,15 @@
     if (savedFontSize) {
       setFontSize(parseInt(savedFontSize, 10));
     }
+
+    // Ouvinte unificado para botões de tema na interface (Navbar, Drawer e Floating)
+    document.addEventListener('click', (e) => {
+      const toggleTrigger = e.target.closest('.btn-theme-toggle, #btnThemeToggle, [data-action="toggle-theme"]');
+      if (toggleTrigger) {
+        e.preventDefault();
+        toggleDarkMode();
+      }
+    });
   }
 
   window.addEventListener('beforeunload', () => {
