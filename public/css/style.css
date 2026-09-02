@@ -1216,7 +1216,7 @@ a:hover {
 .login-form-wrap { position: relative; z-index: 1; width: min(100%, 470px); animation: formReveal .8s .12s cubic-bezier(.2,.75,.25,1) both; }
 .login-mobile-brand { display: none; }
 .login-heading { margin-bottom: 2.2rem; }
-.login-heading h2 { margin: 1.2rem 0 .55rem; color: #13263a; font-size: clamp(1.8rem, 3vw, 2.5rem); letter-spacing: -.045em; }
+.login-heading h2 { margin: 1.2rem 0 .55rem; color: #000000 !important; font-size: clamp(1.8rem, 3vw, 2.5rem); letter-spacing: -.045em; font-weight: 800; }
 .login-heading p { color: #778697; }
 .login-field-label { margin-bottom: .5rem; color: #293b4e; font-size: .84rem; font-weight: 700; }
 .login-forgot { font-size: .78rem; font-weight: 700; }
@@ -2647,7 +2647,7 @@ body.dark-mode .form-select {
 [data-theme="dark"] .search-bar-premium,
 body.dark-mode .search-bar-premium {
   background-color: #18243e !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1.5px solid #243452 !important;
   box-shadow: none !important;
 }
 
@@ -2657,31 +2657,52 @@ body.dark-mode .search-bar-premium:focus-within {
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
 }
 
+.search-bar-premium .input-group-text,
+.search-bar-premium .form-control,
+.search-bar-premium input,
+[data-theme="dark"] .search-bar-premium .input-group-text,
+[data-theme="dark"] .search-bar-premium .form-control,
+[data-theme="dark"] .search-bar-premium input,
+body.dark-mode .search-bar-premium .input-group-text,
+body.dark-mode .search-bar-premium .form-control,
+body.dark-mode .search-bar-premium input {
+  background-color: transparent !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 [data-theme="dark"] .search-bar-premium .input-group-text,
 body.dark-mode .search-bar-premium .input-group-text {
-  background-color: transparent !important;
-  border: none !important;
   color: #94a3b8 !important;
 }
 
 [data-theme="dark"] .search-bar-premium .form-control,
-body.dark-mode .search-bar-premium .form-control {
-  background-color: transparent !important;
-  border: none !important;
+[data-theme="dark"] .search-bar-premium input,
+body.dark-mode .search-bar-premium .form-control,
+body.dark-mode .search-bar-premium input {
   color: #f8fafc !important;
-  box-shadow: none !important;
 }
 
 [data-theme="dark"] .search-bar-premium .form-control:focus,
-body.dark-mode .search-bar-premium .form-control:focus {
+[data-theme="dark"] .search-bar-premium input:focus,
+body.dark-mode .search-bar-premium .form-control:focus,
+body.dark-mode .search-bar-premium input:focus {
   background-color: transparent !important;
-  border: none !important;
+  border: 0 !important;
+  border-width: 0 !important;
+  border-color: transparent !important;
+  outline: none !important;
   box-shadow: none !important;
   color: #ffffff !important;
 }
 
 [data-theme="dark"] .search-bar-premium .form-control::placeholder,
-body.dark-mode .search-bar-premium .form-control::placeholder {
+[data-theme="dark"] .search-bar-premium input::placeholder,
+body.dark-mode .search-bar-premium .form-control::placeholder,
+body.dark-mode .search-bar-premium input::placeholder {
   color: #94a3b8 !important;
   opacity: 0.9 !important;
 }
@@ -2779,11 +2800,19 @@ body.dark-mode .login-form-panel {
   color: #f8fafc !important;
 }
 
+.login-heading h2,
+.login-page .login-heading h2,
 [data-theme="dark"] .login-heading h2,
-[data-theme="dark"] .login-heading p,
+[data-theme="dark"] .login-page .login-heading h2,
 body.dark-mode .login-heading h2,
+body.dark-mode.login-page .login-heading h2 {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .login-heading p,
 body.dark-mode .login-heading p {
-  color: #f8fafc !important;
+  color: #64748b !important;
 }
 
 [data-theme="dark"] .login-field-label,
@@ -2806,6 +2835,12 @@ body.dark-mode .login-input-group > i {
 body.dark-mode .login-input-group input {
   background: transparent !important;
   color: #f8fafc !important;
+}
+
+[data-theme="dark"] .login-input-group input::placeholder,
+body.dark-mode .login-input-group input::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.9 !important;
 }
 
 [data-theme="dark"] .auth-wrapper,
