@@ -1800,23 +1800,41 @@ body.ui-page-leaving { pointer-events: none; opacity: 0; transition: opacity .2s
   border: 2px solid var(--senac-orange);
 }
 
-/* 3. CARDS DE CURSO ULTRA-DETALHADOS */
+/* 3. CARDS DE CURSO COMPACTOS E MODERNOS */
 .course-detail-card {
   background: #ffffff;
   border: 1px solid #e2e8f0;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 14px -2px rgba(0, 74, 141, 0.06);
   display: flex;
   flex-direction: column;
   height: 100%;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .course-detail-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 36px -8px rgba(0, 74, 141, 0.16);
-  border-color: rgba(0, 74, 141, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(0, 74, 141, 0.16);
+  border-color: rgba(0, 74, 141, 0.35);
+}
+
+.course-detail-card .card-img-container {
+  height: 140px;
+  overflow: hidden;
+  position: relative;
+  background-color: #e0f2fe;
+}
+
+.course-detail-card .card-img-container img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.35s ease;
+}
+
+.course-detail-card:hover .card-img-container img {
+  transform: scale(1.05);
 }
 
 .course-syllabus-box {

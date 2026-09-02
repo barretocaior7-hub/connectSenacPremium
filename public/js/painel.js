@@ -212,27 +212,20 @@ function renderizarVitrineCursos(){
         const card = `
             <div class="col-md-6 col-lg-4">
                 <div class="course-detail-card h-100" onclick="abrirModalDetalhesCurso('${curso.id}')" style="cursor: pointer;">
-                    <div class="card-img-container position-relative" style="height: 180px; overflow: hidden;">
+                    <div class="card-img-container position-relative" style="height: 140px; overflow: hidden;">
                         <img src="${imagem}" alt="${nomeFormatado}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                        <span class="course-badge position-absolute top-0 start-0 m-3"><i class="bi bi-stars me-1"></i> Vagas Abertas</span>
+                        <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-stars me-1"></i> Vagas Abertas</span>
                     </div>
-                    <div class="p-4 d-flex flex-column flex-grow-1">
-                        <h5 class="fw-bold mb-1 text-dark font-heading">${nomeFormatado}</h5>
-                        <div class="d-flex align-items-center gap-2 text-muted small mb-2">
+                    <div class="p-3 d-flex flex-column flex-grow-1">
+                        <h5 class="fw-bold mb-1 text-dark font-heading" style="font-size: 1.05rem;">${nomeFormatado}</h5>
+                        <div class="d-flex align-items-center gap-2 text-muted small mb-2" style="font-size: 0.8rem;">
                             <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}</span>
                             <span>•</span>
-                            <span><i class="bi bi-person-badge-fill text-primary me-1"></i> Prof. ${profNome}</span>
+                            <span><i class="bi bi-person-badge-fill text-primary me-1"></i> ${profNome}</span>
                         </div>
-                        <p class="card-text mb-2">${descResumo}</p>
-                        
-                        <div class="course-syllabus-box">
-                            <strong class="d-block small fw-bold mb-2"><i class="bi bi-journal-text text-primary me-1"></i> O que você recebe na sessão:</strong>
-                            <ul class="course-syllabus-list">
-                                <li><i class="bi bi-check2-circle"></i> <span>${motivo}</span></li>
-                            </ul>
-                        </div>
+                        <p class="card-text mb-3 text-secondary" style="font-size: 0.84rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${descResumo}</p>
 
-                        <div class="pt-3 border-top mt-auto d-flex align-items-center justify-content-between">
+                        <div class="pt-2 border-top mt-auto d-flex align-items-center justify-content-between">
                             <span class="badge bg-light text-primary border"><i class="bi bi-clock me-1"></i> 1h a 2h</span>
                             <button class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation(); abrirModalDetalhesCurso('${curso.id}');">
                                 Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
@@ -284,6 +277,15 @@ function abrirModalDetalhesCurso(cursoParam){
     const imgEl = document.getElementById('detalheCursoImagem');
     imgEl.src = curso.foto_url || 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60';
     imgEl.onerror = () => { imgEl.src = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'; };
+
+    const blocoMotivo = document.getElementById('blocoMotivo');
+    if (curso.motivo_modelo && curso.motivo_modelo.trim() !== '') {
+        if (blocoMotivo) blocoMotivo.style.display = 'block';
+        const elMotivo = document.getElementById('detalheCursoMotivo');
+        if (elMotivo) elMotivo.textContent = curso.motivo_modelo;
+    } else if (blocoMotivo) {
+        blocoMotivo.style.display = 'none';
+    }
 
     const blocoRestricoes = document.getElementById('blocoRestricoes');
     if (curso.restricoes && curso.restricoes.trim() !== '') {
