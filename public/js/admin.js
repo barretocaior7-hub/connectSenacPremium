@@ -123,7 +123,7 @@ function renderizarTabelaUsuários(lista){
     tbody.innerHTML = '';
 
     if (!Array.isArray(lista) || lista.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum usuário encontrado com os filtros selecionados.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum usuário encontrado com os filtros selecionados.</td></tr>';
         return;
     }
 
@@ -176,21 +176,35 @@ function renderizarTabelaUsuários(lista){
 
         let btnBloqueio = '';
         if (isSelf) {
-            btnBloqueio = `<button class="btn btn-sm btn-outline-secondary p-1 px-2" disabled title="Você não pode bloquear sua própria conta"><i class="bi bi-lock"></i></button>`;
+            btnBloqueio = `<button class="btn btn-sm btn-light text-muted border py-1 px-2" disabled title="Sua conta atual"><i class="bi bi-lock me-1"></i>Bloquear</button>`;
         } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
-            btnBloqueio = `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueio('${user.id}', ${Boolean(user.is_bloqueado)})" title="${user.is_bloqueado ? 'Desbloquear usuário' : 'Bloquear / Suspender usuário'}">
-                <i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i>
-            </button>`;
+            if (user.is_bloqueado) {
+                btnBloqueio = `<button class="btn btn-sm btn-success fw-bold py-1 px-2" onclick="toggleBloqueio('${user.id}', true)" title="Clique para desbloquear e reativar este usuário">
+                    <i class="bi bi-unlock-fill me-1"></i>Desbloquear
+                </button>`;
+            } else {
+                btnBloqueio = `<button class="btn btn-sm btn-warning text-dark fw-bold py-1 px-2" onclick="toggleBloqueio('${user.id}', false)" title="Clique para suspender/bloquear este usuário">
+                    <i class="bi bi-lock-fill me-1"></i>Bloquear
+                </button>`;
+            }
         }
 
         let btnExcluir = '';
         if (isSelf) {
-            btnExcluir = `<button class="btn btn-sm btn-outline-secondary p-1 px-2" disabled title="Você não pode excluir sua própria conta"><i class="bi bi-trash"></i></button>`;
+            btnExcluir = `<button class="btn btn-sm btn-light text-muted border py-1 px-2" disabled title="Sua conta atual"><i class="bi bi-trash me-1"></i>Excluir</button>`;
         } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
-            btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Usuário')}'))" title="Excluir usuário permanentemente">
-                <i class="bi bi-trash-fill"></i>
+            btnExcluir = `<button class="btn btn-sm btn-danger fw-bold py-1 px-2" onclick="excluirUsuario('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Usuário')}'))" title="Excluir este usuário permanentemente">
+                <i class="bi bi-trash-fill me-1"></i>Excluir
             </button>`;
         }
+
+        const sessoesBadge = `
+            <div class="d-flex flex-wrap justify-content-center gap-1" style="font-size: 0.74rem;">
+                <span class="badge bg-primary-subtle text-primary border" title="Agendados / Confirmados">${user.total_agendados || 0} Conf.</span>
+                <span class="badge bg-success-subtle text-success border" title="Concluídos">${user.total_concluidos || 0} Conc.</span>
+                <span class="badge bg-danger-subtle text-danger border" title="Cancelados">${user.total_cancelados || 0} Canc.</span>
+            </div>
+        `;
 
         const row = `
             <tr>
@@ -207,11 +221,9 @@ function renderizarTabelaUsuários(lista){
                     <div class="d-flex flex-column gap-1">${badgeLgpd}${badgeImagem}</div>
                 </td>
                 <td><span class="text-secondary small fw-semibold">${cursosAtivosFormatado}</span></td>
-                <td class="text-center fw-bold text-primary">${user.total_agendados || 0}</td>
-                <td class="text-center fw-bold text-success">${user.total_concluidos || 0}</td>
-                <td class="text-center fw-bold text-danger">${user.total_cancelados || 0}</td>
-                <td class="text-end text-nowrap">
-                    <div class="d-inline-flex gap-1">
+                <td class="text-center">${sessoesBadge}</td>
+                <td class="text-center text-nowrap">
+                    <div class="d-inline-flex align-items-center gap-1">
                         ${btnZap}
                         ${btnBloqueio}
                         ${btnExcluir}
