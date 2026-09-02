@@ -72,8 +72,8 @@ exports.registrar = async (req, res) => {
                     email,
                     telefone,
                     senha: senhaHash,
-                    consentimento_termos: consentimento_termos === 1 || consentimento_termos === true,
-                    consentimento_imagem: consentimento_imagem === 1 || consentimento_imagem === true
+                    consentimento_termos: consentimento_termos === 1 || consentimento_termos === true || consentimento_termos === '1' || consentimento_termos === 'true',
+                    consentimento_imagem: consentimento_imagem === 1 || consentimento_imagem === true || consentimento_imagem === '1' || consentimento_imagem === 'true'
                 }
             ])
             .select(); // Força o retorno dos dados inseridos

@@ -2,16 +2,31 @@
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
 
-// 1. Listar usuarios com metricas (consome a nossa nova View)
+// 1. Listar usuarios com metricas (consome a View agregando consentimentos LGPD e Imagem)
 exports.listarUsuarios = async (req, res) => {
     try {
-        const { data: usuarios, error } = await supabase
-            .from('view_usuarios_estatisticas')
-            .select('*')
-            .order('nome', { ascending: true });
+        const [{ data: usuarios, error: errView }, { data: consentimentos, error: errCons }] = await Promise.all([
+            supabase.from('view_usuarios_estatisticas').select('*').order('nome', { ascending: true }),
+            supabase.from('usuarios').select('id, consentimento_termos, consentimento_imagem')
+        ]);
 
-        if (error) throw error;
-        res.json(usuarios);
+        if (errView) throw errView;
+
+        const consentMap = new Map();
+        if (consentimentos) {
+            consentimentos.forEach(c => consentMap.set(c.id, c));
+        }
+
+        const usuariosCompletos = (usuarios || []).map(u => {
+            const consent = consentMap.get(u.id);
+            return {
+                ...u,
+                consentimento_termos: consent ? Boolean(consent.consentimento_termos) : Boolean(u.consentimento_termos),
+                consentimento_imagem: consent ? Boolean(consent.consentimento_imagem) : Boolean(u.consentimento_imagem)
+            };
+        });
+
+        res.json(usuariosCompletos);
     } catch (error) {
         console.error('Erro ao listar usuarios:', error.message);
         res.status(500).json({ erro: 'Erro ao carregar a lista de usuarios.' });
