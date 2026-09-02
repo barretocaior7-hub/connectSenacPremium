@@ -48,7 +48,8 @@ exports.conversar = async (req, res) => {
             parts: [{ text: mensagem.trim().slice(0, 1000) }]
         });
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+        const modelo = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
 
         const payload = {
             system_instruction: {
@@ -70,7 +71,8 @@ exports.conversar = async (req, res) => {
                 const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: AbortSignal.timeout(15000)
                 });
 
                 data = await response.json();
@@ -87,6 +89,11 @@ exports.conversar = async (req, res) => {
                         await new Promise(r => setTimeout(r, attempt * 600));
                         continue;
                     }
+                } else if (response.status === 429 || data.error?.code === 429) {
+                    lastError = '429 Quota Exceeded';
+                    return res.json({
+                        resposta: 'Olá! O nosso assistente atingiu o limite temporário de requisições por minuto da API do Google. Por favor, aguarde cerca de 1 minuto para nova tentativa ou clique no botão do WhatsApp para falar diretamente com a coordenação!'
+                    });
                 } else {
                     lastError = data.error?.message || 'Erro na API Gemini';
                     break;
