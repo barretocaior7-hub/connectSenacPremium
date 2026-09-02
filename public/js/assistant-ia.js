@@ -1,4 +1,4 @@
-﻿// public/js/assistant-ia.js - Assistente Virtual Inteligente Connect Senac (SENAC AI)
+// public/js/assistant-ia.js - Assistente Virtual Inteligente Connect Senac (Gemini 3.6 Flash)
 
 (() => {
   'use strict';
@@ -27,31 +27,41 @@
     {
       keywords: ['idade', 'menor', 'requisitos', 'documentos', 'rg'],
       response: 'Para a maioria dos procedimentos é necessário ter a partir de 16 ou 18 anos (menores de 18 anos devem estar acompanhados de responsável legal). Traga documento com foto no dia do atendimento.'
-    },
-    {
-      keywords: ['alergia', 'restricoes', 'gravida', 'gestante', 'quimica'],
-      response: 'No momento do agendamento, informe qualquer restrição ou alergia no campo de observações. Para gestantes e peles sensibilizadas, consulte previamente as orientações no card do curso.'
     }
   ];
 
-  function getAiResponse(userMessage) {
+  function getLocalFallback(userMessage) {
     const cleanMsg = userMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    
     for (const item of knowledgeBase) {
       if (item.keywords.some(kw => cleanMsg.includes(kw))) {
         return item.response;
       }
     }
+    return `Olá! Sou o assistente virtual do Connect Senac. Posso te ajudar com dúvidas sobre atendimentos 100% gratuitos, como ser modelo voluntário, localização da unidade e regras de agendamento. Você também pode falar diretamente com nossa coordenação pelo botão do WhatsApp!`;
+  }
 
-    return `Olá! Sou o assistente virtual do Connect Senac. Posso te ajudar com dúvidas sobre:
-    <ul>
-      <li>Como agendar ou ser modelo voluntário</li>
-      <li>Atendimentos 100% gratuitos</li>
-      <li>Localização da unidade SENAC</li>
-      <li>Regras de cancelamento e antecedência</li>
-      <li>Horas complementares / declaração</li>
-    </ul>
-    Você também pode falar com a nossa coordenação pelo botão do WhatsApp!`;
+  function formatMarkdown(text) {
+    if (!text) return '';
+    let escaped = String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    // Negrito **texto**
+    escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+    // Itálico *texto*
+    escaped = escaped.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    // Listas com bullet (* item ou - item)
+    escaped = escaped.replace(/(?:^|\n)[*-]\s+(.+)/g, '<br>• $1');
+
+    // Quebras de linha duplas e simples
+    escaped = escaped.replace(/\n\n+/g, '<br><br>').replace(/\n/g, '<br>');
+
+    return escaped;
   }
 
   function injectAssistantUI() {
@@ -61,7 +71,7 @@
     container.id = 'senac-ai-container';
     container.innerHTML = `
       <!-- Botão Flutuante da I.A. -->
-      <button id="btnAiToggle" class="senac-ai-fab" title="Assistente Virtual SENAC AI" aria-label="Abrir Assistente Virtual">
+      <button id="btnAiToggle" class="senac-ai-fab" title="Assistente Virtual SENAC AI (Gemini 3.6 Flash)" aria-label="Abrir Assistente Virtual">
         <i class="bi bi-robot"></i>
         <span class="senac-ai-fab-badge">IA</span>
       </button>
@@ -75,7 +85,7 @@
             </div>
             <div>
               <strong class="d-block font-heading" style="font-size: 0.95rem;">Connect AI • SENAC</strong>
-              <small class="text-white-50" style="font-size: 0.75rem;">Assistente Inteligente</small>
+              <small class="text-white-50" style="font-size: 0.72rem;"><i class="bi bi-cpu me-1"></i>Gemini 3.6 Flash</small>
             </div>
           </div>
           <button id="btnAiClose" class="btn-close btn-close-white" aria-label="Fechar"></button>
@@ -83,7 +93,7 @@
 
         <div class="senac-ai-body" id="senacAiMessages">
           <div class="senac-ai-msg bot">
-            <span>Olá! 👋 Sou a Inteligência Artificial do Connect Senac. Como posso te ajudar hoje?</span>
+            <span>Olá! 👋 Sou a Inteligência Artificial do <strong>Connect Senac</strong> (alimentada pelo Gemini 3.6 Flash). Como posso te ajudar hoje?</span>
           </div>
           <div class="senac-ai-chips">
             <button class="ai-chip" data-query="É gratuito?">É gratuito?</button>
@@ -94,8 +104,8 @@
         </div>
 
         <form id="senacAiForm" class="senac-ai-footer">
-          <input type="text" id="senacAiInput" placeholder="Digite sua dúvida..." autocomplete="off" required>
-          <button type="submit" class="btn-ai-send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button>
+          <input type="text" id="senacAiInput" placeholder="Pergunte sobre os cursos ou agendamentos..." autocomplete="off" required>
+          <button type="submit" id="btnAiSend" class="btn-ai-send" aria-label="Enviar"><i class="bi bi-send-fill"></i></button>
         </form>
       </div>
     `;
@@ -107,7 +117,11 @@
     const btnClose = document.getElementById('btnAiClose');
     const form = document.getElementById('senacAiForm');
     const input = document.getElementById('senacAiInput');
+    const btnSend = document.getElementById('btnAiSend');
     const msgBox = document.getElementById('senacAiMessages');
+
+    let chatHistory = [];
+    let isProcessing = false;
 
     btnToggle.addEventListener('click', () => {
       chatWindow.classList.toggle('d-none');
@@ -118,35 +132,95 @@
 
     btnClose.addEventListener('click', () => chatWindow.classList.add('d-none'));
 
-    function appendMessage(text, sender) {
+    function appendMessage(content, sender, isHtml = false) {
       const msgDiv = document.createElement('div');
       msgDiv.className = `senac-ai-msg ${sender}`;
-      msgDiv.innerHTML = `<span>${text}</span>`;
+      msgDiv.innerHTML = isHtml ? `<span>${content}</span>` : `<span>${formatMarkdown(content)}</span>`;
       msgBox.appendChild(msgDiv);
       msgBox.scrollTop = msgBox.scrollHeight;
+      return msgDiv;
     }
 
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const text = input.value.trim();
+    function showTypingIndicator() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'senac-ai-msg bot senac-ai-typing';
+      typingDiv.id = 'aiTypingIndicator';
+      typingDiv.innerHTML = `
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      `;
+      msgBox.appendChild(typingDiv);
+      msgBox.scrollTop = msgBox.scrollHeight;
+      return typingDiv;
+    }
+
+    function removeTypingIndicator() {
+      const typingEl = document.getElementById('aiTypingIndicator');
+      if (typingEl) typingEl.remove();
+    }
+
+    async function handleUserSubmit(userText) {
+      if (isProcessing) return;
+      const text = userText.trim();
       if (!text) return;
 
       appendMessage(text, 'user');
       input.value = '';
+      input.disabled = true;
+      btnSend.disabled = true;
+      isProcessing = true;
 
-      // Simulação de processamento inteligente com delay natural
-      setTimeout(() => {
-        const reply = getAiResponse(text);
-        appendMessage(reply, 'bot');
-      }, 450);
+      const indicator = showTypingIndicator();
+
+      try {
+        const response = await fetch('/api/assistente/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            mensagem: text,
+            historico: chatHistory
+          })
+        });
+
+        const data = await response.json();
+        removeTypingIndicator();
+
+        const botReply = data.resposta || getLocalFallback(text);
+        appendMessage(botReply, 'bot');
+
+        // Atualiza o histórico de conversação
+        chatHistory.push({ role: 'user', text: text });
+        chatHistory.push({ role: 'model', text: botReply });
+
+        // Limita o histórico local a 10 interações
+        if (chatHistory.length > 10) {
+          chatHistory = chatHistory.slice(-10);
+        }
+
+      } catch (err) {
+        console.warn('Falha na requisição Gemini, ativando resposta local:', err);
+        removeTypingIndicator();
+        const fallback = getLocalFallback(text);
+        appendMessage(fallback, 'bot', true);
+      } finally {
+        input.disabled = false;
+        btnSend.disabled = false;
+        isProcessing = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      handleUserSubmit(input.value);
     });
 
     msgBox.addEventListener('click', (e) => {
       const chip = e.target.closest('.ai-chip');
-      if (!chip) return;
+      if (!chip || isProcessing) return;
       const query = chip.getAttribute('data-query');
-      input.value = query;
-      form.dispatchEvent(new Event('submit'));
+      handleUserSubmit(query);
     });
   }
 

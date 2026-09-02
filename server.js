@@ -103,6 +103,7 @@ app.use('/api/dashboard', require('./backend/routes/dashboardRoutes'));
 app.use('/api/admin', require('./backend/routes/adminRoutes'));
 app.use('/api/profissional', require('./backend/routes/profissionalRoutes'));
 app.use('/api/feedbacks', require('./backend/routes/feedbackRoutes'));
+app.use('/api/assistente', require('./backend/routes/assistenteRoutes'));
 
 
 
