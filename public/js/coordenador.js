@@ -87,7 +87,7 @@ async function carregarMetricas() {
     if (response.ok) {
       const data = await response.json();
       const el = (id) => document.getElementById(id);
-      if (el("metricUsuarios")) el("metricUsuarios").textContent = data.totalUsuarios;
+      if (el("metricUsuarios")) el("metricUsuarios").textContent = data.totalModelos !== undefined ? data.totalModelos : data.totalUsuarios;
       if (el("metricAgendados")) el("metricAgendados").textContent = data.agendamentos.agendados;
       if (el("metricConcluidos")) el("metricConcluidos").textContent = data.agendamentos.concluidos;
       if (el("metricCancelamento")) el("metricCancelamento").textContent = data.taxaCancelamento;

@@ -6,14 +6,15 @@ exports.obterMetricas = async (req, res) => {
         // Consultas otimizadas com { count: 'exact', head: true }
         // Não trafega linhas de dados pela rede, apenas a contagem exata no banco de dados
         const [
-            usuariosResult,
+            modelosResult,
             cursosResult,
             totalAgendamentosResult,
             agendadosResult,
             concluidosResult,
             canceladosResult
         ] = await Promise.all([
-            supabase.from('usuarios').select('*', { count: 'exact', head: true }),
+            // Conta estritamente os usuários com perfil de modelo (candidato), excluindo admin, coordenador e professores (profissional)
+            supabase.from('usuarios').select('*', { count: 'exact', head: true }).eq('perfil', 'candidato'),
             supabase.from('cursos').select('*', { count: 'exact', head: true }).eq('status', 'ativo'),
             supabase.from('agendamentos').select('*', { count: 'exact', head: true }),
             supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('status', 'agendado'),
@@ -21,7 +22,7 @@ exports.obterMetricas = async (req, res) => {
             supabase.from('agendamentos').select('*', { count: 'exact', head: true }).eq('status', 'cancelado')
         ]);
 
-        if (usuariosResult.error) throw usuariosResult.error;
+        if (modelosResult.error) throw modelosResult.error;
         if (cursosResult.error) throw cursosResult.error;
         if (totalAgendamentosResult.error) throw totalAgendamentosResult.error;
         if (agendadosResult.error) throw agendadosResult.error;
@@ -46,7 +47,8 @@ exports.obterMetricas = async (req, res) => {
             : 0;
 
         res.json({
-            totalUsuarios: usuariosResult.count || 0,
+            totalModelos: modelosResult.count || 0,
+            totalUsuarios: modelosResult.count || 0,
             totalCursosAtivos: cursosResult.count || 0,
             agendamentos: metricasAgendamentos,
             taxaCancelamento: `${taxaCancelamento}%`

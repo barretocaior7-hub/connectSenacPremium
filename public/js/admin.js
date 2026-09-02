@@ -74,7 +74,7 @@ async function carregarMetricas(){
             const elConcluidos = document.getElementById('metricConcluidos');
             const elCancelamento = document.getElementById('metricCancelamento');
 
-            if (elUsuarios) elUsuarios.textContent = data.totalUsuarios;
+            if (elUsuarios) elUsuarios.textContent = data.totalModelos !== undefined ? data.totalModelos : data.totalUsuarios;
             if (elAgendados) elAgendados.textContent = data.agendamentos.agendados;
             if (elConcluidos) elConcluidos.textContent = data.agendamentos.concluidos;
             if (elCancelamento) elCancelamento.textContent = data.taxaCancelamento;
