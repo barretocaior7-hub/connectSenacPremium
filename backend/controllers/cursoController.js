@@ -6,11 +6,24 @@ exports.listarAtivos = async (req, res) => {
     try {
         const { data: cursos, error } = await supabase
             .from('cursos')
-            .select(`id, nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, status, usuarios ( nome )`)
+            .select(`
+                id, nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, status,
+                usuarios ( nome ),
+                disponibilidades ( id, data_hora, vagas_totais, vagas_ocupadas )
+            `)
             .eq('status', 'ativo')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
+
+        if (Array.isArray(cursos)) {
+            cursos.forEach(c => {
+                if (Array.isArray(c.disponibilidades)) {
+                    c.disponibilidades.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+                }
+            });
+        }
+
         res.json(cursos);
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao buscar o catálogo.' });

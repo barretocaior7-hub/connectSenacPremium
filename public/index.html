@@ -436,12 +436,27 @@
                             <p id="pubDetalheRestricoes" class="text-secondary small mb-0"></p>
                         </div>
                     </div>
+
+                    <!-- Horários e Vagas Disponíveis -->
+                    <div class="mb-4 pt-3 border-top">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <h6 class="fw-bold text-uppercase small text-dark mb-0 font-heading">
+                                <i class="bi bi-calendar2-week-fill text-primary me-1"></i> Horários e Vagas Disponíveis
+                            </h6>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" id="pubTotalVagasBadge">
+                                <i class="bi bi-people-fill me-1"></i> Vagas Abertas
+                            </span>
+                        </div>
+                        <div id="pubListaHorarios" class="row g-2">
+                            <!-- Renderizado via JS -->
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer modal-footer-custom">
                     <button type="button" class="btn btn-light-custom" data-bs-dismiss="modal">Fechar</button>
-                    <a href="#" id="pubBtnReservar" class="btn btn-brand px-4">
-                        <i class="bi bi-calendar-check me-1"></i> Quero Ser Modelo / Reservar Vaga
-                    </a>
+                    <button type="button" id="pubBtnReservar" class="btn btn-brand px-4">
+                        <i class="bi bi-calendar-check me-1"></i> Agendar Vaga
+                    </button>
                 </div>
             </div>
         </div>
@@ -536,26 +551,42 @@
                 const prof = escapeHTML(c.usuarios?.nome || 'Docente SENAC');
                 const local = escapeHTML(c.localizacao || 'SENAC Santo Antônio de Jesus');
 
+                const disps = Array.isArray(c.disponibilidades) ? c.disponibilidades : [];
+                const totalVagas = disps.reduce((acc, d) => acc + Math.max(0, (d.vagas_totais || 0) - (d.vagas_ocupadas || 0)), 0);
+                const qtdHorarios = disps.length;
+
+                const badgeVagas = totalVagas > 0
+                    ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-people-fill me-1"></i> ${totalVagas} vaga(s) livre(s)</span>`
+                    : `<span class="badge bg-secondary bg-opacity-10 text-secondary border" style="font-size: 0.76rem;"><i class="bi bi-clock-history me-1"></i> Vagas em breve</span>`;
+
+                const badgeHorarios = qtdHorarios > 0
+                    ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-calendar-event me-1"></i> ${qtdHorarios} data(s)</span>`
+                    : '';
+
                 div.innerHTML += `
                     <div class="col-md-6 col-lg-4">
                         <div class="course-detail-card h-100" onclick="abrirModalDetalhesPublico('${c.id}')" style="cursor: pointer;">
                             <div class="card-img-container position-relative" style="height: 140px; overflow: hidden;">
                                 <img src="${img}" alt="${nome}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                                <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-check-circle-fill me-1"></i> Vagas Abertas</span>
+                                <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-check-circle-fill me-1"></i> ${totalVagas > 0 ? `${totalVagas} Vagas Abertas` : 'Consulte Vagas'}</span>
                             </div>
                             <div class="p-3 d-flex flex-column flex-grow-1">
                                 <h5 class="fw-bold font-heading text-dark mb-1" style="font-size: 1.05rem;">${nome}</h5>
                                 <div class="d-flex align-items-center gap-2 text-muted small mb-2" style="font-size: 0.8rem;">
                                     <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}</span>
                                     <span>•</span>
-                                    <span><i class="bi bi-clock-fill text-primary me-1"></i> 1h a 2h</span>
+                                    <span><i class="bi bi-person-badge-fill text-primary me-1"></i> ${prof}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-1 mb-2">
+                                    ${badgeVagas}
+                                    ${badgeHorarios}
                                 </div>
                                 <p class="card-text mb-3 text-secondary" style="font-size: 0.84rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${descResumo}</p>
 
                                 <div class="pt-2 border-top mt-auto d-flex align-items-center justify-content-between">
-                                    <span class="badge bg-light text-primary border"><i class="bi bi-person-badge me-1"></i> ${prof}</span>
+                                    <span class="badge bg-light text-primary border"><i class="bi bi-clock me-1"></i> 1h a 2h</span>
                                     <button type="button" class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation(); abrirModalDetalhesPublico('${c.id}');">
-                                        Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
+                                        Ver Detalhes <i class="bi bi-eye ms-1"></i>
                                     </button>
                                 </div>
                             </div>
@@ -600,10 +631,85 @@
                 blocoRestricoes.style.display = 'none';
             }
 
-            const urlDestino = token ? `painel.html?curso=${curso.id}` : `login.html?curso=${curso.id}`;
-            document.getElementById('pubBtnReservar').href = urlDestino;
+            // Renderizar Horários e Vagas Disponíveis
+            const listaHorariosEl = document.getElementById('pubListaHorarios');
+            const totalVagasBadgeEl = document.getElementById('pubTotalVagasBadge');
+            const disponibilidades = Array.isArray(curso.disponibilidades) ? curso.disponibilidades : [];
+
+            let totalVagasLivres = 0;
+            let horariosHTML = '';
+
+            if (disponibilidades.length === 0) {
+                horariosHTML = `
+                    <div class="col-12">
+                        <div class="p-3 bg-light rounded text-center small text-muted">
+                            <i class="bi bi-calendar-x me-1"></i> Não há horários abertos para este procedimento no momento.
+                        </div>
+                    </div>
+                `;
+            } else {
+                disponibilidades.forEach(disp => {
+                    const vagasLivres = Math.max(0, (disp.vagas_totais || 0) - (disp.vagas_ocupadas || 0));
+                    totalVagasLivres += vagasLivres;
+                    const dataHoraFormatada = disp.data_hora
+                        ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                        : 'Data a definir';
+
+                    const isEsgotado = vagasLivres <= 0;
+                    const badgeVagas = isEsgotado
+                        ? '<span class="badge bg-secondary">Esgotado</span>'
+                        : `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-people-fill me-1"></i> ${vagasLivres} vaga(s) livre(s)</span>`;
+
+                    const botaoAcao = isEsgotado
+                        ? '<button class="btn btn-sm btn-secondary disabled" disabled>Esgotado</button>'
+                        : `<button type="button" class="btn btn-sm btn-orange fw-bold" onclick="redirecionarParaAgendar('${curso.id}', '${disp.id}')"><i class="bi bi-calendar-plus me-1"></i> Agendar Vaga</button>`;
+
+                    horariosHTML += `
+                        <div class="col-12 col-md-6">
+                            <div class="p-2 border rounded d-flex justify-content-between align-items-center bg-light bg-opacity-50">
+                                <div>
+                                    <div class="fw-bold small text-dark"><i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada}</div>
+                                    <div class="mt-1">${badgeVagas}</div>
+                                </div>
+                                <div>
+                                    ${botaoAcao}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            if (listaHorariosEl) listaHorariosEl.innerHTML = horariosHTML;
+            if (totalVagasBadgeEl) {
+                totalVagasBadgeEl.innerHTML = `<i class="bi bi-people-fill me-1"></i> ${totalVagasLivres} vaga(s) no total`;
+                totalVagasBadgeEl.className = totalVagasLivres > 0
+                    ? 'badge bg-success bg-opacity-10 text-success border border-success border-opacity-25'
+                    : 'badge bg-secondary bg-opacity-10 text-secondary border';
+            }
+
+            // O botão de agendar no rodapé do modal redireciona apenas quando clicado
+            const btnReservar = document.getElementById('pubBtnReservar');
+            if (btnReservar) {
+                btnReservar.onclick = () => {
+                    const primeiroDisp = disponibilidades.find(d => ((d.vagas_totais || 0) - (d.vagas_ocupadas || 0)) > 0);
+                    redirecionarParaAgendar(curso.id, primeiroDisp?.id);
+                };
+            }
 
             modalDetalhesPublicoInstance.show();
+        }
+
+        function redirecionarParaAgendar(cursoId, horarioId = null) {
+            const token = localStorage.getItem('token');
+            const horarioParam = horarioId ? `&horario=${encodeURIComponent(horarioId)}` : '';
+            if (token) {
+                // Usuário autenticado: direciona ao painel
+                window.location.href = `painel.html?curso=${encodeURIComponent(cursoId)}${horarioParam}#vitrine`;
+            } else {
+                // Usuário visitante: direciona para criar conta
+                window.location.href = `cadastro.html?curso=${encodeURIComponent(cursoId)}${horarioParam}`;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {

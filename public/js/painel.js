@@ -136,10 +136,17 @@ async function carregarCursos(){
         if (!Array.isArray(baseCursos)) baseCursos = [];
         renderizarVitrineCursos();
 
-        const requestedCourseId = new URLSearchParams(window.location.search).get('curso');
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestedCourseId = urlParams.get('curso');
+        const requestedHorarioId = urlParams.get('horario');
         if (requestedCourseId && window.cursosAtivosMap.has(String(requestedCourseId))) {
             window.history.replaceState({}, '', `${window.location.pathname}#vitrine`);
-            setTimeout(() => abrirModalDetalhesCurso(requestedCourseId), 250);
+            if (requestedHorarioId) {
+                const c = window.cursosAtivosMap.get(String(requestedCourseId));
+                setTimeout(() => abrirModalAgendamento(requestedCourseId, c.nome, c.descricao, requestedHorarioId), 250);
+            } else {
+                setTimeout(() => abrirModalDetalhesCurso(requestedCourseId), 250);
+            }
         }
     } catch (error) {
         divCursos.innerHTML = `
@@ -207,14 +214,25 @@ function renderizarVitrineCursos(){
         const nomeFormatado = escapeHTML(curso.nome);
         const descRaw = curso.descricao || 'Procedimento prático supervisionado.';
         const descResumo = escapeHTML(descRaw.length > 90 ? descRaw.substring(0, 90) + '...' : descRaw);
-        const motivo = escapeHTML(curso.motivo_modelo || 'Prática supervisionada em ambiente de excelência.');
+
+        const disps = Array.isArray(curso.disponibilidades) ? curso.disponibilidades : [];
+        const totalVagas = disps.reduce((acc, d) => acc + Math.max(0, (d.vagas_totais || 0) - (d.vagas_ocupadas || 0)), 0);
+        const qtdHorarios = disps.length;
+
+        const badgeVagas = totalVagas > 0
+            ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-people-fill me-1"></i> ${totalVagas} vaga(s)</span>`
+            : `<span class="badge bg-secondary bg-opacity-10 text-secondary border" style="font-size: 0.76rem;"><i class="bi bi-clock-history me-1"></i> Em breve</span>`;
+
+        const badgeHorarios = qtdHorarios > 0
+            ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-calendar-event me-1"></i> ${qtdHorarios} data(s)</span>`
+            : '';
 
         const card = `
             <div class="col-md-6 col-lg-4">
                 <div class="course-detail-card h-100" onclick="abrirModalDetalhesCurso('${curso.id}')" style="cursor: pointer;">
                     <div class="card-img-container position-relative" style="height: 140px; overflow: hidden;">
                         <img src="${imagem}" alt="${nomeFormatado}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
-                        <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-stars me-1"></i> Vagas Abertas</span>
+                        <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-stars me-1"></i> ${totalVagas > 0 ? `${totalVagas} Vagas Abertas` : 'Consulte Vagas'}</span>
                     </div>
                     <div class="p-3 d-flex flex-column flex-grow-1">
                         <h5 class="fw-bold mb-1 text-dark font-heading" style="font-size: 1.05rem;">${nomeFormatado}</h5>
@@ -222,6 +240,10 @@ function renderizarVitrineCursos(){
                             <span><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${local}</span>
                             <span>•</span>
                             <span><i class="bi bi-person-badge-fill text-primary me-1"></i> ${profNome}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-1 mb-2">
+                            ${badgeVagas}
+                            ${badgeHorarios}
                         </div>
                         <p class="card-text mb-3 text-secondary" style="font-size: 0.84rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${descResumo}</p>
 
@@ -295,6 +317,63 @@ function abrirModalDetalhesCurso(cursoParam){
         blocoRestricoes.style.display = 'none';
     }
 
+    // Renderizar Horários e Vagas Disponíveis
+    const listaHorariosEl = document.getElementById('detalheCursoListaHorarios');
+    const totalVagasBadgeEl = document.getElementById('detalheCursoTotalVagasBadge');
+    const disponibilidades = Array.isArray(curso.disponibilidades) ? curso.disponibilidades : [];
+
+    let totalVagasLivres = 0;
+    let horariosHTML = '';
+
+    if (disponibilidades.length === 0) {
+        horariosHTML = `
+            <div class="col-12">
+                <div class="p-3 bg-light rounded text-center small text-muted">
+                    <i class="bi bi-calendar-x me-1"></i> Não há horários abertos para este procedimento no momento.
+                </div>
+            </div>
+        `;
+    } else {
+        disponibilidades.forEach(disp => {
+            const vagasLivres = Math.max(0, (disp.vagas_totais || 0) - (disp.vagas_ocupadas || 0));
+            totalVagasLivres += vagasLivres;
+            const dataHoraFormatada = disp.data_hora
+                ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                : 'Data a definir';
+
+            const isEsgotado = vagasLivres <= 0;
+            const badgeVagasDisp = isEsgotado
+                ? '<span class="badge bg-secondary">Esgotado</span>'
+                : `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-people-fill me-1"></i> ${vagasLivres} vaga(s)</span>`;
+
+            const botaoAcao = isEsgotado
+                ? '<button class="btn btn-sm btn-secondary disabled" disabled>Esgotado</button>'
+                : `<button type="button" class="btn btn-sm btn-orange fw-bold" onclick="selecionarHorarioEAgendar('${curso.id}', '${disp.id}')"><i class="bi bi-calendar-plus me-1"></i> Agendar Vaga</button>`;
+
+            horariosHTML += `
+                <div class="col-12 col-md-6">
+                    <div class="p-2 border rounded d-flex justify-content-between align-items-center bg-light bg-opacity-50">
+                        <div>
+                            <div class="fw-bold small text-dark"><i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada}</div>
+                            <div class="mt-1">${badgeVagasDisp}</div>
+                        </div>
+                        <div>
+                            ${botaoAcao}
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    if (listaHorariosEl) listaHorariosEl.innerHTML = horariosHTML;
+    if (totalVagasBadgeEl) {
+        totalVagasBadgeEl.innerHTML = `<i class="bi bi-people-fill me-1"></i> ${totalVagasLivres} vaga(s) no total`;
+        totalVagasBadgeEl.className = totalVagasLivres > 0
+            ? 'badge bg-success bg-opacity-10 text-success border border-success border-opacity-25'
+            : 'badge bg-secondary bg-opacity-10 text-secondary border';
+    }
+
     const btnHorarios = document.getElementById('btnIrParaHorarios');
     btnHorarios.onclick = () => {
         modalDetalhesCurso.hide();
@@ -363,7 +442,16 @@ window.currentSchedulingData = {
     localizacao: 'SENAC - Santo Antônio de Jesus, BA'
 };
 
-async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
+function selecionarHorarioEAgendar(cursoId, dispId) {
+    if (modalDetalhesCurso) modalDetalhesCurso.hide();
+    const curso = window.cursosAtivosMap.get(String(cursoId));
+    setTimeout(() => {
+        abrirModalAgendamento(cursoId, curso?.nome || 'Curso SENAC', curso?.descricao || '', dispId);
+    }, 400);
+}
+window.selecionarHorarioEAgendar = selecionarHorarioEAgendar;
+
+async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, preselectedDispId = null){
     if (!modalAgendamento) return;
 
     window.currentSchedulingData.cursoNome = cursoNome;
@@ -456,6 +544,10 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao){
                 resumo.classList.remove('d-none');
             });
             grade.appendChild(chip);
+
+            if (preselectedDispId && String(h.id) === String(preselectedDispId)) {
+                setTimeout(() => chip.click(), 100);
+            }
         });
 
     } catch (error) {

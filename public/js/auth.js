@@ -10,8 +10,10 @@ const API_URL = isLocalDev
 function getSafeReturnUrl() {
   const params = new URLSearchParams(window.location.search);
   const cursoId = params.get("curso");
+  const horarioId = params.get("horario");
   if (cursoId) {
-    return `painel.html?curso=${encodeURIComponent(cursoId)}`;
+    const horarioParam = horarioId ? `&horario=${encodeURIComponent(horarioId)}` : '';
+    return `painel.html?curso=${encodeURIComponent(cursoId)}${horarioParam}`;
   }
 
   const rawReturnUrl = params.get("returnUrl");
