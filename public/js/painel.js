@@ -223,9 +223,10 @@ function renderizarVitrineCursos(){
                             <span>•</span>
                             <span><i class="bi bi-person-badge-fill text-primary me-1"></i> Prof. ${profNome}</span>
                         </div>
-                        <p class="card-text small text-secondary mb-2">${descResumo}</p>
+                        <p class="card-text mb-2">${descResumo}</p>
                         
                         <div class="course-syllabus-box">
+                            <strong class="d-block small fw-bold mb-2"><i class="bi bi-journal-text text-primary me-1"></i> O que você recebe na sessão:</strong>
                             <ul class="course-syllabus-list">
                                 <li><i class="bi bi-check2-circle"></i> <span>${motivo}</span></li>
                             </ul>

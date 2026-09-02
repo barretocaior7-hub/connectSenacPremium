@@ -889,25 +889,47 @@ a:hover {
 }
 
 .search-bar-premium {
-  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-color);
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: var(--shadow-sm);
-  background: #ffffff;
+  box-shadow: var(--shadow-xs);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+}
+
+.search-bar-premium:focus-within {
+  border-color: var(--senac-blue);
+  box-shadow: 0 0 0 3px var(--senac-blue-glow);
 }
 
 .search-bar-premium .input-group-text {
-  border-color: var(--border-color);
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted);
   font-size: 1rem;
+  padding-left: 1rem;
+  padding-right: 0.4rem;
 }
 
 .search-bar-premium .form-control {
-  border-color: var(--border-color);
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-primary);
   font-size: 0.92rem;
+  padding-left: 0.3rem;
+  padding-right: 1rem;
 }
 
 .search-bar-premium .form-control:focus {
-  box-shadow: none;
-  border-color: var(--border-color);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: var(--text-primary);
+}
+
+.search-bar-premium .form-control::placeholder {
+  color: var(--text-muted);
+  opacity: 0.85;
 }
 
 /* ==========================================================================
@@ -1798,11 +1820,19 @@ body.ui-page-leaving { pointer-events: none; opacity: 0; transition: opacity .2s
 }
 
 .course-syllabus-box {
-  background: #f8fafc;
-  border: 1px solid #edf2f7;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
   border-radius: 12px;
-  padding: 0.9rem;
+  padding: 0.95rem;
   margin: 0.85rem 0;
+}
+
+.course-syllabus-box strong {
+  color: #0f172a;
+  font-size: 0.88rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.4rem;
 }
 
 .course-syllabus-list {
@@ -1812,18 +1842,31 @@ body.ui-page-leaving { pointer-events: none; opacity: 0; transition: opacity .2s
 }
 
 .course-syllabus-list li {
-  font-size: 0.84rem;
-  color: #334155;
-  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  color: #1e293b;
+  font-weight: 500;
+  margin-bottom: 0.45rem;
   display: flex;
   align-items: flex-start;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  line-height: 1.45;
+}
+
+.course-syllabus-list li span {
+  color: inherit;
 }
 
 .course-syllabus-list li i {
   color: var(--senac-blue);
   margin-top: 2px;
   flex-shrink: 0;
+  font-size: 1rem;
+}
+
+.course-detail-card .card-text {
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 /* 4. CHIPS DE HORÁRIO DINÂMICOS (SELEÇÃO EM FORMATO DE CARDS) */
@@ -2354,17 +2397,66 @@ body.dark-mode .card-course-interactive .card-img-container {
   background: #0d1527 !important;
 }
 
+[data-theme="dark"] .course-detail-card .card-text,
+body.dark-mode .course-detail-card .card-text,
+[data-theme="dark"] .card-course-interactive .card-text,
+body.dark-mode .card-course-interactive .card-text {
+  color: #e2e8f0 !important;
+  font-size: 0.9rem !important;
+  line-height: 1.55 !important;
+}
+
+[data-theme="dark"] .course-detail-card .text-secondary,
+body.dark-mode .course-detail-card .text-secondary {
+  color: #e2e8f0 !important;
+}
+
+[data-theme="dark"] .course-detail-card .text-muted,
+body.dark-mode .course-detail-card .text-muted {
+  color: #cbd5e1 !important;
+}
+
 [data-theme="dark"] .course-syllabus-box,
 body.dark-mode .course-syllabus-box,
 [data-theme="dark"] .public-course-info > div,
 body.dark-mode .public-course-info > div {
-  background-color: #18243e !important;
-  border-color: rgba(255, 255, 255, 0.08) !important;
+  background-color: #1a2744 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .course-syllabus-box strong,
+body.dark-mode .course-syllabus-box strong {
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .course-syllabus-box strong i,
+body.dark-mode .course-syllabus-box strong i {
+  color: #38bdf8 !important;
 }
 
 [data-theme="dark"] .course-syllabus-list li,
-body.dark-mode .course-syllabus-list li {
-  color: #cbd5e1 !important;
+body.dark-mode .course-syllabus-list li,
+[data-theme="dark"] .course-syllabus-list li span,
+body.dark-mode .course-syllabus-list li span,
+[data-theme="dark"] .course-syllabus-list li .text-muted,
+body.dark-mode .course-syllabus-list li .text-muted {
+  color: #f1f5f9 !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+}
+
+[data-theme="dark"] .course-syllabus-list li i,
+body.dark-mode .course-syllabus-list li i {
+  color: #34d399 !important;
+  font-size: 1.05rem !important;
+  filter: drop-shadow(0 0 5px rgba(52, 211, 153, 0.35));
+}
+
+[data-theme="dark"] .course-syllabus-list li i.bi-exclamation-circle,
+body.dark-mode .course-syllabus-list li i.bi-exclamation-circle {
+  color: #fbbf24 !important;
+  filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.35));
 }
 
 [data-theme="dark"] .notice-box-20min,
@@ -2549,6 +2641,49 @@ body.dark-mode .form-select:focus {
 [data-theme="dark"] .form-select,
 body.dark-mode .form-select {
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+/* Barra de Pesquisa Premium Unificada (Zero Borda Branca) */
+[data-theme="dark"] .search-bar-premium,
+body.dark-mode .search-bar-premium {
+  background-color: #18243e !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .search-bar-premium:focus-within,
+body.dark-mode .search-bar-premium:focus-within {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25) !important;
+}
+
+[data-theme="dark"] .search-bar-premium .input-group-text,
+body.dark-mode .search-bar-premium .input-group-text {
+  background-color: transparent !important;
+  border: none !important;
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .search-bar-premium .form-control,
+body.dark-mode .search-bar-premium .form-control {
+  background-color: transparent !important;
+  border: none !important;
+  color: #f8fafc !important;
+  box-shadow: none !important;
+}
+
+[data-theme="dark"] .search-bar-premium .form-control:focus,
+body.dark-mode .search-bar-premium .form-control:focus {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .search-bar-premium .form-control::placeholder,
+body.dark-mode .search-bar-premium .form-control::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.9 !important;
 }
 
 /* Tabelas e Moderação */
