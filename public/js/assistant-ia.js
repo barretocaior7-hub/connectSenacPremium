@@ -32,6 +32,12 @@
 
   function getLocalFallback(userMessage) {
     const cleanMsg = userMessage.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+    const foraDeContexto = /\b(codigo|calculadora|javascript|python|programa|script|jogo|receita|piada|funcao|algoritmo)\b/i.test(cleanMsg);
+    if (foraDeContexto) {
+      return `Desculpe, sou o assistente virtual exclusivo do Connect Senac e só posso responder sobre nossos agendamentos, serviços práticos e cursos para modelos voluntários. Como posso te ajudar com o seu agendamento hoje? 😊`;
+    }
+
     for (const item of knowledgeBase) {
       if (item.keywords.some(kw => cleanMsg.includes(kw))) {
         return item.response;
