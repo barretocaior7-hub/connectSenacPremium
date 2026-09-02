@@ -420,10 +420,9 @@
             <div class="alert d-flex align-items-start gap-3 mb-4 border-0 rounded-3" style="background: var(--state-info-bg); border-left: 4px solid var(--state-info) !important;">
               <i class="bi bi-info-circle-fill text-info fs-5 mt-1 flex-shrink-0"></i>
               <div>
-                <strong class="text-dark d-block mb-1">Escopo de moderacao</strong>
+                <strong class="text-dark d-block mb-1">Painel de Candidatos & Modelos</strong>
                 <span class="text-secondary small">
-                  Como coordenador, voce pode visualizar todos os candidatos e excluir contas inativas.
-                  Acoes como bloqueio e alteracao de cargo sao restritas ao <strong>Administrador</strong>.
+                  Como coordenador, você pode visualizar todos os candidatos, conferir o consentimento de termos <strong>LGPD e Uso de Imagem</strong>, além de moderar e bloquear modelos da unidade.
                 </span>
               </div>
             </div>
@@ -431,18 +430,17 @@
               <table class="table table-custom align-middle">
                 <thead>
                   <tr>
-                    <th>Nome</th>
-                    <th>E-mail / Contato</th>
-                    <th>Matricula Ativa</th>
-                    <th class="text-center">Agendados</th>
-                    <th class="text-center">Concluidos</th>
-                    <th class="text-center">Cancelados</th>
-                    <th class="text-end">Acoes</th>
+                    <th>Nome / Status</th>
+                    <th>E-mail & Contato</th>
+                    <th>LGPD & Imagem</th>
+                    <th>Matrícula Ativa</th>
+                    <th class="text-center">Sessões</th>
+                    <th class="text-center" style="min-width: 200px;">Ações</th>
                   </tr>
                 </thead>
                 <tbody id="tabelaUsuariosBody">
                   <tr>
-                    <td colspan="7" class="text-center text-muted py-4">
+                    <td colspan="6" class="text-center text-muted py-4">
                       <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
                       Carregando candidatos...
                     </td>

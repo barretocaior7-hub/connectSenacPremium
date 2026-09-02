@@ -827,7 +827,7 @@ function renderizarCandidatos(lista) {
 
   if (!Array.isArray(lista) || lista.length === 0) {
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum candidato encontrado.</td></tr>';
+      '<tr><td colspan="6" class="text-center text-muted py-4"><i class="bi bi-search me-1"></i> Nenhum candidato encontrado.</td></tr>';
     return;
   }
 
@@ -841,16 +841,35 @@ function renderizarCandidatos(lista) {
       ? '<span class="badge-custom badge-status-bloqueado"><i class="bi bi-lock-fill"></i> Bloqueado</span>'
       : '<span class="badge-custom badge-status-concluido"><i class="bi bi-check-circle-fill"></i> Ativo</span>';
 
+    const badgeLgpd = user.consentimento_termos
+      ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.72rem;" title="Termos LGPD Aceitos"><i class="bi bi-shield-check me-1"></i> LGPD OK</span>'
+      : '<span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 0.72rem;" title="Termos LGPD Não Aceitos"><i class="bi bi-shield-x me-1"></i> Sem LGPD</span>';
+
+    const badgeImagem = user.consentimento_imagem
+      ? '<span class="badge bg-info-subtle text-info-emphasis border border-info-subtle" style="font-size: 0.72rem;" title="Uso de Imagem Autorizado"><i class="bi bi-camera-fill me-1"></i> Imagem OK</span>'
+      : '<span class="badge bg-light text-muted border" style="font-size: 0.72rem;" title="Uso de Imagem Não Autorizado"><i class="bi bi-camera-video-off me-1"></i> Sem Imagem</span>';
+
     const telLimpo = (user.telefone || "").replace(/\D/g, "");
     const msgZap = encodeURIComponent(
-      `Ola, ${user.nome}! Aqui e a Coordenacao do Connect Senac.`
+      `Olá, ${user.nome}! Aqui é a Coordenação do Connect Senac.`
     );
     const btnZap = telLimpo
-      ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success p-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
+      ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success py-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
       : '<span class="text-muted small">-</span>';
 
-    const btnBloqueio = `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', ${Boolean(user.is_bloqueado)})" title="${user.is_bloqueado ? 'Desbloquear modelo' : 'Bloquear modelo'}"><i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i></button>`;
-    const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCandidato('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Candidato')}'))" title="Excluir modelo"><i class="bi bi-trash-fill"></i></button>`;
+    const btnBloqueio = user.is_bloqueado
+      ? `<button class="btn btn-sm btn-success fw-bold py-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', true)" title="Clique para desbloquear este modelo"><i class="bi bi-unlock-fill me-1"></i>Desbloquear</button>`
+      : `<button class="btn btn-sm btn-warning text-dark fw-bold py-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', false)" title="Clique para bloquear este modelo"><i class="bi bi-lock-fill me-1"></i>Bloquear</button>`;
+
+    const btnExcluir = `<button class="btn btn-sm btn-danger fw-bold py-1 px-2" onclick="excluirCandidato('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Candidato')}'))" title="Excluir modelo permanentemente"><i class="bi bi-trash-fill me-1"></i>Excluir</button>`;
+
+    const sessoesBadge = `
+      <div class="d-flex flex-wrap justify-content-center gap-1" style="font-size: 0.74rem;">
+        <span class="badge bg-primary-subtle text-primary border" title="Agendados">${user.total_agendados || 0} Agend.</span>
+        <span class="badge bg-success-subtle text-success border" title="Concluídos">${user.total_concluidos || 0} Conc.</span>
+        <span class="badge bg-danger-subtle text-danger border" title="Cancelados">${user.total_cancelados || 0} Canc.</span>
+      </div>
+    `;
 
     tbody.innerHTML += `
       <tr>
@@ -862,12 +881,13 @@ function renderizarCandidatos(lista) {
           <div class="small text-dark">${emailFormatado}</div>
           <div class="text-muted small">${telFormatado}</div>
         </td>
+        <td>
+          <div class="d-flex flex-column gap-1">${badgeLgpd}${badgeImagem}</div>
+        </td>
         <td><span class="text-secondary small fw-semibold">${cursosAtivosFormatado}</span></td>
-        <td class="text-center fw-bold text-primary">${user.total_agendados || 0}</td>
-        <td class="text-center fw-bold text-success">${user.total_concluidos || 0}</td>
-        <td class="text-center fw-bold text-danger">${user.total_cancelados || 0}</td>
-        <td class="text-end text-nowrap">
-          <div class="d-inline-flex gap-1">
+        <td class="text-center">${sessoesBadge}</td>
+        <td class="text-center text-nowrap">
+          <div class="d-inline-flex align-items-center gap-1">
             ${btnZap}
             ${btnBloqueio}
             ${btnExcluir}
