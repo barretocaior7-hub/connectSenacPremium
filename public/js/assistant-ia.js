@@ -71,7 +71,7 @@
     container.id = 'senac-ai-container';
     container.innerHTML = `
       <!-- Botão Flutuante da I.A. -->
-      <button id="btnAiToggle" class="senac-ai-fab" title="Assistente Virtual SENAC AI (Gemini 3.6 Flash)" aria-label="Abrir Assistente Virtual">
+      <button id="btnAiToggle" class="senac-ai-fab" title="Assistente Virtual SENAC AI (Gemini Flash Lite)" aria-label="Abrir Assistente Virtual">
         <i class="bi bi-robot"></i>
         <span class="senac-ai-fab-badge">IA</span>
       </button>
@@ -85,7 +85,7 @@
             </div>
             <div>
               <strong class="d-block font-heading" style="font-size: 0.95rem;">Connect AI • SENAC</strong>
-              <small class="text-white-50" style="font-size: 0.72rem;"><i class="bi bi-cpu me-1"></i>Gemini 3.6 Flash</small>
+              <small class="text-white-50" style="font-size: 0.72rem;"><i class="bi bi-cpu me-1"></i>Gemini Flash Lite</small>
             </div>
           </div>
           <button id="btnAiClose" class="btn-close btn-close-white" aria-label="Fechar"></button>
@@ -93,7 +93,7 @@
 
         <div class="senac-ai-body" id="senacAiMessages">
           <div class="senac-ai-msg bot">
-            <span>Olá! 👋 Sou a Inteligência Artificial do <strong>Connect Senac</strong> (alimentada pelo Gemini 3.6 Flash). Como posso te ajudar hoje?</span>
+            <span>Olá! 👋 Sou a Inteligência Artificial do <strong>Connect Senac</strong> (alimentada pelo Gemini Flash Lite). Como posso te ajudar hoje?</span>
           </div>
           <div class="senac-ai-chips">
             <button class="ai-chip" data-query="É gratuito?">É gratuito?</button>

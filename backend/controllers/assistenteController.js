@@ -28,15 +28,15 @@ exports.conversar = async (req, res) => {
             });
         }
 
-        // Monta o histórico de mensagens
+        // Monta o histórico de mensagens enxuto para poupar tokens
         const contents = [];
 
         if (Array.isArray(historico)) {
-            historico.slice(-8).forEach(item => {
+            historico.slice(-4).forEach(item => {
                 if (item && item.text && (item.role === 'user' || item.role === 'model')) {
                     contents.push({
                         role: item.role,
-                        parts: [{ text: String(item.text).slice(0, 1000) }]
+                        parts: [{ text: String(item.text).slice(0, 300) }]
                     });
                 }
             });
@@ -45,11 +45,11 @@ exports.conversar = async (req, res) => {
         // Adiciona a mensagem atual do usuário
         contents.push({
             role: 'user',
-            parts: [{ text: mensagem.trim().slice(0, 1000) }]
+            parts: [{ text: mensagem.trim().slice(0, 500) }]
         });
 
-        const modelo = process.env.GEMINI_MODEL || 'gemini-3.6-flash';
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`;
+        const modeloPrincipal = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+        const modelosParaTentar = [modeloPrincipal, 'gemini-flash-lite-latest'];
 
         const payload = {
             system_instruction: {
@@ -57,52 +57,53 @@ exports.conversar = async (req, res) => {
             },
             contents,
             generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 1500
+                temperature: 0.6,
+                maxOutputTokens: 500
             }
         };
 
         let data = null;
         let lastError = null;
+        let modeloUsado = modeloPrincipal;
 
-        // Executa até 3 tentativas para mitigar picos de demanda temporários (503) da API
-        for (let attempt = 1; attempt <= 3; attempt++) {
-            try {
-                const response = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
-                    signal: AbortSignal.timeout(15000)
-                });
+        // Tenta os modelos Flash Lite disponíveis com retry resiliente
+        for (const mod of modelosParaTentar) {
+            modeloUsado = mod;
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${mod}:generateContent?key=${apiKey}`;
 
-                data = await response.json();
-
-                if (response.ok && data.candidates && data.candidates.length > 0) {
-                    lastError = null;
-                    break;
-                }
-
-                // Se recebeu 503 (alta demanda temporária), aguarda e tenta novamente
-                if (response.status === 503 || data.error?.code === 503) {
-                    lastError = data.error?.message || '503 High Demand';
-                    if (attempt < 3) {
-                        await new Promise(r => setTimeout(r, attempt * 600));
-                        continue;
-                    }
-                } else if (response.status === 429 || data.error?.code === 429) {
-                    lastError = '429 Quota Exceeded';
-                    return res.json({
-                        resposta: 'Olá! O nosso assistente atingiu o limite temporário de requisições por minuto da API do Google. Por favor, aguarde cerca de 1 minuto para nova tentativa ou clique no botão do WhatsApp para falar diretamente com a coordenação!'
+            for (let attempt = 1; attempt <= 2; attempt++) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload),
+                        signal: AbortSignal.timeout(12000)
                     });
-                } else {
-                    lastError = data.error?.message || 'Erro na API Gemini';
-                    break;
+
+                    data = await response.json();
+
+                    if (response.ok && data.candidates && data.candidates.length > 0) {
+                        lastError = null;
+                        break;
+                    }
+
+                    if (response.status === 429 || data.error?.code === 429) {
+                        lastError = '429 Quota Exceeded';
+                        break; // tenta o próximo modelo da lista
+                    } else if (response.status === 503 || data.error?.code === 503) {
+                        lastError = data.error?.message || '503 High Demand';
+                        if (attempt < 2) await new Promise(r => setTimeout(r, 500));
+                    } else {
+                        lastError = data.error?.message || 'Erro na API Gemini';
+                        break;
+                    }
+                } catch (fetchErr) {
+                    lastError = fetchErr.message;
                 }
-            } catch (fetchErr) {
-                lastError = fetchErr.message;
-                if (attempt < 3) {
-                    await new Promise(r => setTimeout(r, attempt * 600));
-                }
+            }
+
+            if (data && data.candidates && data.candidates.length > 0) {
+                break; // Sucesso com este modelo!
             }
         }
 
@@ -131,7 +132,7 @@ exports.conversar = async (req, res) => {
 
         res.json({
             resposta: respostaTexto.trim(),
-            modelo: 'gemini-3.6-flash'
+            modelo: modeloUsado
         });
 
     } catch (error) {
