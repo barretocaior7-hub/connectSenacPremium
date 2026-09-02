@@ -849,7 +849,8 @@ function renderizarCandidatos(lista) {
       ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success p-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
       : '<span class="text-muted small">-</span>';
 
-    const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCandidato('${user.id}', '${user.nome.replace(/'/g, "\\'")}')"><i class="bi bi-trash-fill"></i></button>`;
+    const btnBloqueio = `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', ${Boolean(user.is_bloqueado)})" title="${user.is_bloqueado ? 'Desbloquear modelo' : 'Bloquear modelo'}"><i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i></button>`;
+    const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCandidato('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Candidato')}'))" title="Excluir modelo"><i class="bi bi-trash-fill"></i></button>`;
 
     tbody.innerHTML += `
       <tr>
@@ -868,6 +869,7 @@ function renderizarCandidatos(lista) {
         <td class="text-end text-nowrap">
           <div class="d-inline-flex gap-1">
             ${btnZap}
+            ${btnBloqueio}
             ${btnExcluir}
           </div>
         </td>
@@ -887,10 +889,37 @@ function aplicarFiltroCandidatos() {
   renderizarCandidatos(filtrados);
 }
 
+async function toggleBloqueioCandidato(id, statusAtual) {
+  const acao = statusAtual ? "desbloquear" : "bloquear";
+  if (!confirm(`Tem certeza que deseja ${acao} este modelo?`)) return;
+
+  try {
+    const response = await fetch(`${API_URL}/admin/usuarios/${id}/bloquear`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({ is_bloqueado: !statusAtual })
+    });
+
+    const resData = await response.json();
+    if (response.ok) {
+      alert(resData.mensagem || `Modelo ${statusAtual ? "desbloqueado" : "bloqueado"} com sucesso!`);
+      carregarCandidatos();
+      carregarMetricas();
+    } else {
+      alert(resData.erro || "Erro ao alterar status.");
+    }
+  } catch (error) {
+    alert("Erro de conexão ao alterar status.");
+  }
+}
+
 async function excluirCandidato(id, nome) {
   if (
     !confirm(
-      `ATENCAO: Tem certeza que deseja remover a conta de ${nome}? Todos seus agendamentos serao excluidos.`
+      `ATENÇÃO: Tem certeza que deseja remover permanentemente a conta de "${nome}"? Todos seus agendamentos serão excluídos.`
     )
   )
     return;
@@ -899,15 +928,16 @@ async function excluirCandidato(id, nome) {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
+    const resData = await response.json();
     if (response.ok) {
+      alert(resData.mensagem || `Modelo "${nome}" excluído com sucesso!`);
       carregarCandidatos();
       carregarMetricas();
     } else {
-      const err = await response.json();
-      alert(err.erro || "Erro ao remover conta.");
+      alert(resData.erro || "Erro ao remover conta.");
     }
   } catch (error) {
-    alert("Erro na conexao com o servidor.");
+    alert("Erro na conexão com o servidor ao excluir modelo.");
   }
 }
 
@@ -957,3 +987,7 @@ async function desarquivarCurso(id, nome) {
         alert('Erro ao conectar com o servidor.');
     }
 }
+
+// Exportações globais para a tabela
+window.excluirCandidato = excluirCandidato;
+window.toggleBloqueioCandidato = toggleBloqueioCandidato;

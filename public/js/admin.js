@@ -170,17 +170,27 @@ function renderizarTabelaUsuários(lista){
             `;
         }
 
-        const podeBloquear = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin' && user.perfil !== 'coordenador');
-        const btnBloqueio = podeBloquear
-            ? `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueio('${user.id}', ${user.is_bloqueado})" title="${user.is_bloqueado ? 'Desbloquear conta' : 'Bloquear conta'}">
-                <i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i>
-               </button>` : '';
+        const isSelf = user.id === payloadToken.id;
+        const isAdmin = (payloadToken.perfil || '').toLowerCase() === 'admin';
+        const isCoord = (payloadToken.perfil || '').toLowerCase() === 'coordenador';
 
-        const podeExcluir = payloadToken.perfil === 'admin' || (payloadToken.perfil === 'coordenador' && user.perfil !== 'admin' && user.perfil !== 'coordenador');
-        const btnExcluir = podeExcluir
-            ? `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', '${user.nome.replace(/'/g, "\\'")}')" title="Excluir conta">
+        let btnBloqueio = '';
+        if (isSelf) {
+            btnBloqueio = `<button class="btn btn-sm btn-outline-secondary p-1 px-2" disabled title="Você não pode bloquear sua própria conta"><i class="bi bi-lock"></i></button>`;
+        } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
+            btnBloqueio = `<button class="btn btn-sm ${user.is_bloqueado ? 'btn-outline-success' : 'btn-outline-warning'} p-1 px-2" onclick="toggleBloqueio('${user.id}', ${Boolean(user.is_bloqueado)})" title="${user.is_bloqueado ? 'Desbloquear usuário' : 'Bloquear / Suspender usuário'}">
+                <i class="bi ${user.is_bloqueado ? 'bi-unlock-fill' : 'bi-lock-fill'}"></i>
+            </button>`;
+        }
+
+        let btnExcluir = '';
+        if (isSelf) {
+            btnExcluir = `<button class="btn btn-sm btn-outline-secondary p-1 px-2" disabled title="Você não pode excluir sua própria conta"><i class="bi bi-trash"></i></button>`;
+        } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
+            btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Usuário')}'))" title="Excluir usuário permanentemente">
                 <i class="bi bi-trash-fill"></i>
-               </button>` : '';
+            </button>`;
+        }
 
         const row = `
             <tr>
@@ -268,7 +278,7 @@ async function alterarPerfil(idUsuario, novoPerfil){
 
 async function toggleBloqueio(id, statusAtual){
     const acao = statusAtual ? 'desbloquear' : 'bloquear';
-    if (!confirm(`Tem a certeza que deseja ${acao} este usuário?`)) return;
+    if (!confirm(`Tem certeza que deseja ${acao} o acesso deste usuário ao sistema?`)) return;
 
     try {
         const response = await fetch(`${API_URL}/admin/usuarios/${id}/bloquear`, {
@@ -280,15 +290,16 @@ async function toggleBloqueio(id, statusAtual){
             body: JSON.stringify({ is_bloqueado: !statusAtual })
         });
 
+        const resData = await response.json();
         if (response.ok) {
+            alert(resData.mensagem || `Usuário ${statusAtual ? 'desbloqueado' : 'bloqueado'} com sucesso!`);
             carregarUsuários();
             carregarMetricas();
         } else {
-            const err = await response.json();
-            alert(err.erro || 'Erro ao alterar status.');
+            alert(resData.erro || 'Erro ao alterar status.');
         }
     } catch (error) {
-        alert("Erro de ligação.");
+        alert("Erro de conexão ao alterar status do usuário.");
     }
 }
 
@@ -604,7 +615,7 @@ async function carregarProfissionaisNoSelect(){
 }
 
 async function excluirUsuario(id, nome){
-    if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja remover a conta de ${nome}? Todos seus agendamentos serão excluídos.`)) return;
+    if (!confirm(`ATENÇÃO: Tem certeza absoluta que deseja excluir a conta de "${nome}"?\n\nEsta ação é irreversível e removerá todos os agendamentos e dados relacionados.`)) return;
 
     try {
         const response = await fetch(`${API_URL}/admin/usuarios/${id}`, {
@@ -612,15 +623,16 @@ async function excluirUsuario(id, nome){
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
+        const resData = await response.json();
         if (response.ok) {
+            alert(resData.mensagem || `Usuário "${nome}" excluído do sistema com sucesso!`);
             carregarUsuários();
             carregarMetricas();
         } else {
-            const err = await response.json();
-            alert(err.erro || 'Erro ao remover conta.');
+            alert(resData.erro || 'Erro ao remover conta.');
         }
     } catch (error) {
-        alert("Erro na conexão com o servidor.");
+        alert("Erro na conexão com o servidor ao excluir usuário.");
     }
 }
 
@@ -1013,3 +1025,8 @@ if (colabTelInput) {
         colabTelInput.value = formatted;
     });
 }
+
+// Exportações globais para os botões inline da tabela de usuários
+window.excluirUsuario = excluirUsuario;
+window.toggleBloqueio = toggleBloqueio;
+window.alterarPerfil = alterarPerfil;

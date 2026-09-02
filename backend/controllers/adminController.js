@@ -158,7 +158,19 @@ exports.excluirUsuario = async (req, res) => {
             return res.status(403).json({ erro: 'Coordenadores não possuem permissão para excluir Administradores ou outros Coordenadores.' });
         }
 
-        // 3. Executar deleção (O banco em cascata limpa agendamentos associados)
+        // 3. Desvincular cursos se o usuário for profissional docente
+        await supabase
+            .from('cursos')
+            .update({ profissional_id: null })
+            .eq('profissional_id', id);
+
+        // 4. Limpar agendamentos associados
+        await supabase
+            .from('agendamentos')
+            .delete()
+            .eq('usuario_id', id);
+
+        // 5. Executar deleção definitiva do usuário
         const { error: erroExclusao } = await supabase
             .from('usuarios')
             .delete()
