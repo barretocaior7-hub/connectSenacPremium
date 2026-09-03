@@ -26,6 +26,50 @@
     <meta property="og:description" content="Atendimentos 100% gratuitos e supervisionados por docentes do SENAC. Agende sua vaga online!">
     <meta property="og:image" content="/assets/logo-connect-senac.png">
     <meta property="og:type" content="website">
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('themeMode') || localStorage.getItem('theme');
+          if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
+    <style>
+      [data-theme="dark"] .workspace-section-header,
+      [data-theme="dark"] .section-header-custom,
+      body.dark-mode .workspace-section-header,
+      body.dark-mode .section-header-custom {
+        background-color: #131e33 !important;
+        background: #131e33 !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+      }
+      [data-theme="dark"] .workspace-section-header .section-title,
+      [data-theme="dark"] .section-header-custom .section-title,
+      [data-theme="dark"] .section-header-custom h4,
+      body.dark-mode .workspace-section-header .section-title,
+      body.dark-mode .section-header-custom .section-title,
+      body.dark-mode .section-header-custom h4 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+      }
+      [data-theme="dark"] .workspace-section-header .text-muted,
+      [data-theme="dark"] .section-header-custom .text-muted,
+      [data-theme="dark"] .section-header-custom p,
+      body.dark-mode .workspace-section-header .text-muted,
+      body.dark-mode .section-header-custom .text-muted,
+      body.dark-mode .section-header-custom p {
+        color: #cbd5e1 !important;
+      }
+      [data-theme="dark"] .workspace-section-header .bi-journal-text,
+      [data-theme="dark"] .section-header-custom .bi-journal-text,
+      body.dark-mode .workspace-section-header .bi-journal-text,
+      body.dark-mode .section-header-custom .bi-journal-text {
+        color: #60a5fa !important;
+      }
+    </style>
 </head>
   <body class="bg-main d-flex flex-column min-vh-100 dashboard-page professional-page">
     <!-- Navbar -->

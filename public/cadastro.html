@@ -20,6 +20,47 @@
     <meta property="og:description" content="Atendimentos 100% gratuitos e supervisionados por docentes do SENAC. Agende sua vaga online!">
     <meta property="og:image" content="/assets/logo-connect-senac.png">
     <meta property="og:type" content="website">
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('themeMode') || localStorage.getItem('theme');
+          if (saved === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch(e) {}
+      })();
+    </script>
+    <style>
+      [data-theme="dark"] .form-floating,
+      body.dark-mode .form-floating {
+        --bs-body-bg: transparent !important;
+        --bs-body-color: #ffffff !important;
+      }
+      [data-theme="dark"] .form-floating > label,
+      [data-theme="dark"] .form-floating > .form-select ~ label,
+      [data-theme="dark"] label[for="ddiPais"],
+      body.dark-mode .form-floating > label,
+      body.dark-mode .form-floating > .form-select ~ label,
+      body.dark-mode label[for="ddiPais"] {
+        color: #ffffff !important;
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+      [data-theme="dark"] .form-floating > label::after,
+      [data-theme="dark"] .form-floating > label::before,
+      [data-theme="dark"] label[for="ddiPais"]::after,
+      [data-theme="dark"] label[for="ddiPais"]::before,
+      body.dark-mode .form-floating > label::after,
+      body.dark-mode .form-floating > label::before,
+      body.dark-mode label[for="ddiPais"]::after,
+      body.dark-mode label[for="ddiPais"]::before {
+        background: transparent !important;
+        background-color: transparent !important;
+        display: none !important;
+        content: none !important;
+        opacity: 0 !important;
+      }
+    </style>
 </head>
 <body class="bg-main">
 
