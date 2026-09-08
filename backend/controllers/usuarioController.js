@@ -284,14 +284,6 @@ exports.authGoogle = async (req, res) => {
                 return res.status(403).json({ erro: 'Sua conta está temporariamente suspensa. Entre em contato com a coordenação.' });
             }
 
-            // Atualiza a foto de perfil caso o usuário ainda não tenha
-            if (!usuarioExistente.foto_url && foto_url) {
-                await supabase
-                    .from('usuarios')
-                    .update({ foto_url })
-                    .eq('id', usuarioExistente.id);
-            }
-
             usuarioFinal = usuarioExistente;
         } else {
             // Criação automática de novo usuário como candidato/modelo voluntário
@@ -307,10 +299,8 @@ exports.authGoogle = async (req, res) => {
                         email,
                         telefone: null,
                         senha: senhaHash,
-                        perfil: 'candidato',
                         consentimento_termos: true,
-                        consentimento_imagem: true,
-                        foto_url
+                        consentimento_imagem: true
                     }
                 ])
                 .select();
@@ -328,13 +318,13 @@ exports.authGoogle = async (req, res) => {
                 id: usuarioFinal.id,
                 nome: usuarioFinal.nome,
                 email: usuarioFinal.email,
-                perfil: usuarioFinal.perfil,
-                foto_url: usuarioFinal.foto_url
+                perfil: usuarioFinal.perfil || 'candidato',
+                foto_url: foto_url || null
             }
         });
 
     } catch (error) {
-        console.error('Erro na autenticação com Google:', error.message);
-        return res.status(500).json({ erro: 'Erro interno ao processar login com Google.' });
+        console.error('Erro na autenticação com Google:', error);
+        return res.status(500).json({ erro: error.message || 'Erro interno ao processar login com Google.' });
     }
 };
