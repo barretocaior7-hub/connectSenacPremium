@@ -3737,7 +3737,7 @@ body.high-contrast .accessibility-speaking-highlight {
 .whatsapp-floating-btn,
 #whatsapp-floating-btn {
   position: fixed !important;
-  bottom: 84px !important;
+  bottom: 102px !important; /* Espaçamento generoso acima do botão Dúvidas */
   right: 24px !important;
   z-index: 999990 !important;
   background-color: #25D366;
