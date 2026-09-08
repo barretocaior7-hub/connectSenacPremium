@@ -4,6 +4,46 @@
   'use strict';
 
   function injectCookieConsent() {
+    const hasAdopt = Boolean(document.querySelector('meta[name="adopt-website-id"]') || document.querySelector('.adopt-injector'));
+
+    // Modal de Termos & Privacidade LGPD (mantido para consulta detalhada)
+    if (!document.getElementById('modalLGPDTerms')) {
+      const modalLGPD = document.createElement('div');
+      modalLGPD.id = 'modalLGPDTerms';
+      modalLGPD.className = 'modal fade';
+      modalLGPD.tabIndex = -1;
+      modalLGPD.innerHTML = `
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+          <div class="modal-content">
+            <div class="modal-header bg-senac-blue text-white">
+              <h5 class="modal-title font-heading" id="modalLGPDTitle"><i class="bi bi-shield-check me-2"></i> Termos de Uso e LGPD</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="modal-body text-secondary small p-4">
+              <h6 class="fw-bold text-dark">1. Finalidade do Tratamento de Dados (Lei 13.709/2018 - LGPD)</h6>
+              <p>O Connect Senac coleta dados cadastrais (nome, e-mail, telefone) estritamente para o gerenciamento de pautas, agendamento de modelos voluntários e comunicação institucional relativa às aulas práticas de cursos de formação profissional.</p>
+              
+              <h6 class="fw-bold text-dark mt-3">2. Modelo Voluntário e Isenção de Custos</h6>
+              <p>Os atendimentos realizados pelos alunos são de caráter pedagógico, 100% gratuitos e supervisionados por docentes qualificados do SENAC. O modelo voluntário declara ciência de que os procedimentos são realizados por alunos em treinamento prático.</p>
+
+              <h6 class="fw-bold text-dark mt-3">3. Uso de Imagem (Facultativo)</h6>
+              <p>A cessão de imagem para fins acadêmicos e divulgação do portfólio da turma é opcional e pode ser revogada pelo titular a qualquer momento junto à coordenação.</p>
+
+              <h6 class="fw-bold text-dark mt-3">4. Política de Cancelamento</h6>
+              <p>O cancelamento pelo modelo deve ocorrer com no mínimo 2 horas de antecedência na plataforma para evitar prejuízo pedagógico às turmas práticas.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Entendi e Concordo</button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modalLGPD);
+    }
+
+    // Se o Adopt estiver ativo na página, o Adopt gerencia o banner oficial de cookies
+    if (hasAdopt) return;
+
     if (localStorage.getItem('senac_cookie_consent')) return;
     if (document.getElementById('senac-cookie-banner')) return;
 
@@ -32,59 +72,27 @@
       </div>
     `;
 
-    // Modal de Termos & Privacidade LGPD
-    const modalLGPD = document.createElement('div');
-    modalLGPD.id = 'modalLGPDTerms';
-    modalLGPD.className = 'modal fade';
-    modalLGPD.tabIndex = -1;
-    modalLGPD.innerHTML = `
-      <div class="modal-dialog modal-dialog-scrollable modal-lg">
-        <div class="modal-content">
-          <div class="modal-header bg-senac-blue text-white">
-            <h5 class="modal-title font-heading" id="modalLGPDTitle"><i class="bi bi-shield-check me-2"></i> Termos de Uso e LGPD</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
-          </div>
-          <div class="modal-body text-secondary small p-4">
-            <h6 class="fw-bold text-dark">1. Finalidade do Tratamento de Dados (Lei 13.709/2018 - LGPD)</h6>
-            <p>O Connect Senac coleta dados cadastrais (nome, e-mail, telefone) estritamente para o gerenciamento de pautas, agendamento de modelos voluntários e comunicação institucional relativa às aulas práticas de cursos de formação profissional.</p>
-            
-            <h6 class="fw-bold text-dark mt-3">2. Modelo Voluntário e Isenção de Custos</h6>
-            <p>Os atendimentos realizados pelos alunos são de caráter pedagógico, 100% gratuitos e supervisionados por docentes qualificados do SENAC. O modelo voluntário declara ciência de que os procedimentos são realizados por alunos em treinamento prático.</p>
-
-            <h6 class="fw-bold text-dark mt-3">3. Uso de Imagem (Facultativo)</h6>
-            <p>A cessão de imagem para fins acadêmicos e divulgação do portfólio da turma é opcional e pode ser revogada pelo titular a qualquer momento junto à coordenação.</p>
-
-            <h6 class="fw-bold text-dark mt-3">4. Política de Cancelamento</h6>
-            <p>O cancelamento pelo modelo deve ocorrer com no mínimo 2 horas de antecedência na plataforma para evitar prejuízo pedagógico às turmas práticas.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Entendi e Concordo</button>
-          </div>
-        </div>
-      </div>
-    `;
-
     document.body.appendChild(banner);
-    document.body.appendChild(modalLGPD);
 
-    const modalInstance = typeof bootstrap !== 'undefined' ? new bootstrap.Modal(modalLGPD) : null;
+    const modalLGPD = document.getElementById('modalLGPDTerms');
+    const modalInstance = (typeof bootstrap !== 'undefined' && modalLGPD) ? new bootstrap.Modal(modalLGPD) : null;
 
-    document.getElementById('btnCookiesTodos').addEventListener('click', () => {
+    document.getElementById('btnCookiesTodos')?.addEventListener('click', () => {
       localStorage.setItem('senac_cookie_consent', 'all');
       banner.remove();
     });
 
-    document.getElementById('btnCookiesEssenciais').addEventListener('click', () => {
+    document.getElementById('btnCookiesEssenciais')?.addEventListener('click', () => {
       localStorage.setItem('senac_cookie_consent', 'essential');
       banner.remove();
     });
 
-    document.getElementById('linkAbrirPolitica').addEventListener('click', (e) => {
+    document.getElementById('linkAbrirPolitica')?.addEventListener('click', (e) => {
       e.preventDefault();
       if (modalInstance) modalInstance.show();
     });
 
-    document.getElementById('linkAbrirTermos').addEventListener('click', (e) => {
+    document.getElementById('linkAbrirTermos')?.addEventListener('click', (e) => {
       e.preventDefault();
       if (modalInstance) modalInstance.show();
     });
