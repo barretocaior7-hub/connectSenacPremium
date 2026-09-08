@@ -4347,12 +4347,17 @@ body.dark-mode .upload-preview-container {
   /* Painel de Acessibilidade Ajustado no Mobile */
   #accessibility-toolbar,
   .accessibility-floating-panel {
-    left: 12px !important;
-    right: 12px !important;
-    bottom: 12px !important;
-    width: calc(100vw - 24px) !important;
-    max-width: 100% !important;
+    position: fixed !important;
+    left: 16px !important;
+    right: 16px !important;
+    bottom: 24px !important;
+    width: calc(100vw - 32px) !important;
+    max-width: 360px !important;
+    margin: 0 auto !important;
     z-index: 999999 !important;
+    background: #ffffff !important;
+    border-radius: 18px !important;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
   }
 }
 

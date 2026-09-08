@@ -366,8 +366,13 @@
       }
     }
 
-    window.openAccessibilityMenu = function(show) {
-      toggleAccessibilityPanel(show !== undefined ? show : true);
+    window.openAccessibilityMenu = function(show, event) {
+      if (event && event.stopPropagation) {
+        event.stopPropagation();
+      }
+      setTimeout(() => {
+        toggleAccessibilityPanel(show !== undefined ? show : true);
+      }, 80);
     };
 
     fabBtn.addEventListener('click', (e) => {
@@ -383,9 +388,13 @@
       });
     }
 
-    // Fecha ao clicar fora
+    // Fecha ao clicar fora do painel
     document.addEventListener('click', (e) => {
-      if (!container.contains(e.target) && !panel.classList.contains('d-none')) {
+      // Se clicou dentro do container ou em algum botão/link que dispara a acessibilidade, não fecha
+      if (e.target.closest('#accessibility-container') || e.target.closest('[onclick*="openAccessibilityMenu"]') || e.target.closest('.drawer-link')) {
+        return;
+      }
+      if (!panel.classList.contains('d-none')) {
         toggleAccessibilityPanel(false);
       }
     });
