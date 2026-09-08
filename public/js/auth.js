@@ -465,19 +465,101 @@ document.addEventListener('DOMContentLoaded', () => {
     cadSenha.addEventListener('input', updateStrength);
     cadConfSenha.addEventListener('input', updateStrength);
   }
-
-  // Google Login Hook
-  const btnGoogle = document.getElementById('btnGoogleLogin');
-  if (btnGoogle) {
-    btnGoogle.addEventListener('click', () => {
-      const msgDiv = document.getElementById('mensagemErro') || document.getElementById('mensagemCadastro');
-      if (msgDiv) {
-        msgDiv.classList.remove('d-none');
-        msgDiv.innerHTML = '<div class="alert alert-info py-2 small mb-0"><i class="bi bi-info-circle-fill me-1"></i> Redirecionando para autenticação segura com o Google...</div>';
-      }
-      setTimeout(() => {
-        alert('Integração Google Identity Services pronta para ambiente de produção com o Client ID do SENAC!');
-      }, 500);
-    });
-  }
 });
+
+// ===================================================
+// 6. GOOGLE IDENTITY SERVICES (GIS / OAUTH 2.0)
+// ===================================================
+const GOOGLE_CLIENT_ID = '829544077365-15gti2p3tijsp20fqlcrt3r98cv1820u.apps.googleusercontent.com';
+
+window.handleGoogleCredentialResponse = async function(response) {
+  if (!response || !response.credential) {
+    console.error('Resposta do Google sem credencial válida.');
+    return;
+  }
+
+  const msgDiv = document.getElementById("mensagemErro") || document.getElementById("mensagemCadastro");
+  if (msgDiv) {
+    msgDiv.classList.remove("d-none", "alert-danger", "alert-warning");
+    msgDiv.classList.add("alert", "alert-info");
+    msgDiv.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Validando autenticação com o Google...';
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/auth/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential: response.credential })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.erro || 'Falha ao autenticar com a conta Google.');
+    }
+
+    // Salvar token e dados do usuário na sessão local
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("usuario", JSON.stringify(data.usuário));
+    sessionStorage.setItem("usuarioLogado", JSON.stringify(data.usuário));
+
+    if (msgDiv) {
+      msgDiv.classList.remove("alert-info", "alert-danger");
+      msgDiv.classList.add("alert", "alert-success");
+      msgDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Autenticado com sucesso! Redirecionando...';
+    }
+
+    setTimeout(() => {
+      redirectAfterAuthentication(data.usuário);
+    }, 400);
+
+  } catch (error) {
+    console.error("Erro no login com o Google:", error);
+    if (msgDiv) {
+      msgDiv.classList.remove("alert-info", "alert-success", "d-none");
+      msgDiv.classList.add("alert", "alert-danger");
+      msgDiv.textContent = error.message || "Erro ao conectar com sua conta Google.";
+    }
+  }
+};
+
+function initGoogleAuth() {
+  if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    try {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: window.handleGoogleCredentialResponse,
+        auto_select: false,
+        cancel_on_tap_outside: true
+      });
+
+      // Renderiza botões com a identidade visual apropriada
+      const gButtons = document.querySelectorAll('.g_id_signin');
+      const isDark = (localStorage.getItem('themeMode') || localStorage.getItem('theme')) === 'dark' ||
+                     document.documentElement.getAttribute('data-theme') === 'dark';
+
+      gButtons.forEach(btnContainer => {
+        google.accounts.id.renderButton(btnContainer, {
+          theme: isDark ? 'filled_blue' : 'outline',
+          size: 'large',
+          text: btnContainer.getAttribute('data-text') || 'sign_in_with',
+          shape: 'rectangular',
+          width: Math.min(360, window.innerWidth - 48),
+          locale: 'pt-BR'
+        });
+      });
+    } catch (e) {
+      console.warn('Google Identity initialization error:', e);
+    }
+  } else {
+    setTimeout(initGoogleAuth, 300);
+  }
+}
+
+// Inicia o Google Identity Services ao carregar a página
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initGoogleAuth);
+} else {
+  initGoogleAuth();
+}
+window.addEventListener('load', initGoogleAuth);

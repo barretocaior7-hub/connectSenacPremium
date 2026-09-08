@@ -6,6 +6,7 @@ const usuarioController = require('../controllers/usuarioController');
 // Definindo os Endpoints
 router.post('/registrar', usuarioController.registrar);
 router.post('/login', usuarioController.login);
+router.post('/auth/google', usuarioController.authGoogle);
 
 // Rotas públicas (não precisam de authMiddleware porque o usuário esqueceu a senha)
 router.post('/esqueci-senha', usuarioController.solicitarRecuperacao);

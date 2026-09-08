@@ -23,6 +23,8 @@
     <!-- Adopt LGPD / Cookies & Google Consent Mode v2 -->
     <meta name="adopt-website-id" content="e876823a-f0e3-47c8-9228-a67f309c7d97" />
     <script src="//tag.goadopt.io/injector.js?website_code=e876823a-f0e3-47c8-9228-a67f309c7d97" class="adopt-injector"></script>
+    <!-- Google Identity Services (GIS) -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script>
       (function() {
         try {
@@ -81,7 +83,30 @@
                                 <i class="bi bi-person-plus-fill"></i> Novo Cadastro
                             </div>
                             <h2 class="fw-bold mb-1" style="color: var(--senac-blue);">Criar Nova Conta</h2>
-                            <p class="text-muted small">Preencha os dados abaixo para participar como modelo em nossas aulas práticas</p>
+                            <p class="text-muted small">Preencha os dados abaixo ou cadastre-se instantaneamente com o Google</p>
+                        </div>
+
+                        <!-- Cadastro Rápido com Google -->
+                        <div class="mb-4 text-center">
+                            <div id="g_id_onload"
+                                 data-client_id="829544077365-15gti2p3tijsp20fqlcrt3r98cv1820u.apps.googleusercontent.com"
+                                 data-callback="handleGoogleCredentialResponse"
+                                 data-auto_prompt="false">
+                            </div>
+                            <div class="g_id_signin d-flex justify-content-center mb-3"
+                                 data-type="standard"
+                                 data-size="large"
+                                 data-theme="outline"
+                                 data-text="signup_with"
+                                 data-shape="rectangular"
+                                 data-logo_alignment="left"
+                                 data-width="100%">
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <hr class="flex-grow-1 my-0">
+                                <span class="px-2 text-muted small text-uppercase" style="font-size: 0.72rem;">ou preencha seus dados</span>
+                                <hr class="flex-grow-1 my-0">
+                            </div>
                         </div>
 
                         <!-- Formulário -->

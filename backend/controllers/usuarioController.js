@@ -231,3 +231,110 @@ exports.redefinirSenha = async (req, res) => {
         res.status(500).json({ erro: 'Erro interno ao redefinir a senha.' });
     }
 };
+
+// 5. AUTENTICAÇÃO COM GOOGLE (OAUTH 2.0 / GOOGLE IDENTITY SERVICES)
+exports.authGoogle = async (req, res) => {
+    const { credential } = req.body;
+
+    if (!credential) {
+        return res.status(400).json({ erro: 'Credencial do Google não informada.' });
+    }
+
+    try {
+        // Validação oficial do token com o endpoint do Google
+        const googleRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+
+        if (!googleRes.ok) {
+            const errData = await googleRes.json().catch(() => ({}));
+            console.error('Falha na validação do token Google:', errData);
+            return res.status(401).json({ erro: 'Token de autenticação do Google inválido ou expirado.' });
+        }
+
+        const payload = await googleRes.json();
+        const expectedClientId = process.env.GOOGLE_CLIENT_ID || '829544077365-15gti2p3tijsp20fqlcrt3r98cv1820u.apps.googleusercontent.com';
+
+        // Validação de Audience do Token
+        if (payload.aud !== expectedClientId) {
+            console.error('Audience mismatch Google Token:', payload.aud, 'Esperado:', expectedClientId);
+            return res.status(401).json({ erro: 'Token emitido para um aplicativo não autorizado.' });
+        }
+
+        if (!payload.email_verified || payload.email_verified === 'false' || payload.email_verified === false) {
+            return res.status(400).json({ erro: 'A conta Google informada não possui e-mail verificado.' });
+        }
+
+        const email = String(payload.email).toLowerCase().trim();
+        const nome = payload.name || payload.given_name || 'Usuário Google';
+        const foto_url = payload.picture || null;
+
+        // Verificar se o usuário já existe no banco de dados
+        const { data: usuarioExistente, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+
+        if (erroBusca) throw erroBusca;
+
+        let usuarioFinal = null;
+
+        if (usuarioExistente) {
+            // Verificar se está bloqueado pela administração
+            if (usuarioExistente.is_bloqueado) {
+                return res.status(403).json({ erro: 'Sua conta está temporariamente suspensa. Entre em contato com a coordenação.' });
+            }
+
+            // Atualiza a foto de perfil caso o usuário ainda não tenha
+            if (!usuarioExistente.foto_url && foto_url) {
+                await supabase
+                    .from('usuarios')
+                    .update({ foto_url })
+                    .eq('id', usuarioExistente.id);
+            }
+
+            usuarioFinal = usuarioExistente;
+        } else {
+            // Criação automática de novo usuário como candidato/modelo voluntário
+            const senhaAleatoria = crypto.randomBytes(24).toString('hex');
+            const salt = await bcrypt.genSalt(10);
+            const senhaHash = await bcrypt.hash(senhaAleatoria, salt);
+
+            const { data: novoUsuario, error: erroInsercao } = await supabase
+                .from('usuarios')
+                .insert([
+                    {
+                        nome,
+                        email,
+                        telefone: null,
+                        senha: senhaHash,
+                        perfil: 'candidato',
+                        consentimento_termos: true,
+                        consentimento_imagem: true,
+                        foto_url
+                    }
+                ])
+                .select();
+
+            if (erroInsercao) throw erroInsercao;
+            usuarioFinal = novoUsuario[0];
+        }
+
+        const token = gerarToken(usuarioFinal);
+
+        return res.json({
+            mensagem: 'Autenticado com sucesso via Google!',
+            token,
+            usuário: {
+                id: usuarioFinal.id,
+                nome: usuarioFinal.nome,
+                email: usuarioFinal.email,
+                perfil: usuarioFinal.perfil,
+                foto_url: usuarioFinal.foto_url
+            }
+        });
+
+    } catch (error) {
+        console.error('Erro na autenticação com Google:', error.message);
+        return res.status(500).json({ erro: 'Erro interno ao processar login com Google.' });
+    }
+};

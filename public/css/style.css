@@ -4221,3 +4221,22 @@ body.dark-mode .upload-preview-container {
   border-color: rgba(255, 255, 255, 0.12) !important;
 }
 
+/* ==========================================
+   GOOGLE IDENTITY SERVICES (GIS) BUTTON STYLES
+   ========================================== */
+.g_id_signin {
+  min-height: 44px;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+.g_id_signin iframe {
+  margin: 0 auto !important;
+  border-radius: 12px !important;
+}
+
+
