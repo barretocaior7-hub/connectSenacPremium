@@ -223,15 +223,17 @@ a:hover {
   padding: 1.25rem 1.25rem;
 }
 
+.mobile-drawer .btn-close,
 .mobile-drawer .btn-close-white {
-  filter: invert(1) grayscale(100%) brightness(200%);
-  opacity: 0.8;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  filter: none !important;
+  opacity: 1 !important;
+  transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease;
 }
 
+.mobile-drawer .btn-close:hover,
 .mobile-drawer .btn-close-white:hover {
-  opacity: 1;
-  transform: rotate(90deg);
+  opacity: 1 !important;
+  transform: scale(1.08) rotate(90deg) !important;
 }
 
 /* Mini Card do Usuário */
@@ -1127,53 +1129,12 @@ a:hover {
   box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
 }
 
-/* Botões de Fechar Padrão em Cabeçalhos de Modais e Offcanvas */
+/* Botões de Fechar Padrão em Cabeçalhos de Modais, Offcanvas e Pop-ups */
+.btn-close,
 .modal-header .btn-close,
-.offcanvas-header .btn-close {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  min-height: 34px !important;
-  border-radius: 50% !important;
-  background-color: #e2e8f0 !important;
-  border: 1.5px solid #cbd5e1 !important;
-  color: #1e293b !important;
-  opacity: 1 !important;
-  padding: 0 !important;
-  background-image: none !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
-  transition: all 0.2s ease !important;
-  cursor: pointer !important;
-}
-
-.modal-header .btn-close::before,
-.offcanvas-header .btn-close::before {
-  content: "✕" !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  font-weight: 900 !important;
-  font-size: 15px !important;
-  line-height: 1 !important;
-  display: block !important;
-  color: #1e293b !important;
-}
-
-.modal-header .btn-close:hover,
-.offcanvas-header .btn-close:hover {
-  background-color: #fee2e2 !important;
-  border-color: #fca5a5 !important;
-  color: #dc2626 !important;
-  transform: scale(1.1) !important;
-}
-
-.modal-header .btn-close:hover::before,
-.offcanvas-header .btn-close:hover::before {
-  color: #dc2626 !important;
-}
-
-/* Botão Fechar do Chatbot IA */
+.offcanvas-header .btn-close,
+.btn-close-white,
+.btn-close-accessibility,
 #btnAiClose {
   display: inline-flex !important;
   align-items: center !important;
@@ -1181,30 +1142,88 @@ a:hover {
   width: 32px !important;
   height: 32px !important;
   min-width: 32px !important;
+  min-height: 32px !important;
   border-radius: 50% !important;
-  background-color: rgba(255, 255, 255, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.45) !important;
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
   color: #ffffff !important;
   opacity: 1 !important;
-  background-image: none !important;
-  cursor: pointer !important;
-  transition: all 0.2s ease !important;
   padding: 0 !important;
+  background-image: none !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  text-decoration: none !important;
 }
 
-#btnAiClose::before {
-  content: "✕" !important;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-  font-weight: 900 !important;
-  font-size: 14px !important;
+.btn-close::before,
+.btn-close::after,
+.modal-header .btn-close::before,
+.modal-header .btn-close::after,
+.offcanvas-header .btn-close::before,
+.offcanvas-header .btn-close::after,
+.btn-close-white::before,
+.btn-close-white::after,
+.btn-close-accessibility::before,
+.btn-close-accessibility::after,
+#btnAiClose::before,
+#btnAiClose::after {
+  content: none !important;
+  display: none !important;
+}
+
+.btn-close i,
+.modal-header .btn-close i,
+.offcanvas-header .btn-close i,
+.btn-close-white i,
+.btn-close-accessibility i,
+#btnAiClose i {
+  font-size: 15px !important;
   line-height: 1 !important;
+  color: #ffffff !important;
+  display: inline-block !important;
+}
+
+.btn-close:hover,
+.modal-header .btn-close:hover,
+.offcanvas-header .btn-close:hover,
+.btn-close-white:hover,
+.btn-close-accessibility:hover,
+#btnAiClose:hover {
+  background-color: #dc2626 !important;
+  border-color: #ef4444 !important;
+  color: #ffffff !important;
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+.btn-close:hover i,
+.modal-header .btn-close:hover i,
+.offcanvas-header .btn-close:hover i,
+.btn-close-white:hover i,
+.btn-close-accessibility:hover i,
+#btnAiClose:hover i {
   color: #ffffff !important;
 }
 
-#btnAiClose:hover {
-  background-color: #dc2626 !important;
-  border-color: #ffffff !important;
-  transform: scale(1.1) rotate(90deg) !important;
+/* Modais com Header Claro */
+.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white) {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white) i {
+  color: #334155 !important;
+}
+
+.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white):hover {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+}
+
+.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white):hover i {
+  color: #dc2626 !important;
 }
 
 /* ==========================================================================
@@ -2795,13 +2814,13 @@ body.dark-mode .modal-footer-custom {
 
 [data-theme="dark"] .btn-close,
 body.dark-mode .btn-close {
-  filter: invert(1) grayscale(100%) brightness(200%) !important;
-  opacity: 0.75;
+  filter: none !important;
+  opacity: 1 !important;
 }
 
 [data-theme="dark"] .btn-close:hover,
 body.dark-mode .btn-close:hover {
-  opacity: 1;
+  opacity: 1 !important;
 }
 
 /* Formulários, Inputs e Selects */
