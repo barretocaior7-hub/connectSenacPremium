@@ -3872,21 +3872,89 @@ div[vw].enabled,
   border-radius: 14px;
   font-size: 0.86rem;
   line-height: 1.45;
+  word-break: break-word;
 }
 
 .senac-ai-msg.bot {
-  background: #ffffff;
-  color: #1e293b;
+  background: #ffffff !important;
+  color: #0f172a !important;
   align-self: flex-start;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1 !important;
   border-bottom-left-radius: 4px;
 }
 
+.senac-ai-msg.bot strong,
+.senac-ai-msg.bot b {
+  color: #004a8d !important; /* Azul escuro no tema claro */
+  font-weight: 800 !important;
+}
+
 .senac-ai-msg.user {
-  background: #004a8d;
-  color: #ffffff;
+  background: #004a8d !important;
+  color: #ffffff !important;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
+}
+
+.senac-ai-msg.user strong,
+.senac-ai-msg.user b {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* Suporte a Dark Mode no Chatbot */
+[data-theme="dark"] .senac-ai-window,
+body.dark-mode .senac-ai-window {
+  background: #0f172a !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .senac-ai-body,
+body.dark-mode .senac-ai-body {
+  background: #090e1a !important;
+}
+
+[data-theme="dark"] .senac-ai-msg.bot,
+body.dark-mode .senac-ai-msg.bot {
+  background: #18243e !important;
+  color: #f1f5f9 !important;
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .senac-ai-msg.bot strong,
+body.dark-mode .senac-ai-msg.bot strong,
+[data-theme="dark"] .senac-ai-msg.bot b,
+body.dark-mode .senac-ai-msg.bot b {
+  color: #38bdf8 !important; /* Azul celeste no modo escuro */
+  font-weight: 800 !important;
+}
+
+[data-theme="dark"] .ai-chip,
+body.dark-mode .ai-chip {
+  background: #18243e !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .ai-chip:hover,
+body.dark-mode .ai-chip:hover {
+  background: #004a8d !important;
+  color: #ffffff !important;
+  border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .senac-ai-footer,
+body.dark-mode .senac-ai-footer {
+  background: #0f172a !important;
+  border-top-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .senac-ai-footer input,
+body.dark-mode .senac-ai-footer input {
+  background: #18243e !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
 }
 
 .senac-ai-typing {
