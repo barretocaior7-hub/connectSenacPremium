@@ -471,12 +471,249 @@ document.addEventListener('DOMContentLoaded', () => {
 // 6. GOOGLE IDENTITY SERVICES (GIS / OAUTH 2.0)
 // ===================================================
 const GOOGLE_CLIENT_ID = '829544077365-15gti2p3tijsp20fqlcrt3r98cv1820u.apps.googleusercontent.com';
+let activeGoogleCredential = null;
+
+function renderGoogleComplementoModal() {
+  let modalEl = document.getElementById("modalGoogleComplemento");
+  if (modalEl) return modalEl;
+
+  const modalHtml = `
+    <div class="modal fade" id="modalGoogleComplemento" tabindex="-1" aria-labelledby="modalGoogleComplementoLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-custom border-0 shadow-lg" style="border-radius: 20px; overflow: hidden;">
+          <div class="modal-header modal-header-custom border-0 pb-0 pt-4 px-4 position-relative">
+            <div class="d-flex align-items-center gap-3">
+              <div id="googleUserAvatarWrap" class="rounded-circle overflow-hidden shadow-sm d-flex align-items-center justify-content-center bg-primary bg-opacity-10" style="width: 48px; height: 48px; border: 2px solid var(--senac-orange, #f28b00); flex-shrink: 0;">
+                <i class="bi bi-person-circle fs-3 text-primary" id="googleUserIconFallback"></i>
+                <img id="googleUserAvatarImg" src="" alt="Google Avatar" class="d-none w-100 h-100 object-fit-cover">
+              </div>
+              <div>
+                <h5 class="modal-title fw-bold mb-0 font-heading" id="modalGoogleComplementoLabel" style="font-size: 1.15rem;">
+                  <i class="bi bi-google text-primary me-1"></i> Concluir Cadastro
+                </h5>
+                <small class="text-muted d-block text-truncate" id="googleUserEmailLabel" style="max-width: 240px; font-size: 0.82rem;">Google</small>
+              </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
+          </div>
+
+          <div class="modal-body modal-body-custom px-4 py-3">
+            <p class="small text-muted mb-3">
+              Para validar seus agendamentos práticos e receber lembretes no WhatsApp das aulas do SENAC, informe seu contato e confirme os termos legais:
+            </p>
+
+            <form id="formGoogleComplemento" novalidate>
+              <!-- Telefone WhatsApp com DDI -->
+              <div class="mb-3">
+                <label class="form-label small fw-bold mb-1" for="telGoogleComplemento">
+                  <i class="bi bi-whatsapp text-success me-1"></i> Número de WhatsApp <span class="text-danger">*</span>
+                </label>
+                <div class="input-group">
+                  <div class="form-floating" style="max-width: 82px; flex-shrink: 0;">
+                    <select class="form-select px-2 text-center" id="ddiGoogleComplemento" aria-label="DDI" style="font-size: 0.9rem;">
+                      <option value="+55" selected>+55</option>
+                      <option value="+1">+1</option>
+                      <option value="+351">+351</option>
+                      <option value="+34">+34</option>
+                      <option value="+54">+54</option>
+                      <option value="+44">+44</option>
+                      <option value="+33">+33</option>
+                      <option value="+49">+49</option>
+                      <option value="+39">+39</option>
+                      <option value="+598">+598</option>
+                      <option value="+595">+595</option>
+                      <option value="+81">+81</option>
+                    </select>
+                    <label for="ddiGoogleComplemento" class="px-2">DDI</label>
+                  </div>
+                  <div class="form-floating flex-grow-1">
+                    <input 
+                      type="tel" 
+                      class="form-control" 
+                      id="telGoogleComplemento" 
+                      placeholder="(DDD) 9XXXX-XXXX" 
+                      required 
+                      maxlength="15"
+                      autocomplete="tel"
+                      aria-label="WhatsApp"
+                    >
+                    <label for="telGoogleComplemento"><i class="bi bi-phone me-1"></i> (DDD) 9XXXX-XXXX</label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Termos LGPD e Uso de Imagem -->
+              <div class="p-3 bg-light bg-opacity-75 rounded-3 mb-3 border">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                  <span class="badge bg-primary text-white" style="font-size: 0.7rem;"><i class="bi bi-shield-shaded"></i> LGPD</span>
+                  <strong class="small text-secondary">Termos Legais e Consentimentos</strong>
+                </div>
+                <div class="form-check mb-2">
+                  <input class="form-check-input" type="checkbox" id="termoUsoGoogle" required>
+                  <label class="form-check-label small" for="termoUsoGoogle">
+                    Li e aceito os <a href="politica-de-privacidade.html" target="_blank" class="text-decoration-none fw-semibold">Termos de Uso</a> e a <a href="politica-de-privacidade.html" target="_blank" class="text-decoration-none fw-semibold">Política de Privacidade</a> do SENAC.*
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" id="termoImagemGoogle">
+                  <label class="form-check-label small text-muted" for="termoImagemGoogle">
+                    Autorizo o uso de imagens dos procedimentos para fins acadêmicos e portfólio da turma (Opcional).
+                  </label>
+                </div>
+              </div>
+
+              <div id="msgErroGoogleComplemento" class="alert alert-danger d-none small py-2 px-3 mb-3 rounded-3" role="alert"></div>
+
+              <button type="submit" class="btn btn-brand w-100 py-3 fw-bold shadow-sm" id="btnSubmitGoogleComplemento">
+                <i class="bi bi-check2-circle me-1"></i> Concluir Cadastro com o Google
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  modalEl = document.getElementById("modalGoogleComplemento");
+
+  // Máscara e sincronização de telefone para o modal do Google
+  const telInput = document.getElementById("telGoogleComplemento");
+  const ddiSelect = document.getElementById("ddiGoogleComplemento");
+
+  if (ddiSelect && telInput) {
+    ddiSelect.addEventListener("change", () => {
+      telInput.value = "";
+      const ddi = ddiSelect.value;
+      if (ddi === "+55") {
+        telInput.placeholder = "(DDD) 9XXXX-XXXX";
+        telInput.maxLength = 15;
+      } else if (ddi === "+1") {
+        telInput.placeholder = "(555) 000-0000";
+        telInput.maxLength = 14;
+      } else {
+        telInput.placeholder = "Número de telefone";
+        telInput.maxLength = 16;
+      }
+      telInput.focus();
+    });
+
+    telInput.addEventListener("input", () => {
+      const ddi = ddiSelect.value;
+      if (ddi === "+55") {
+        let digits = telInput.value.replace(/\D/g, "");
+        if (digits.length > 11) digits = digits.substring(0, 11);
+        let formatted = "";
+        if (digits.length === 1) formatted = "(" + digits;
+        else if (digits.length === 2) formatted = "(" + digits + ") ";
+        else if (digits.length > 2 && digits.length <= 7) formatted = "(" + digits.substring(0, 2) + ") " + digits.substring(2);
+        else if (digits.length > 7) formatted = "(" + digits.substring(0, 2) + ") " + digits.substring(2, 7) + "-" + digits.substring(7, 11);
+        telInput.value = formatted;
+      } else if (ddi === "+1") {
+        let digits = telInput.value.replace(/\D/g, "");
+        if (digits.length > 10) digits = digits.substring(0, 10);
+        let formatted = "";
+        if (digits.length > 0) formatted = "(" + digits.substring(0, 3);
+        if (digits.length >= 3) formatted += ") ";
+        if (digits.length >= 4) formatted += digits.substring(3, 6);
+        if (digits.length >= 7) formatted += "-" + digits.substring(6, 10);
+        telInput.value = formatted;
+      }
+    });
+  }
+
+  // Envio do formulário complementar
+  const formGoogle = document.getElementById("formGoogleComplemento");
+  formGoogle.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const msgErr = document.getElementById("msgErroGoogleComplemento");
+    const submitBtn = document.getElementById("btnSubmitGoogleComplemento");
+    const telRaw = telInput.value.trim();
+    const apenasDigitos = telRaw.replace(/\D/g, "");
+    const ddi = ddiSelect ? ddiSelect.value : "+55";
+    const termoUso = document.getElementById("termoUsoGoogle").checked;
+    const termoImagem = document.getElementById("termoImagemGoogle").checked;
+
+    if (msgErr) msgErr.classList.add("d-none");
+
+    if (apenasDigitos.length < 10 || apenasDigitos.length > 11) {
+      if (msgErr) {
+        msgErr.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Por favor, digite um número de WhatsApp válido com DDD (10 a 11 dígitos).';
+        msgErr.classList.remove("d-none");
+      }
+      telInput.focus();
+      return;
+    }
+
+    if (!termoUso) {
+      if (msgErr) {
+        msgErr.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> É obrigatório aceitar os Termos de Uso e a Política de Privacidade (LGPD).';
+        msgErr.classList.remove("d-none");
+      }
+      return;
+    }
+
+    const telefoneFinal = ddi === "+55" ? telRaw : `${ddi} ${telRaw}`;
+
+    try {
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Criando sua conta...';
+      }
+
+      const res = await fetch(`${API_URL}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          credential: activeGoogleCredential,
+          telefone: telefoneFinal,
+          consentimento_termos: termoUso,
+          consentimento_imagem: termoImagem
+        })
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.erro || "Erro ao finalizar cadastro via Google.");
+      }
+
+      // Sucesso!
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("usuario", JSON.stringify(data.usuário));
+      sessionStorage.setItem("usuarioLogado", JSON.stringify(data.usuário));
+
+      if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
+        const bsModal = bootstrap.Modal.getInstance(modalEl);
+        if (bsModal) bsModal.hide();
+      }
+
+      redirectAfterAuthentication(data.usuário);
+
+    } catch (err) {
+      console.error("Erro ao concluir cadastro Google:", err);
+      if (msgErr) {
+        msgErr.innerHTML = `<i class="bi bi-exclamation-triangle-fill me-1"></i> ${err.message || "Falha ao concluir cadastro."}`;
+        msgErr.classList.remove("d-none");
+      }
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Concluir Cadastro com o Google';
+      }
+    }
+  });
+
+  return modalEl;
+}
 
 window.handleGoogleCredentialResponse = async function(response) {
   if (!response || !response.credential) {
     console.error('Resposta do Google sem credencial válida.');
     return;
   }
+
+  activeGoogleCredential = response.credential;
 
   const msgDiv = document.getElementById("mensagemErro") || document.getElementById("mensagemCadastro");
   if (msgDiv) {
@@ -498,7 +735,42 @@ window.handleGoogleCredentialResponse = async function(response) {
       throw new Error(data.erro || 'Falha ao autenticar com a conta Google.');
     }
 
-    // Salvar token e dados do usuário na sessão local
+    // Se o usuário for novo, abrir modal para coletar WhatsApp e consentimentos LGPD/Imagem
+    if (data.precisa_completar_cadastro) {
+      if (msgDiv) msgDiv.classList.add("d-none");
+
+      const modalEl = renderGoogleComplementoModal();
+      const emailLabel = document.getElementById("googleUserEmailLabel");
+      const avatarImg = document.getElementById("googleUserAvatarImg");
+      const iconFallback = document.getElementById("googleUserIconFallback");
+      const msgErr = document.getElementById("msgErroGoogleComplemento");
+      const telInput = document.getElementById("telGoogleComplemento");
+      const termoUso = document.getElementById("termoUsoGoogle");
+      const termoImagem = document.getElementById("termoImagemGoogle");
+
+      if (emailLabel) emailLabel.textContent = `${data.nome} (${data.email})`;
+      if (data.foto_url && avatarImg) {
+        avatarImg.src = data.foto_url;
+        avatarImg.classList.remove("d-none");
+        if (iconFallback) iconFallback.classList.add("d-none");
+      } else if (iconFallback && avatarImg) {
+        avatarImg.classList.add("d-none");
+        iconFallback.classList.remove("d-none");
+      }
+
+      if (msgErr) msgErr.classList.add("d-none");
+      if (telInput) telInput.value = "";
+      if (termoUso) termoUso.checked = false;
+      if (termoImagem) termoImagem.checked = false;
+
+      if (typeof bootstrap !== "undefined" && bootstrap.Modal) {
+        const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        bsModal.show();
+      }
+      return;
+    }
+
+    // Login imediato para usuário existente
     localStorage.setItem("token", data.token);
     localStorage.setItem("usuario", JSON.stringify(data.usuário));
     sessionStorage.setItem("usuarioLogado", JSON.stringify(data.usuário));

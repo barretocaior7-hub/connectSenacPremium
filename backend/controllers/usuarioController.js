@@ -234,7 +234,7 @@ exports.redefinirSenha = async (req, res) => {
 
 // 5. AUTENTICAÇÃO COM GOOGLE (OAUTH 2.0 / GOOGLE IDENTITY SERVICES)
 exports.authGoogle = async (req, res) => {
-    const { credential } = req.body;
+    const { credential, telefone, consentimento_termos, consentimento_imagem } = req.body;
 
     if (!credential) {
         return res.status(400).json({ erro: 'Credencial do Google não informada.' });
@@ -286,7 +286,27 @@ exports.authGoogle = async (req, res) => {
 
             usuarioFinal = usuarioExistente;
         } else {
-            // Criação automática de novo usuário como candidato/modelo voluntário
+            // Se o usuário não existe no banco, é OBRIGATÓRIO informar o WhatsApp e aceitar os termos LGPD
+            const isConsentimentoTermos = consentimento_termos === 1 || consentimento_termos === true || consentimento_termos === '1' || consentimento_termos === 'true';
+
+            if (!telefone || !isConsentimentoTermos) {
+                return res.json({
+                    precisa_completar_cadastro: true,
+                    nome,
+                    email,
+                    foto_url
+                });
+            }
+
+            // Validação de Telefone / WhatsApp (mínimo de 10 a 11 dígitos para DDD + Celular)
+            const digitos = String(telefone).replace(/\D/g, '');
+            if (digitos.length < 10 || digitos.length > 15) {
+                return res.status(400).json({ erro: 'O número de WhatsApp deve conter o DDD da região e os dígitos válidos (mínimo 10 a 11 dígitos).' });
+            }
+
+            const isConsentimentoImagem = consentimento_imagem === 1 || consentimento_imagem === true || consentimento_imagem === '1' || consentimento_imagem === 'true';
+
+            // Criação de novo usuário como candidato/modelo voluntário
             const senhaAleatoria = crypto.randomBytes(24).toString('hex');
             const salt = await bcrypt.genSalt(10);
             const senhaHash = await bcrypt.hash(senhaAleatoria, salt);
@@ -297,10 +317,10 @@ exports.authGoogle = async (req, res) => {
                     {
                         nome,
                         email,
-                        telefone: '(00) 00000-0000',
+                        telefone,
                         senha: senhaHash,
-                        consentimento_termos: true,
-                        consentimento_imagem: true
+                        consentimento_termos: isConsentimentoTermos,
+                        consentimento_imagem: isConsentimentoImagem
                     }
                 ])
                 .select();
