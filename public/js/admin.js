@@ -176,25 +176,25 @@ function renderizarTabelaUsuários(lista){
 
         let btnBloqueio = '';
         if (isSelf) {
-            btnBloqueio = `<button class="btn btn-sm btn-light text-muted border py-1 px-2" disabled title="Sua conta atual"><i class="bi bi-lock me-1"></i>Bloquear</button>`;
+            btnBloqueio = `<button class="btn btn-sm btn-light text-muted border p-1 px-2" disabled title="Sua conta atual"><i class="bi bi-lock"></i></button>`;
         } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
             if (user.is_bloqueado) {
-                btnBloqueio = `<button class="btn btn-sm btn-success fw-bold py-1 px-2" onclick="toggleBloqueio('${user.id}', true)" title="Clique para desbloquear e reativar este usuário">
-                    <i class="bi bi-unlock-fill me-1"></i>Desbloquear
+                btnBloqueio = `<button class="btn btn-sm btn-outline-success p-1 px-2" onclick="toggleBloqueio('${user.id}', true)" title="Desbloquear usuário">
+                    <i class="bi bi-unlock-fill"></i>
                 </button>`;
             } else {
-                btnBloqueio = `<button class="btn btn-sm btn-warning text-dark fw-bold py-1 px-2" onclick="toggleBloqueio('${user.id}', false)" title="Clique para suspender/bloquear este usuário">
-                    <i class="bi bi-lock-fill me-1"></i>Bloquear
+                btnBloqueio = `<button class="btn btn-sm btn-outline-warning p-1 px-2" onclick="toggleBloqueio('${user.id}', false)" title="Bloquear usuário">
+                    <i class="bi bi-lock-fill"></i>
                 </button>`;
             }
         }
 
         let btnExcluir = '';
         if (isSelf) {
-            btnExcluir = `<button class="btn btn-sm btn-light text-muted border py-1 px-2" disabled title="Sua conta atual"><i class="bi bi-trash me-1"></i>Excluir</button>`;
+            btnExcluir = `<button class="btn btn-sm btn-light text-muted border p-1 px-2" disabled title="Sua conta atual"><i class="bi bi-trash"></i></button>`;
         } else if (isAdmin || (isCoord && user.perfil !== 'admin' && user.perfil !== 'coordenador')) {
-            btnExcluir = `<button class="btn btn-sm btn-danger fw-bold py-1 px-2" onclick="excluirUsuario('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Usuário')}'))" title="Excluir este usuário permanentemente">
-                <i class="bi bi-trash-fill me-1"></i>Excluir
+            btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirUsuario('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Usuário')}'))" title="Excluir usuário permanentemente">
+                <i class="bi bi-trash-fill"></i>
             </button>`;
         }
 

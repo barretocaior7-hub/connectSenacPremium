@@ -854,14 +854,14 @@ function renderizarCandidatos(lista) {
       `Olá, ${user.nome}! Aqui é a Coordenação do Connect Senac.`
     );
     const btnZap = telLimpo
-      ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success py-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
+      ? `<a href="https://wa.me/55${telLimpo}?text=${msgZap}" target="_blank" class="btn btn-sm btn-outline-success p-1 px-2" title="Conversar no WhatsApp"><i class="bi bi-whatsapp"></i></a>`
       : '<span class="text-muted small">-</span>';
 
     const btnBloqueio = user.is_bloqueado
-      ? `<button class="btn btn-sm btn-success fw-bold py-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', true)" title="Clique para desbloquear este modelo"><i class="bi bi-unlock-fill me-1"></i>Desbloquear</button>`
-      : `<button class="btn btn-sm btn-warning text-dark fw-bold py-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', false)" title="Clique para bloquear este modelo"><i class="bi bi-lock-fill me-1"></i>Bloquear</button>`;
+      ? `<button class="btn btn-sm btn-outline-success p-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', true)" title="Desbloquear modelo"><i class="bi bi-unlock-fill"></i></button>`
+      : `<button class="btn btn-sm btn-outline-warning p-1 px-2" onclick="toggleBloqueioCandidato('${user.id}', false)" title="Bloquear modelo"><i class="bi bi-lock-fill"></i></button>`;
 
-    const btnExcluir = `<button class="btn btn-sm btn-danger fw-bold py-1 px-2" onclick="excluirCandidato('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Candidato')}'))" title="Excluir modelo permanentemente"><i class="bi bi-trash-fill me-1"></i>Excluir</button>`;
+    const btnExcluir = `<button class="btn btn-sm btn-outline-danger p-1 px-2" onclick="excluirCandidato('${user.id}', decodeURIComponent('${encodeURIComponent(user.nome || 'Candidato')}'))" title="Excluir modelo permanentemente"><i class="bi bi-trash-fill"></i></button>`;
 
     const sessoesBadge = `
       <div class="d-flex flex-wrap justify-content-center gap-1" style="font-size: 0.74rem;">
