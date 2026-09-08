@@ -497,6 +497,12 @@
         if (token) {
             if (authButtons) {
                 authButtons.innerHTML = `
+                    <button class="btn btn-settings-toggle btn-settings-trigger me-1" id="btnConfiguracoes" title="Configurações da Conta" aria-label="Abrir Configurações">
+                        <i class="bi bi-gear-fill"></i>
+                    </button>
+                    <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
+                        <i class="bi bi-moon-stars-fill"></i>
+                    </button>
                     <a href="painel.html" class="btn btn-sm btn-orange px-3 fw-bold">
                         <i class="bi bi-speedometer2 me-1"></i> Meu Painel
                     </a>
@@ -504,6 +510,9 @@
             }
             if (drawerAuthActions) {
                 drawerAuthActions.innerHTML = `
+                    <a class="drawer-link btn-settings-trigger mb-2" href="javascript:void(0)" id="btnDrawerConfiguracoes" data-bs-dismiss="offcanvas">
+                        <i class="bi bi-gear-fill"></i> Configurações da Conta
+                    </a>
                     <a href="painel.html" class="btn btn-orange w-100 mb-3 py-2 fw-bold">
                         <i class="bi bi-speedometer2 me-1"></i> Acessar Meu Painel
                     </a>
@@ -769,6 +778,7 @@
     <script src="js/cookie-consent.js"></script>
     <script src="js/whatsapp-widget.js"></script>
     <script src="js/assistant-ia.js"></script>
+    <script src="js/user-settings.js"></script>
 
 </body>
 </html>

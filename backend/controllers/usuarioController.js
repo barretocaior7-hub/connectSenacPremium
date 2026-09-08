@@ -348,3 +348,117 @@ exports.authGoogle = async (req, res) => {
         return res.status(500).json({ erro: error.message || 'Erro interno ao processar login com Google.' });
     }
 };
+
+// 4. OBTER PERFIL DO USUÁRIO LOGADO
+exports.obterPerfil = async (req, res) => {
+    const usuario_id = req.usuario.id;
+    try {
+        const { data: usuario, error } = await supabase
+            .from('usuarios')
+            .select('id, nome, email, telefone, perfil, consentimento_termos, consentimento_imagem, created_at, is_bloqueado')
+            .eq('id', usuario_id)
+            .single();
+
+        if (error || !usuario) {
+            return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        }
+
+        res.json(usuario);
+    } catch (err) {
+        console.error('Erro ao obter perfil:', err.message);
+        res.status(500).json({ erro: 'Erro ao carregar dados do perfil.' });
+    }
+};
+
+// 5. ATUALIZAR DADOS PESSOAIS DO USUÁRIO
+exports.atualizarPerfil = async (req, res) => {
+    const usuario_id = req.usuario.id;
+    const { nome, telefone } = req.body;
+
+    if (!nome || !nome.trim()) {
+        return res.status(400).json({ erro: 'O nome é obrigatório.' });
+    }
+
+    let telefoneFinal = null;
+    if (telefone) {
+        const digitos = String(telefone).replace(/\D/g, '');
+        if (digitos.length < 10 || digitos.length > 15) {
+            return res.status(400).json({ erro: 'O número de WhatsApp deve conter o DDD e dígitos válidos (10 a 11 dígitos).' });
+        }
+        telefoneFinal = telefone.trim();
+    }
+
+    try {
+        const { data: usuarioAtualizado, error } = await supabase
+            .from('usuarios')
+            .update({
+                nome: nome.trim(),
+                telefone: telefoneFinal
+            })
+            .eq('id', usuario_id)
+            .select('id, nome, email, telefone, perfil, consentimento_termos, consentimento_imagem, created_at')
+            .single();
+
+        if (error) throw error;
+
+        res.json({
+            mensagem: 'Dados pessoais atualizados com sucesso!',
+            usuario: usuarioAtualizado
+        });
+    } catch (err) {
+        console.error('Erro ao atualizar perfil:', err.message);
+        res.status(500).json({ erro: 'Erro ao salvar alterações no perfil.' });
+    }
+};
+
+// 6. ALTERAR SENHA DO USUÁRIO
+exports.alterarSenha = async (req, res) => {
+    const usuario_id = req.usuario.id;
+    const { senhaAtual, novaSenha, confirmarNovaSenha } = req.body;
+
+    if (!senhaAtual || !novaSenha || !confirmarNovaSenha) {
+        return res.status(400).json({ erro: 'Todos os campos de senha são obrigatórios.' });
+    }
+
+    if (novaSenha.length < 6) {
+        return res.status(400).json({ erro: 'A nova senha deve ter no mínimo 6 caracteres.' });
+    }
+
+    if (novaSenha !== confirmarNovaSenha) {
+        return res.status(400).json({ erro: 'A confirmação não coincide com a nova senha.' });
+    }
+
+    try {
+        const { data: usuario, error } = await supabase
+            .from('usuarios')
+            .select('id, senha')
+            .eq('id', usuario_id)
+            .single();
+
+        if (error || !usuario) {
+            return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        }
+
+        if (usuario.senha) {
+            const senhaValida = await bcrypt.compare(senhaAtual, usuario.senha);
+            if (!senhaValida) {
+                return res.status(400).json({ erro: 'A senha atual informada está incorreta.' });
+            }
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const senhaHash = await bcrypt.hash(novaSenha, salt);
+
+        const { error: erroUpdate } = await supabase
+            .from('usuarios')
+            .update({ senha: senhaHash })
+            .eq('id', usuario_id);
+
+        if (erroUpdate) throw erroUpdate;
+
+        res.json({ mensagem: 'Senha alterada com sucesso!' });
+    } catch (err) {
+        console.error('Erro ao alterar senha:', err.message);
+        res.status(500).json({ erro: 'Erro ao processar alteração de senha.' });
+    }
+};

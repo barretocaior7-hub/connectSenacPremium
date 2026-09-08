@@ -4377,5 +4377,141 @@ body.dark-mode .upload-preview-container {
   margin-bottom: 0.4rem;
 }
 
+/* ==========================================================================
+   MÓDULO DE CONFIGURAÇÕES DA CONTA (ÍCONE DE ENGRENAGEM & MODAL TABULADO)
+   ========================================================================== */
 
+.btn-settings-toggle {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
+.btn-settings-toggle:hover {
+  background: rgba(255, 255, 255, 0.24);
+  color: #ffffff;
+  transform: rotate(30deg) scale(1.05);
+}
+
+.settings-header-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: rgba(0, 74, 141, 0.08);
+  color: var(--senac-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+}
+
+.settings-nav-pills .nav-link {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.settings-nav-pills .nav-link:hover {
+  background: rgba(0, 74, 141, 0.05);
+  color: var(--senac-blue);
+}
+
+.settings-nav-pills .nav-link.active {
+  background: var(--senac-blue);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 74, 141, 0.25);
+}
+
+.settings-profile-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--senac-blue), #0070b8);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0, 74, 141, 0.2);
+}
+
+.settings-appointment-item {
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.settings-appointment-item:hover {
+  transform: translateY(-1px);
+  border-color: #cbd5e1 !important;
+}
+
+/* Modo Escuro para Modal de Configurações */
+[data-theme="dark"] .modal-settings-card,
+body.dark-mode .modal-settings-card {
+  background: #0f172a !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .settings-header-icon,
+body.dark-mode .settings-header-icon {
+  background: rgba(59, 130, 246, 0.15) !important;
+  color: #60a5fa !important;
+}
+
+[data-theme="dark"] .settings-tabs-wrap,
+body.dark-mode .settings-tabs-wrap {
+  background: #131e33 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .settings-nav-pills .nav-link,
+body.dark-mode .settings-nav-pills .nav-link {
+  color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .settings-nav-pills .nav-link:hover,
+body.dark-mode .settings-nav-pills .nav-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .settings-nav-pills .nav-link.active,
+body.dark-mode .settings-nav-pills .nav-link.active {
+  background: #2563eb !important;
+  color: #ffffff !important;
+}
+
+[data-theme="dark"] .settings-profile-card,
+body.dark-mode .settings-profile-card {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .settings-appointment-item,
+body.dark-mode .settings-appointment-item {
+  background: #1e293b !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .settings-appointment-item .text-dark,
+body.dark-mode .settings-appointment-item .text-dark,
+[data-theme="dark"] .settings-profile-card .text-dark,
+body.dark-mode .settings-profile-card .text-dark,
+[data-theme="dark"] .modal-settings-card label,
+body.dark-mode .modal-settings-card label {
+  color: #ffffff !important;
+}

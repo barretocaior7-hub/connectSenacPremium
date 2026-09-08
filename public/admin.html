@@ -42,8 +42,11 @@
           </span>
         </a>
 
-        <!-- Controles Mobile (Alternador de Tema + Hambúrguer) -->
+        <!-- Controles Mobile (Configurações + Tema + Hambúrguer) -->
         <div class="d-flex align-items-center gap-2 d-lg-none">
+          <button class="btn btn-settings-toggle btn-settings-trigger" id="btnMobileConfiguracoesTop" title="Configurações da Conta" aria-label="Abrir Configurações">
+            <i class="bi bi-gear-fill"></i>
+          </button>
           <button class="btn btn-theme-toggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
             <i class="bi bi-moon-stars-fill"></i>
           </button>
@@ -53,6 +56,9 @@
         </div>
 
         <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
+          <button class="btn btn-settings-toggle btn-settings-trigger me-1" id="btnConfiguracoes" title="Configurações da Conta" aria-label="Abrir Configurações">
+            <i class="bi bi-gear-fill"></i>
+          </button>
           <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
             <i class="bi bi-moon-stars-fill"></i>
           </button>
@@ -104,6 +110,9 @@
             </a>
             <a class="drawer-link" href="#" id="drawerEquipeLink" onclick="ativarTabMobile('equipe-tab')" data-bs-dismiss="offcanvas">
               <i class="bi bi-person-plus-fill"></i> Equipe Institucional
+            </a>
+            <a class="drawer-link btn-settings-trigger" href="javascript:void(0)" id="btnDrawerConfiguracoes" data-bs-dismiss="offcanvas">
+              <i class="bi bi-gear-fill"></i> Configurações da Conta
             </a>
             <hr class="border-white border-opacity-15 my-2">
             <a class="drawer-link text-warning fw-semibold" href="painel.html">
@@ -813,6 +822,7 @@
     <script src="js/cookie-consent.js"></script>
     <script src="js/whatsapp-widget.js"></script>
     <script src="js/assistant-ia.js"></script>
+    <script src="js/user-settings.js"></script>
 
 </body>
 </html>
