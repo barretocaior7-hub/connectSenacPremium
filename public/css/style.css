@@ -2149,55 +2149,75 @@ html {
    ========================================================================== */
 .accessibility-floating-wrapper {
   position: fixed !important;
-  bottom: 24px !important;
-  left: 24px !important;
+  bottom: 96px !important; /* Espaçado acima do widget Adopt (bottom: 20px) */
+  left: 20px !important;
   z-index: 999990 !important;
 }
 
 .accessibility-fab {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #004a8d 0%, #002b53 100%);
-  color: #ffffff !important;
-  border: 2px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.35);
-  font-size: 1.5rem;
+  background: #ffffff;
+  border: 2px solid #004a8d;
+  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   padding: 0;
   outline: none;
 }
 
 .accessibility-fab:hover {
   transform: scale(1.08);
-  box-shadow: 0 10px 28px rgba(0, 74, 141, 0.45);
+  box-shadow: 0 12px 28px rgba(0, 74, 141, 0.35);
+  border-color: #f7941d;
+}
+
+.accessibility-fab:hover .floating-fab-logo {
+  transform: scale(1.1);
 }
 
 .accessibility-fab.active {
-  background: linear-gradient(135deg, #f7941d 0%, #d4780c 100%);
-  border-color: #ffffff;
+  background: #fef5ea;
+  border-color: #f7941d;
 }
 
-.accessibility-fab-badge {
+/* Logos e Selos Superiores dos Botões Flutuantes */
+.floating-fab-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+  display: block;
+}
+
+.floating-fab-top-badge {
   position: absolute;
-  top: -3px;
-  right: -3px;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
   background-color: #f7941d;
   color: #ffffff;
-  font-size: 0.65rem;
+  font-size: 0.58rem;
   font-weight: 800;
-  padding: 2px 5px;
+  padding: 2px 7px;
   border-radius: 9999px;
-  border: 2px solid #ffffff;
-  line-height: 1;
+  border: 1.5px solid #ffffff;
+  line-height: 1.1;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 10;
 }
 
-.accessibility-fab.active .accessibility-fab-badge {
+.accessibility-fab.active .floating-fab-top-badge {
   background-color: #004a8d;
 }
 
@@ -3752,37 +3772,31 @@ body.high-contrast .accessibility-speaking-highlight {
   bottom: 20px !important;
   right: 24px !important;
   z-index: 999995 !important;
-  width: 54px;
-  height: 54px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #004a8d 0%, #002b53 100%);
-  color: #ffffff;
-  border: 2px solid rgba(255, 255, 255, 0.35);
-  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.35);
-  font-size: 1.5rem;
+  background: #ffffff;
+  border: 2px solid #004a8d;
+  box-shadow: 0 8px 24px rgba(0, 74, 141, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  padding: 0;
+  outline: none;
 }
 
 .senac-ai-fab:hover,
 #btnAiToggle:hover {
   transform: scale(1.08);
+  box-shadow: 0 12px 28px rgba(0, 74, 141, 0.35);
+  border-color: #f7941d;
 }
 
-.senac-ai-fab-badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  background-color: #f7941d;
-  color: #ffffff;
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 9999px;
-  border: 2px solid #ffffff;
+.senac-ai-fab:hover .floating-fab-logo,
+#btnAiToggle:hover .floating-fab-logo {
+  transform: scale(1.1);
 }
 
 .senac-ai-window,

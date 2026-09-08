@@ -302,8 +302,8 @@
     fabBtn.setAttribute('aria-label', 'Abrir menu de recursos de acessibilidade');
     fabBtn.setAttribute('aria-expanded', 'false');
     fabBtn.innerHTML = `
-      <i class="bi bi-universal-access"></i>
-      <span class="accessibility-fab-badge">A11y</span>
+      <span class="floating-fab-top-badge">Acessibilidade</span>
+      <img src="assets/logo-connect-senac.png" onerror="this.src='/assets/logo-connect-senac.png'" alt="Acessibilidade" class="floating-fab-logo" />
     `;
 
     // 2. Painel Flutuante Expansível

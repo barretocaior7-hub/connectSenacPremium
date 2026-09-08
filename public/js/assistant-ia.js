@@ -77,9 +77,9 @@
     container.id = 'senac-ai-container';
     container.innerHTML = `
       <!-- Botão Flutuante da I.A. -->
-      <button id="btnAiToggle" class="senac-ai-fab" title="Assistente Virtual SENAC AI (Gemini Flash Lite)" aria-label="Abrir Assistente Virtual">
-        <i class="bi bi-robot"></i>
-        <span class="senac-ai-fab-badge">IA</span>
+      <button id="btnAiToggle" class="senac-ai-fab" title="Tire suas Dúvidas com o Assistente Connect AI" aria-label="Abrir Assistente de Dúvidas">
+        <span class="floating-fab-top-badge">Dúvidas</span>
+        <img src="assets/logo-connect-senac.png" onerror="this.src='/assets/logo-connect-senac.png'" alt="Dúvidas" class="floating-fab-logo" />
       </button>
 
       <!-- Janela do Chat -->
