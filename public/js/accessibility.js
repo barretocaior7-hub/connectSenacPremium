@@ -302,8 +302,7 @@
     fabBtn.setAttribute('aria-label', 'Abrir menu de recursos de acessibilidade');
     fabBtn.setAttribute('aria-expanded', 'false');
     fabBtn.innerHTML = `
-      <span class="floating-fab-top-badge">Acessibilidade</span>
-      <img src="assets/logo-connect-senac.png" onerror="this.src='/assets/logo-connect-senac.png'" alt="Acessibilidade" class="floating-fab-logo" />
+      <i class="bi bi-universal-access fs-4 text-primary"></i>
     `;
 
     // 2. Painel Flutuante Expansível
@@ -366,6 +365,10 @@
         fabBtn.classList.remove('active');
       }
     }
+
+    window.openAccessibilityMenu = function(show) {
+      toggleAccessibilityPanel(show !== undefined ? show : true);
+    };
 
     fabBtn.addEventListener('click', (e) => {
       e.stopPropagation();

@@ -2156,8 +2156,8 @@ html {
 
 .accessibility-fab {
   position: relative;
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: #ffffff;
   border: 2px solid #004a8d;
@@ -2171,14 +2171,20 @@ html {
   outline: none;
 }
 
+.accessibility-fab i {
+  font-size: 1.55rem;
+  color: #004a8d;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
 .accessibility-fab:hover {
   transform: scale(1.08);
   box-shadow: 0 12px 28px rgba(0, 74, 141, 0.35);
   border-color: #f7941d;
 }
 
-.accessibility-fab:hover .floating-fab-logo {
-  transform: scale(1.1);
+.accessibility-fab:hover i {
+  color: #f7941d;
 }
 
 .accessibility-fab.active {
@@ -2186,39 +2192,20 @@ html {
   border-color: #f7941d;
 }
 
-/* Logos e Selos Superiores dos Botões Flutuantes */
-.floating-fab-logo {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-  transition: transform 0.2s ease;
-  pointer-events: none;
-  display: block;
+.accessibility-fab.active i {
+  color: #f7941d;
 }
 
-.floating-fab-top-badge {
-  position: absolute;
-  top: -11px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #f7941d;
-  color: #ffffff;
-  font-size: 0.58rem;
-  font-weight: 800;
-  padding: 2px 7px;
-  border-radius: 9999px;
-  border: 1.5px solid #ffffff;
-  line-height: 1.1;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  pointer-events: none;
-  z-index: 10;
+[data-theme="dark"] .accessibility-fab,
+body.dark-mode .accessibility-fab {
+  background: #131e33 !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
-.accessibility-fab.active .floating-fab-top-badge {
-  background-color: #004a8d;
+[data-theme="dark"] .accessibility-fab i,
+body.dark-mode .accessibility-fab i {
+  color: #60a5fa !important;
 }
 
 /* Painel de Opções Flutuante */
@@ -3772,8 +3759,8 @@ body.high-contrast .accessibility-speaking-highlight {
   bottom: 20px !important;
   right: 24px !important;
   z-index: 999995 !important;
-  width: 56px;
-  height: 56px;
+  width: 54px;
+  height: 54px;
   border-radius: 50%;
   background: #ffffff;
   border: 2px solid #004a8d;
@@ -3787,6 +3774,13 @@ body.high-contrast .accessibility-speaking-highlight {
   outline: none;
 }
 
+.senac-ai-fab i,
+#btnAiToggle i {
+  font-size: 1.5rem;
+  color: #004a8d;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
 .senac-ai-fab:hover,
 #btnAiToggle:hover {
   transform: scale(1.08);
@@ -3794,9 +3788,25 @@ body.high-contrast .accessibility-speaking-highlight {
   border-color: #f7941d;
 }
 
-.senac-ai-fab:hover .floating-fab-logo,
-#btnAiToggle:hover .floating-fab-logo {
-  transform: scale(1.1);
+.senac-ai-fab:hover i,
+#btnAiToggle:hover i {
+  color: #f7941d;
+}
+
+[data-theme="dark"] .senac-ai-fab,
+[data-theme="dark"] #btnAiToggle,
+body.dark-mode .senac-ai-fab,
+body.dark-mode #btnAiToggle {
+  background: #131e33 !important;
+  border-color: #60a5fa !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+}
+
+[data-theme="dark"] .senac-ai-fab i,
+[data-theme="dark"] #btnAiToggle i,
+body.dark-mode .senac-ai-fab i,
+body.dark-mode #btnAiToggle i {
+  color: #60a5fa !important;
 }
 
 .senac-ai-window,
@@ -4238,5 +4248,63 @@ body.dark-mode .upload-preview-container {
   margin: 0 auto !important;
   border-radius: 12px !important;
 }
+
+/* ===================================================
+   OCULTAR BOTÕES FLUTUANTES NO MODO MOBILE
+   (WhatsApp, Chatbot e Acessibilidade ficam dentro do Menu Hamburguer)
+   =================================================== */
+@media (max-width: 768px) {
+  #whatsapp-floating-btn,
+  .whatsapp-floating-btn,
+  #senac-ai-container .senac-ai-fab,
+  .senac-ai-fab,
+  #btnAiToggle,
+  #accessibility-container .accessibility-fab,
+  .accessibility-fab,
+  #btnAccessibilityFab {
+    display: none !important;
+  }
+
+  /* Janela do Chatbot Responsiva em Tela Cheia / Bottom Sheet no Mobile */
+  #senacAiChatWindow,
+  .senac-ai-window {
+    right: 12px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    height: 75vh !important;
+    max-height: 540px !important;
+    z-index: 999999 !important;
+  }
+
+  /* Painel de Acessibilidade Ajustado no Mobile */
+  #accessibility-toolbar,
+  .accessibility-floating-panel {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: 12px !important;
+    width: calc(100vw - 24px) !important;
+    max-width: 100% !important;
+    z-index: 999999 !important;
+  }
+}
+
+/* Divisores e Seções dos Menus Laterais (Mobile Drawer) */
+.drawer-section-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin: 0.75rem 0;
+}
+
+.drawer-section-title {
+  font-size: 0.68rem;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 0 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
 
 

@@ -77,9 +77,8 @@
     container.id = 'senac-ai-container';
     container.innerHTML = `
       <!-- Botão Flutuante da I.A. -->
-      <button id="btnAiToggle" class="senac-ai-fab" title="Tire suas Dúvidas com o Assistente Connect AI" aria-label="Abrir Assistente de Dúvidas">
-        <span class="floating-fab-top-badge">Dúvidas</span>
-        <img src="assets/logo-connect-senac.png" onerror="this.src='/assets/logo-connect-senac.png'" alt="Dúvidas" class="floating-fab-logo" />
+      <button id="btnAiToggle" class="senac-ai-fab" title="Tire suas Dúvidas com a IA Connect Senac" aria-label="Abrir Assistente de Dúvidas">
+        <i class="bi bi-chat-dots-fill fs-4 text-primary"></i>
       </button>
 
       <!-- Janela do Chat -->
@@ -128,6 +127,15 @@
 
     let chatHistory = [];
     let isProcessing = false;
+
+    window.openSenacAiChat = function(open) {
+      if (open === false) {
+        chatWindow.classList.add('d-none');
+      } else {
+        chatWindow.classList.remove('d-none');
+        if (input) setTimeout(() => input.focus(), 150);
+      }
+    };
 
     btnToggle.addEventListener('click', () => {
       chatWindow.classList.toggle('d-none');
