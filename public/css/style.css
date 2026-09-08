@@ -1129,13 +1129,14 @@ a:hover {
   box-shadow: 0 6px 20px rgba(220, 38, 38, 0.6) !important;
 }
 
-/* Botões de Fechar Padrão em Cabeçalhos de Modais, Offcanvas e Pop-ups */
+/* ==========================================================================
+   BOTÕES DE FECHAR PADRÃO (MODAIS, POP-UPS E OFFCANVAS)
+   ========================================================================== */
 .btn-close,
 .modal-header .btn-close,
-.offcanvas-header .btn-close,
-.btn-close-white,
-.btn-close-accessibility,
-#btnAiClose {
+.modal-header-custom .btn-close,
+#modalAgendamento .btn-close,
+.btn-close-accessibility {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -1144,13 +1145,13 @@ a:hover {
   min-width: 32px !important;
   min-height: 32px !important;
   border-radius: 50% !important;
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  color: #ffffff !important;
+  background-color: #e2e8f0 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
   opacity: 1 !important;
   padding: 0 !important;
   background-image: none !important;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08) !important;
   transition: all 0.2s ease !important;
   cursor: pointer !important;
   text-decoration: none !important;
@@ -1160,6 +1161,8 @@ a:hover {
 .btn-close::after,
 .modal-header .btn-close::before,
 .modal-header .btn-close::after,
+.modal-header-custom .btn-close::before,
+.modal-header-custom .btn-close::after,
 .offcanvas-header .btn-close::before,
 .offcanvas-header .btn-close::after,
 .btn-close-white::before,
@@ -1174,56 +1177,100 @@ a:hover {
 
 .btn-close i,
 .modal-header .btn-close i,
-.offcanvas-header .btn-close i,
-.btn-close-white i,
-.btn-close-accessibility i,
-#btnAiClose i {
-  font-size: 15px !important;
+.modal-header-custom .btn-close i,
+#modalAgendamento .btn-close i,
+.btn-close-accessibility i {
+  font-size: 14px !important;
   line-height: 1 !important;
-  color: #ffffff !important;
+  color: #0f172a !important;
   display: inline-block !important;
+  font-weight: 700 !important;
 }
 
 .btn-close:hover,
 .modal-header .btn-close:hover,
+.modal-header-custom .btn-close:hover,
+#modalAgendamento .btn-close:hover,
+.btn-close-accessibility:hover {
+  background-color: #fee2e2 !important;
+  border-color: #fca5a5 !important;
+  color: #dc2626 !important;
+  transform: scale(1.08) rotate(90deg) !important;
+}
+
+.btn-close:hover i,
+.modal-header .btn-close:hover i,
+.modal-header-custom .btn-close:hover i,
+#modalAgendamento .btn-close:hover i,
+.btn-close-accessibility:hover i {
+  color: #dc2626 !important;
+}
+
+/* Modais e Cabeçalhos Escuros / Offcanvas / Chatbot */
+.offcanvas-header .btn-close,
+.offcanvas-header .btn-close-white,
+.modal-header-custom.bg-primary .btn-close,
+.modal-header.bg-primary .btn-close,
+.btn-close-white,
+#btnAiClose,
+[data-theme="dark"] .modal-header .btn-close,
+[data-theme="dark"] .modal-header-custom .btn-close,
+[data-theme="dark"] #modalAgendamento .btn-close,
+[data-theme="dark"] .btn-close,
+body.dark-mode .modal-header .btn-close,
+body.dark-mode .modal-header-custom .btn-close,
+body.dark-mode #modalAgendamento .btn-close,
+body.dark-mode .btn-close {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.35) !important;
+  color: #ffffff !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2) !important;
+}
+
+.offcanvas-header .btn-close i,
+.offcanvas-header .btn-close-white i,
+.modal-header-custom.bg-primary .btn-close i,
+.modal-header.bg-primary .btn-close i,
+.btn-close-white i,
+#btnAiClose i,
+[data-theme="dark"] .modal-header .btn-close i,
+[data-theme="dark"] .modal-header-custom .btn-close i,
+[data-theme="dark"] #modalAgendamento .btn-close i,
+[data-theme="dark"] .btn-close i,
+body.dark-mode .modal-header .btn-close i,
+body.dark-mode .modal-header-custom .btn-close i,
+body.dark-mode #modalAgendamento .btn-close i,
+body.dark-mode .btn-close i {
+  color: #ffffff !important;
+}
+
 .offcanvas-header .btn-close:hover,
+.offcanvas-header .btn-close-white:hover,
+.modal-header-custom.bg-primary .btn-close:hover,
+.modal-header.bg-primary .btn-close:hover,
 .btn-close-white:hover,
-.btn-close-accessibility:hover,
-#btnAiClose:hover {
+#btnAiClose:hover,
+[data-theme="dark"] .modal-header .btn-close:hover,
+[data-theme="dark"] .modal-header-custom .btn-close:hover,
+[data-theme="dark"] #modalAgendamento .btn-close:hover,
+[data-theme="dark"] .btn-close:hover,
+body.dark-mode .modal-header .btn-close:hover,
+body.dark-mode .modal-header-custom .btn-close:hover,
+body.dark-mode #modalAgendamento .btn-close:hover,
+body.dark-mode .btn-close:hover {
   background-color: #dc2626 !important;
   border-color: #ef4444 !important;
   color: #ffffff !important;
   transform: scale(1.08) rotate(90deg) !important;
 }
 
-.btn-close:hover i,
-.modal-header .btn-close:hover i,
 .offcanvas-header .btn-close:hover i,
+.offcanvas-header .btn-close-white:hover i,
 .btn-close-white:hover i,
-.btn-close-accessibility:hover i,
-#btnAiClose:hover i {
+#btnAiClose:hover i,
+[data-theme="dark"] .btn-close:hover i,
+body.dark-mode .btn-close:hover i {
   color: #ffffff !important;
-}
-
-/* Modais com Header Claro */
-.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white) {
-  background-color: #f1f5f9 !important;
-  border-color: #cbd5e1 !important;
-  color: #334155 !important;
-}
-
-.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white) i {
-  color: #334155 !important;
-}
-
-.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white):hover {
-  background-color: #fee2e2 !important;
-  border-color: #fca5a5 !important;
-  color: #dc2626 !important;
-}
-
-.modal-header:not(.modal-header-custom):not(.bg-primary):not(.bg-dark) .btn-close:not(.btn-close-white):hover i {
-  color: #dc2626 !important;
 }
 
 /* ==========================================================================
