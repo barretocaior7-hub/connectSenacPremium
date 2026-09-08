@@ -297,7 +297,7 @@ exports.authGoogle = async (req, res) => {
                     {
                         nome,
                         email,
-                        telefone: null,
+                        telefone: '(00) 00000-0000',
                         senha: senhaHash,
                         consentimento_termos: true,
                         consentimento_imagem: true
