@@ -1,6 +1,32 @@
 // backend/controllers/adminController.js
 const supabase = require('../config/database');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
+const deptFilePath = path.join(__dirname, '../config/professores_departamentos.json');
+
+function getProfessoresDepartamentos() {
+    try {
+        if (!fs.existsSync(deptFilePath)) {
+            fs.writeFileSync(deptFilePath, JSON.stringify({}, null, 2), 'utf8');
+            return {};
+        }
+        return JSON.parse(fs.readFileSync(deptFilePath, 'utf8'));
+    } catch (e) {
+        return {};
+    }
+}
+
+function setProfessorDepartamento(usuarioId, departamento) {
+    try {
+        const mapa = getProfessoresDepartamentos();
+        mapa[usuarioId] = departamento || 'DR/BA';
+        fs.writeFileSync(deptFilePath, JSON.stringify(mapa, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Erro ao salvar departamento de professor:', e.message);
+    }
+}
+
 
 // 1. Listar usuarios com metricas (consome a View agregando consentimentos LGPD e Imagem)
 exports.listarUsuarios = async (req, res) => {
@@ -17,14 +43,21 @@ exports.listarUsuarios = async (req, res) => {
             consentimentos.forEach(c => consentMap.set(c.id, c));
         }
 
-        const usuariosCompletos = (usuarios || []).map(u => {
+        const deptoMap = getProfessoresDepartamentos();
+        let usuariosCompletos = (usuarios || []).map(u => {
             const consent = consentMap.get(u.id);
+            const depto = deptoMap[u.id] || (['profissional', 'coordenador', 'admin'].includes(u.perfil) ? 'DR/BA' : null);
             return {
                 ...u,
                 consentimento_termos: consent ? Boolean(consent.consentimento_termos) : Boolean(u.consentimento_termos),
-                consentimento_imagem: consent ? Boolean(consent.consentimento_imagem) : Boolean(u.consentimento_imagem)
+                consentimento_imagem: consent ? Boolean(consent.consentimento_imagem) : Boolean(u.consentimento_imagem),
+                departamento: depto
             };
         });
+
+        if (req.query.departamento && req.query.departamento !== 'TODOS') {
+            usuariosCompletos = usuariosCompletos.filter(u => u.departamento === req.query.departamento);
+        }
 
         res.json(usuariosCompletos);
     } catch (error) {
@@ -75,7 +108,7 @@ exports.alterarStatusBloqueio = async (req, res) => {
 
 // 3. Criar Novo Colaborador (Admin cria qualquer um; Coordenador cria apenas Professor ou Candidato)
 exports.criarColaborador = async (req, res) => {
-    const { nome, email, telefone, senha, perfil } = req.body;
+    const { nome, email, telefone, senha, perfil, departamento } = req.body;
     const executorPerfil = req.usuario.perfil;
 
     if (!nome || !email || !telefone || !senha || !perfil) {
@@ -121,9 +154,12 @@ exports.criarColaborador = async (req, res) => {
 
         if (error) throw error;
 
+        const deptoFinal = departamento || 'DR/BA';
+        setProfessorDepartamento(novoColab[0].id, deptoFinal);
+
         res.status(201).json({
-            mensagem: `Colaborador (${perfil}) criado com sucesso!`,
-            colaborador: { id: novoColab[0].id, nome: novoColab[0].nome }
+            mensagem: `Colaborador (${perfil}) criado com sucesso para ${deptoFinal}!`,
+            colaborador: { id: novoColab[0].id, nome: novoColab[0].nome, departamento: deptoFinal }
         });
     } catch (error) {
         console.error('Erro ao criar colaborador:', error.message);
@@ -131,9 +167,10 @@ exports.criarColaborador = async (req, res) => {
     }
 };
 
-// Buscar profissionais (professores) ativos parcarregando no dropdown do formulário de curso
+// Buscar profissionais (professores) ativos com suporte a filtro por departamento
 exports.listarProfissionais = async (req, res) => {
     try {
+        const { departamento } = req.query;
         const { data, error } = await supabase
             .from('usuarios')
             .select('id, nome')
@@ -141,7 +178,19 @@ exports.listarProfissionais = async (req, res) => {
             .eq('is_bloqueado', false);
 
         if (error) throw error;
-        res.json(data);
+
+        const deptoMap = getProfessoresDepartamentos();
+        const listaComDepto = (data || []).map(p => ({
+            ...p,
+            departamento: deptoMap[p.id] || 'DR/BA'
+        }));
+
+        if (departamento && departamento !== 'TODOS') {
+            const filtrados = listaComDepto.filter(p => p.departamento === departamento);
+            return res.json(filtrados);
+        }
+
+        res.json(listaComDepto);
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao carregar profissionais.' });
     }

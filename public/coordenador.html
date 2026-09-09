@@ -98,6 +98,9 @@
             <a class="drawer-link" href="#" onclick="ativarTabCoordMobile('tab-candidatos')" data-bs-dismiss="offcanvas">
               <i class="bi bi-people-fill"></i> Moderação de Candidatos
             </a>
+            <a class="drawer-link" href="#" id="drawerProfessoresLink" onclick="ativarTabCoordMobile('tab-professores')" data-bs-dismiss="offcanvas">
+              <i class="bi bi-person-badge-fill"></i> Professores da Unidade
+            </a>
             <a class="drawer-link btn-settings-trigger" href="javascript:void(0)" id="btnDrawerConfiguracoes" data-bs-dismiss="offcanvas">
               <i class="bi bi-gear-fill"></i> Configurações da Conta
             </a>
@@ -136,14 +139,21 @@
 
     <!-- SUBHEADER -->
     <div class="user-subheader-bar mb-4">
-      <div class="container d-flex justify-content-between align-items-center">
+      <div class="container d-flex flex-wrap justify-content-between align-items-center gap-2">
         <span class="text-secondary small">
           <i class="bi bi-person-badge-fill text-primary me-1"></i> Conectado como:
           <strong id="userNome" class="text-dark">--</strong>
         </span>
-        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 font-heading">
-          <i class="bi bi-award-fill me-1"></i> Coordenador da Unidade
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          <span class="small fw-semibold text-secondary d-none d-sm-inline">
+            <i class="bi bi-building text-primary me-1"></i> Departamento Administrado:
+          </span>
+          <select id="selectCoordDepartamento" class="form-select form-select-sm fw-bold border-primary border-opacity-25 shadow-sm" style="width: auto; min-width: 220px; max-width: 330px;" title="Selecione o departamento regional do Senac que você administra">
+          </select>
+          <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-3 py-1 font-heading">
+            <i class="bi bi-award-fill me-1"></i> Coordenador
+          </span>
+        </div>
       </div>
     </div>
 
@@ -224,6 +234,11 @@
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="moderacao-tab" data-bs-toggle="tab" data-bs-target="#moderacao" type="button" role="tab">
               <i class="bi bi-people-fill"></i> Moderacao de Candidatos
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="professores-tab" data-bs-toggle="tab" data-bs-target="#professores" type="button" role="tab">
+              <i class="bi bi-person-badge-fill"></i> Professores da Unidade
             </button>
           </li>
         </ul>
@@ -477,6 +492,97 @@
           </div>
         </div>
 
+        <!-- ABA 5: EQUIPE & PROFESSORES DO DEPARTAMENTO -->
+        <div class="tab-pane fade" id="professores" role="tabpanel" aria-labelledby="professores-tab">
+          <div class="row g-4">
+            <!-- Formulário de Adicionar Professor -->
+            <div class="col-lg-5">
+              <div class="card-premium h-100">
+                <div class="card-header-premium">
+                  <div class="d-flex align-items-center gap-2">
+                    <div class="card-header-icon"><i class="bi bi-person-plus-fill"></i></div>
+                    <div>
+                      <h5 class="mb-0 font-heading">Adicionar Professor</h5>
+                      <small class="text-muted">Cadastrar docente para o departamento ativo</small>
+                    </div>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <form id="formCadastrarProfessorCoord" novalidate>
+                    <div class="form-floating mb-3">
+                      <input type="text" class="form-control" id="coordProfNome" placeholder="Nome Completo" required />
+                      <label for="coordProfNome"><i class="bi bi-person me-1"></i> Nome Completo do Docente</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input type="email" class="form-control" id="coordProfEmail" placeholder="nome@senac.br" required />
+                      <label for="coordProfEmail"><i class="bi bi-envelope me-1"></i> E-mail Institucional</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input type="tel" class="form-control" id="coordProfTelefone" placeholder="(75) 99999-9999" required />
+                      <label for="coordProfTelefone"><i class="bi bi-whatsapp me-1"></i> WhatsApp</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input type="password" class="form-control" id="coordProfSenha" placeholder="Senha Inicial" required />
+                      <label for="coordProfSenha"><i class="bi bi-lock me-1"></i> Senha Inicial</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                      <select class="form-select" id="coordProfDepartamento" required aria-label="Departamento Regional">
+                      </select>
+                      <label for="coordProfDepartamento"><i class="bi bi-building me-1"></i> Departamento Regional (SENAC)</label>
+                    </div>
+
+                    <div id="msgCoordProf" class="mb-3 text-center small fw-bold"></div>
+
+                    <button type="submit" class="btn btn-brand w-100 py-3 shadow-sm">
+                      <i class="bi bi-check-circle-fill me-1"></i> Vincular Professor ao Departamento
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tabela de Docentes do Departamento -->
+            <div class="col-lg-7">
+              <div class="card-premium h-100">
+                <div class="card-header-premium">
+                  <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="card-header-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                      <div>
+                        <h5 class="mb-0 font-heading">Docentes do Departamento</h5>
+                        <small class="text-muted" id="subtituloDocentesCoord">Professores vinculados ao departamento</small>
+                      </div>
+                    </div>
+                    <button class="btn btn-sm btn-outline-brand" onclick="carregarProfissionaisCoord()" title="Atualizar lista">
+                      <i class="bi bi-arrow-clockwise"></i> Atualizar
+                    </button>
+                  </div>
+                </div>
+                <div class="p-4">
+                  <div class="table-responsive">
+                    <table class="table table-custom align-middle">
+                      <thead>
+                        <tr>
+                          <th>Nome do Docente</th>
+                          <th>Departamento</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tabelaProfessoresCoordBody">
+                        <tr><td colspan="3" class="text-center py-4 text-muted"><span class="spinner-border spinner-border-sm me-1"></span> Carregando docentes...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div><!-- /tab-content -->
     </main>
 
@@ -597,6 +703,7 @@
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/senac-departamentos.js"></script>
     <script src="js/coordenador.js"></script>
     <script src="js/ui-effects.js"></script>
       <script src="js/accessibility.js"></script>

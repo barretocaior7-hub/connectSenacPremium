@@ -94,7 +94,10 @@ async function carregarUsuários(){
     if (!tbody) return;
 
     try {
-        const response = await fetch(`${API_URL}/admin/usuarios`, {
+        const selAdmin = document.getElementById('selectAdminDepartamento');
+        const depto = selAdmin ? selAdmin.value : (typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : '');
+        const query = depto && depto !== 'TODOS' ? `?departamento=${encodeURIComponent(depto)}` : '';
+        const response = await fetch(`${API_URL}/admin/usuarios${query}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         baseUsuários = await response.json();
@@ -170,6 +173,7 @@ function renderizarTabelaUsuários(lista){
             `;
         }
 
+        const deptoBadge = user.departamento ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.72rem;"><i class="bi bi-building me-1"></i>${escapeHTML(user.departamento)}</span>` : '';
         const isSelf = user.id === payloadToken.id;
         const isAdmin = (payloadToken.perfil || '').toLowerCase() === 'admin';
         const isCoord = (payloadToken.perfil || '').toLowerCase() === 'coordenador';
@@ -216,7 +220,7 @@ function renderizarTabelaUsuários(lista){
                     <div class="small text-dark">${emailFormatado}</div>
                     <div class="text-muted small">${telFormatado}</div>
                 </td>
-                <td>${seletorPerfil}</td>
+                <td><div class="d-flex align-items-center gap-1">${seletorPerfil} ${deptoBadge}</div></td>
                 <td>
                     <div class="d-flex flex-column gap-1">${badgeLgpd}${badgeImagem}</div>
                 </td>
@@ -330,7 +334,8 @@ if(formColaborador) {
             email: document.getElementById('colabEmail').value,
             telefone: document.getElementById('colabTelefone').value,
             senha: document.getElementById('colabSenha').value,
-            perfil: document.getElementById('colabPerfil').value
+            perfil: document.getElementById('colabPerfil').value,
+            departamento: document.getElementById('colabDepartamento') ? document.getElementById('colabDepartamento').value : (typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : 'DR/BA')
         };
 
         try {
@@ -603,12 +608,14 @@ if (formVagas) {
     });
 }
 
-async function carregarProfissionaisNoSelect(){
+async function carregarProfissionaisNoSelect(deptoFiltro){
     const select = document.getElementById('selectProfissional');
     if (!select) return;
 
     try {
-        const response = await fetch(`${API_URL}/admin/profissionais`, {
+        const depto = deptoFiltro || (document.getElementById('selectAdminDepartamento') ? document.getElementById('selectAdminDepartamento').value : (typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : ''));
+        const query = depto && depto !== 'TODOS' ? `?departamento=${encodeURIComponent(depto)}` : '';
+        const response = await fetch(`${API_URL}/admin/profissionais${query}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         const profissionais = await response.json();
@@ -617,7 +624,7 @@ async function carregarProfissionaisNoSelect(){
             profissionais.forEach(p => {
                 const option = document.createElement('option');
                 option.value = p.id;
-                option.textContent = p.nome;
+                option.textContent = p.departamento ? `${p.nome} (${p.departamento})` : p.nome;
                 select.appendChild(option);
             });
         }
@@ -1042,3 +1049,47 @@ if (colabTelInput) {
 window.excluirUsuario = excluirUsuario;
 window.toggleBloqueio = toggleBloqueio;
 window.alterarPerfil = alterarPerfil;
+
+// ============================================================================
+// GESTÃO DE DEPARTAMENTOS DO SENAC (cloud.plataforma.senac.br)
+// ============================================================================
+function inicializarSeletoresDepartamento() {
+    const selAdmin = document.getElementById('selectAdminDepartamento');
+    const selColab = document.getElementById('colabDepartamento');
+    const deptoAtual = typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : 'DR/BA';
+
+    if (selAdmin && typeof popularSelectDepartamentos === 'function') {
+        popularSelectDepartamentos(selAdmin, deptoAtual, true);
+        selAdmin.addEventListener('change', () => {
+            const novoDepto = selAdmin.value;
+            if (typeof setDepartamentoAtivo === 'function' && novoDepto !== 'TODOS') {
+                setDepartamentoAtivo(novoDepto);
+            }
+            if (selColab && novoDepto !== 'TODOS') {
+                selColab.value = novoDepto;
+            }
+            carregarProfissionaisNoSelect(novoDepto);
+            carregarUsuários();
+        });
+    }
+
+    if (selColab && typeof popularSelectDepartamentos === 'function') {
+        popularSelectDepartamentos(selColab, deptoAtual === 'TODOS' ? 'DR/BA' : deptoAtual, false);
+    }
+
+    window.addEventListener('senacDepartamentoChanged', (e) => {
+        const d = e.detail?.departamento;
+        if (d && selAdmin && selAdmin.value !== d) {
+            selAdmin.value = d;
+            if (selColab) selColab.value = d;
+            carregarProfissionaisNoSelect(d);
+            carregarUsuários();
+        }
+    });
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', inicializarSeletoresDepartamento);
+} else {
+    inicializarSeletoresDepartamento();
+}

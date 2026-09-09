@@ -55,7 +55,20 @@ if (btnCoordDrawerSair) btnCoordDrawerSair.addEventListener("click", logoutCoord
 
 // Ativação de abas via Drawer Mobile
 function ativarTabCoordMobile(tabBtnId) {
-  const triggerEl = document.getElementById(tabBtnId);
+  const map = {
+    'tab-operacoes': 'operacao-tab',
+    'tab-catalogo': 'catalogo-tab',
+    'tab-pautas': 'pautas-tab',
+    'tab-candidatos': 'moderacao-tab',
+    'tab-professores': 'professores-tab',
+    'operacao-tab': 'operacao-tab',
+    'catalogo-tab': 'catalogo-tab',
+    'pautas-tab': 'pautas-tab',
+    'moderacao-tab': 'moderacao-tab',
+    'professores-tab': 'professores-tab'
+  };
+  const targetId = map[tabBtnId] || tabBtnId;
+  const triggerEl = document.getElementById(targetId);
   if (triggerEl) {
     const tab = new bootstrap.Tab(triggerEl);
     tab.show();
@@ -100,11 +113,13 @@ async function carregarMetricas() {
 // ============================================================================
 // 2. CARREGAR PROFESSORES NO SELECT (Cadastro de Curso)
 // ============================================================================
-async function carregarProfissionaisNoSelect() {
+async function carregarProfissionaisNoSelect(deptoFiltro) {
   const select = document.getElementById("selectProfissional");
   if (!select) return;
   try {
-    const response = await fetch(`${API_URL}/admin/profissionais`, {
+    const depto = deptoFiltro !== undefined ? deptoFiltro : (typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA");
+    const query = depto && depto !== "TODOS" ? `?departamento=${encodeURIComponent(depto)}` : "";
+    const response = await fetch(`${API_URL}/admin/profissionais${query}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const profissionais = await response.json();
@@ -114,7 +129,8 @@ async function carregarProfissionaisNoSelect() {
       profissionais.forEach((p) => {
         const option = document.createElement("option");
         option.value = p.id;
-        option.textContent = p.nome;
+        const deptoTag = p.departamento ? ` [${p.departamento}]` : "";
+        option.textContent = `${p.nome}${deptoTag}`;
         select.appendChild(option);
       });
     }
@@ -981,6 +997,7 @@ if (moderacaoTab) moderacaoTab.addEventListener("click", carregarCandidatos);
 // ============================================================================
 carregarMetricas();
 carregarProfissionaisNoSelect();
+inicializarSeletoresDepartamentoCoord();
 carregarCursosNoSelect();
 carregarPautasGlobais();
 carregarCandidatos();
@@ -1011,3 +1028,137 @@ async function desarquivarCurso(id, nome) {
 // Exportações globais para a tabela
 window.excluirCandidato = excluirCandidato;
 window.toggleBloqueioCandidato = toggleBloqueioCandidato;
+
+// ============================================================================
+// GESTAO DE DEPARTAMENTOS E PROFESSORES (COORDENACAO)
+// ============================================================================
+function inicializarSeletoresDepartamentoCoord() {
+  const selCoord = document.getElementById("selectCoordDepartamento");
+  const selProf = document.getElementById("coordProfDepartamento");
+  const deptoAtual = typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA";
+
+  if (selCoord && typeof popularSelectDepartamentos === "function") {
+    popularSelectDepartamentos(selCoord, deptoAtual, false);
+    selCoord.addEventListener("change", () => {
+      const novoDepto = selCoord.value;
+      if (typeof setDepartamentoAtivo === "function") {
+        setDepartamentoAtivo(novoDepto);
+      }
+      if (selProf) {
+        selProf.value = novoDepto;
+      }
+      carregarProfissionaisNoSelect(novoDepto);
+      carregarProfissionaisCoord(novoDepto);
+    });
+  }
+
+  if (selProf && typeof popularSelectDepartamentos === "function") {
+    popularSelectDepartamentos(selProf, deptoAtual, false);
+  }
+
+  window.addEventListener('senacDepartamentoChanged', (e) => {
+    const d = e.detail?.departamento;
+    if (d && selCoord && selCoord.value !== d) {
+      selCoord.value = d;
+      if (selProf) selProf.value = d;
+      carregarProfissionaisNoSelect(d);
+      carregarProfissionaisCoord(d);
+    }
+  });
+
+  carregarProfissionaisCoord(deptoAtual);
+}
+
+// Listar Professores do Departamento na Aba de Equipe
+async function carregarProfissionaisCoord(deptoFiltro) {
+  const tbody = document.getElementById("tabelaProfessoresCoordBody");
+  const subtitulo = document.getElementById("subtituloDocentesCoord");
+  if (!tbody) return;
+
+  const depto = deptoFiltro || (typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA");
+  if (subtitulo) subtitulo.textContent = `Professores vinculados ao departamento ${depto}`;
+
+  try {
+    const query = depto ? `?departamento=${encodeURIComponent(depto)}` : "";
+    const res = await fetch(`${API_URL}/admin/profissionais${query}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const lista = await res.json();
+
+    tbody.innerHTML = "";
+    if (!Array.isArray(lista) || lista.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-muted"><i class="bi bi-inbox me-1"></i> Nenhum professor cadastrado para ${escapeHTML(depto)}. Use o formulário ao lado para adicionar!</td></tr>`;
+      return;
+    }
+
+    lista.forEach((p) => {
+      const row = `
+        <tr>
+          <td>
+            <div class="fw-bold font-heading text-dark">${escapeHTML(p.nome)}</div>
+            <small class="text-muted"><i class="bi bi-person-badge me-1"></i>Docente</small>
+          </td>
+          <td>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+              <i class="bi bi-building me-1"></i>${escapeHTML(p.departamento || depto)}
+            </span>
+          </td>
+          <td>
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+              <i class="bi bi-check-circle-fill me-1"></i>Ativo
+            </span>
+          </td>
+        </tr>
+      `;
+      tbody.innerHTML += row;
+    });
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center py-4 text-danger"><i class="bi bi-wifi-off me-1"></i>Erro ao carregar professores.</td></tr>';
+  }
+}
+
+// Formulário de Cadastro de Professor pela Coordenação
+const formProfCoord = document.getElementById("formCadastrarProfessorCoord");
+if (formProfCoord) {
+  formProfCoord.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msgDiv = document.getElementById("msgCoordProf");
+    msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> Vinculando professor ao departamento...</span>';
+
+    const deptoProf = document.getElementById("coordProfDepartamento");
+    const deptoFinal = deptoProf ? deptoProf.value : (typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA");
+
+    const payload = {
+      nome: document.getElementById("coordProfNome").value,
+      email: document.getElementById("coordProfEmail").value,
+      telefone: document.getElementById("coordProfTelefone").value,
+      senha: document.getElementById("coordProfSenha").value,
+      perfil: "profissional",
+      departamento: deptoFinal,
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/admin/colaboradores`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        msgDiv.innerHTML = `<div class="alert alert-success py-2 small mb-0"><i class="bi bi-check-circle-fill me-1"></i> ${data.mensagem}</div>`;
+        formProfCoord.reset();
+        if (deptoProf) deptoProf.value = deptoFinal;
+        carregarProfissionaisCoord(deptoFinal);
+        carregarProfissionaisNoSelect(deptoFinal);
+      } else {
+        msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
+      }
+    } catch (err) {
+      msgDiv.innerHTML = '<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-wifi-off me-1"></i> Erro de conexão com o servidor.</div>';
+    }
+  });
+}
