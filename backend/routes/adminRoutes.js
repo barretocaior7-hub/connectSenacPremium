@@ -26,4 +26,10 @@ router.put('/usuarios/:id/perfil', authMiddleware, autorizarPerfis('admin', 'coo
 // 6. Pautas Globais de todas as turmas e presenças
 router.get('/pautas-globais', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.listarPautasGlobais);
 
+// 7. Alterar o próprio departamento
+router.put('/usuarios/me/departamento', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.alterarMeuDepartamento);
+
+// 8. Alterar departamento de usuário (com proteção de admin/coord)
+router.put('/usuarios/:id/departamento', authMiddleware, autorizarPerfis('admin', 'coordenador'), adminController.alterarDepartamento);
+
 module.exports = router;

@@ -1,5 +1,5 @@
-﻿// public/js/senac-departamentos.js
-// Relacao Oficial de Departamentos do SENAC (Referencia: cloud.plataforma.senac.br)
+// public/js/senac-departamentos.js
+// Relação Oficial de Departamentos do SENAC (Referência: cloud.plataforma.senac.br)
 
 const SENAC_DEPARTAMENTOS = [
   { sigla: "DR/BA", nome: "Departamento Regional Bahia (DR/BA)", uf: "BA", principal: true },
@@ -7,34 +7,34 @@ const SENAC_DEPARTAMENTOS = [
   { sigla: "DR/AC", nome: "Departamento Regional Acre (DR/AC)", uf: "AC" },
   { sigla: "DR/AL", nome: "Departamento Regional Alagoas (DR/AL)", uf: "AL" },
   { sigla: "DR/AM", nome: "Departamento Regional Amazonas (DR/AM)", uf: "AM" },
-  { sigla: "DR/AP", nome: "Departamento Regional Amapa (DR/AP)", uf: "AP" },
-  { sigla: "DR/CE", nome: "Departamento Regional Ceara (DR/CE)", uf: "CE" },
+  { sigla: "DR/AP", nome: "Departamento Regional Amapá (DR/AP)", uf: "AP" },
+  { sigla: "DR/CE", nome: "Departamento Regional Ceará (DR/CE)", uf: "CE" },
   { sigla: "DR/DF", nome: "Departamento Regional Distrito Federal (DR/DF)", uf: "DF" },
-  { sigla: "DR/ES", nome: "Departamento Regional Espirito Santo (DR/ES)", uf: "ES" },
-  { sigla: "DR/GO", nome: "Departamento Regional Goias (DR/GO)", uf: "GO" },
-  { sigla: "DR/MA", nome: "Departamento Regional Maranhao (DR/MA)", uf: "MA" },
+  { sigla: "DR/ES", nome: "Departamento Regional Espírito Santo (DR/ES)", uf: "ES" },
+  { sigla: "DR/GO", nome: "Departamento Regional Goiás (DR/GO)", uf: "GO" },
+  { sigla: "DR/MA", nome: "Departamento Regional Maranhão (DR/MA)", uf: "MA" },
   { sigla: "DR/MG", nome: "Departamento Regional Minas Gerais (DR/MG)", uf: "MG" },
   { sigla: "DR/MS", nome: "Departamento Regional Mato Grosso do Sul (DR/MS)", uf: "MS" },
   { sigla: "DR/MT", nome: "Departamento Regional Mato Grosso (DR/MT)", uf: "MT" },
-  { sigla: "DR/PA", nome: "Departamento Regional Para (DR/PA)", uf: "PA" },
-  { sigla: "DR/PB", nome: "Departamento Regional Paraiba (DR/PB)", uf: "PB" },
+  { sigla: "DR/PA", nome: "Departamento Regional Pará (DR/PA)", uf: "PA" },
+  { sigla: "DR/PB", nome: "Departamento Regional Paraíba (DR/PB)", uf: "PB" },
   { sigla: "DR/PE", nome: "Departamento Regional Pernambuco (DR/PE)", uf: "PE" },
-  { sigla: "DR/PI", nome: "Departamento Regional Piaui (DR/PI)", uf: "PI" },
-  { sigla: "DR/PR", nome: "Departamento Regional Parana (DR/PR)", uf: "PR" },
+  { sigla: "DR/PI", nome: "Departamento Regional Piauí (DR/PI)", uf: "PI" },
+  { sigla: "DR/PR", nome: "Departamento Regional Paraná (DR/PR)", uf: "PR" },
   { sigla: "DR/RJ", nome: "Departamento Regional Rio de Janeiro (DR/RJ)", uf: "RJ" },
   { sigla: "DR/RN", nome: "Departamento Regional Rio Grande do Norte (DR/RN)", uf: "RN" },
-  { sigla: "DR/RO", nome: "Departamento Regional Rondonia (DR/RO)", uf: "RO" },
+  { sigla: "DR/RO", nome: "Departamento Regional Rondônia (DR/RO)", uf: "RO" },
   { sigla: "DR/RR", nome: "Departamento Regional Roraima (DR/RR)", uf: "RR" },
   { sigla: "DR/RS", nome: "Departamento Regional Rio Grande do Sul (DR/RS)", uf: "RS" },
   { sigla: "DR/SC", nome: "Departamento Regional Santa Catarina (DR/SC)", uf: "SC" },
   { sigla: "DR/SE", nome: "Departamento Regional Sergipe (DR/SE)", uf: "SE" },
-  { sigla: "DR/SP", nome: "Departamento Regional Sao Paulo (DR/SP)", uf: "SP" },
+  { sigla: "DR/SP", nome: "Departamento Regional São Paulo (DR/SP)", uf: "SP" },
   { sigla: "DR/TO", nome: "Departamento Regional Tocantins (DR/TO)", uf: "TO" }
 ];
 
 const STORAGE_KEY_DEPTO = 'senac_departamento_administrado';
 
-// Retorna o departamento ativo no navegador (padrao: DR/BA)
+// Retorna o departamento ativo no navegador (padrão: DR/BA)
 function getDepartamentoAtivo() {
   return localStorage.getItem(STORAGE_KEY_DEPTO) || 'DR/BA';
 }
@@ -55,7 +55,7 @@ function popularSelectDepartamentos(selectEl, selectedVal, incluirTodos = false)
   if (incluirTodos) {
     const optTodos = document.createElement('option');
     optTodos.value = 'TODOS';
-    optTodos.textContent = 'Todos os Departamentos (Visao Global)';
+    optTodos.textContent = 'Todos os Departamentos (Visão Global)';
     selectEl.appendChild(optTodos);
   }
 
@@ -68,8 +68,22 @@ function popularSelectDepartamentos(selectEl, selectedVal, incluirTodos = false)
   });
 }
 
-// Torna acessivel globalmente
+// Retorna HTML de <option> para inserção rápida em tabelas
+function gerarOpcoesSelectDepartamentos(selectedSigla, incluirTodos = false) {
+  let html = '';
+  if (incluirTodos) {
+    html += '<option value="TODOS"' + (selectedSigla === 'TODOS' ? ' selected' : '') + '>Todos os Departamentos</option>';
+  }
+  SENAC_DEPARTAMENTOS.forEach(dep => {
+    const isSelected = dep.sigla === selectedSigla ? ' selected' : '';
+    html += '<option value="' + dep.sigla + '"' + isSelected + '>' + dep.sigla + '</option>';
+  });
+  return html;
+}
+
+// Torna acessível globalmente
 window.SENAC_DEPARTAMENTOS = SENAC_DEPARTAMENTOS;
 window.getDepartamentoAtivo = getDepartamentoAtivo;
 window.setDepartamentoAtivo = setDepartamentoAtivo;
 window.popularSelectDepartamentos = popularSelectDepartamentos;
+window.gerarOpcoesSelectDepartamentos = gerarOpcoesSelectDepartamentos;

@@ -8,7 +8,7 @@ const API_URL = isLocalDev ? 'http://localhost:3000/api' : `${window.location.or
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
 
-// Descodificar o JWT para saber o nome e perfil do Admin conectado
+// Decodificar o JWT para saber o nome e perfil do Admin conectado
 let payloadToken = null;
 try {
     payloadToken = JSON.parse(atob(token.split('.')[1]));
@@ -103,7 +103,7 @@ async function carregarUsuários(){
         baseUsuários = await response.json();
         renderizarTabelaUsuários(baseUsuários);
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao ligar ao servidor.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao conectar ao servidor.</td></tr>';
     }
 }
 
@@ -173,7 +173,51 @@ function renderizarTabelaUsuários(lista){
             `;
         }
 
-        const deptoBadge = user.departamento ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1" style="font-size: 0.72rem;"><i class="bi bi-building me-1"></i>${escapeHTML(user.departamento)}</span>` : '';
+                const userDepto = user.departamento || 'DR/BA';
+        let deptoHtml = '';
+
+        if (isSelf) {
+            // O próprio usuário logado (Admin ou Coordenador) pode editar o seu departamento
+            const opcoes = typeof gerarOpcoesSelectDepartamentos === 'function'
+                ? gerarOpcoesSelectDepartamentos(userDepto, false)
+                : `<option value="${userDepto}" selected>${userDepto}</option>`;
+            deptoHtml = `
+                <div class="d-inline-flex align-items-center ms-1" title="Editar seu próprio departamento">
+                    <select class="form-select form-select-sm border-primary text-primary fw-bold py-0 px-1 shadow-sm"
+                            style="width: 100px; font-size: 0.72rem; height: 31px;"
+                            onchange="alterarMeuProprioDepartamento(this.value)"
+                            aria-label="Editar meu departamento">
+                        ${opcoes}
+                    </select>
+                </div>
+            `;
+        } else if (user.perfil === 'admin' || user.perfil === 'coordenador') {
+            // Outro Admin ou outro Coordenador: BLOQUEADO POR SEGURANÇA (somente leitura com cadeado)
+            deptoHtml = `
+                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1 d-inline-flex align-items-center gap-1 py-1 px-2"
+                      style="font-size: 0.72rem; cursor: not-allowed;"
+                      title="O departamento de outros administradores e coordenadores não pode ser alterado por segurança.">
+                    <i class="bi bi-lock-fill text-muted"></i> ${escapeHTML(userDepto)}
+                </span>
+            `;
+        } else if (user.perfil === 'profissional') {
+            // Professor: Admin e Coordenador podem alterar o departamento do docente
+            const opcoes = typeof gerarOpcoesSelectDepartamentos === 'function'
+                ? gerarOpcoesSelectDepartamentos(userDepto, false)
+                : `<option value="${userDepto}" selected>${userDepto}</option>`;
+            deptoHtml = `
+                <div class="d-inline-flex align-items-center ms-1" title="Alterar departamento do professor">
+                    <select class="form-select form-select-sm border-secondary-subtle py-0 px-1"
+                            style="width: 100px; font-size: 0.72rem; height: 31px;"
+                            onchange="alterarDepartamentoUsuario('${user.id}', this.value)"
+                            aria-label="Alterar departamento do professor">
+                        ${opcoes}
+                    </select>
+                </div>
+            `;
+        } else {
+            deptoHtml = user.departamento ? `<span class="badge bg-light text-muted border ms-1" style="font-size: 0.72rem;">${escapeHTML(user.departamento)}</span>` : '';
+        }
         const isSelf = user.id === payloadToken.id;
         const isAdmin = (payloadToken.perfil || '').toLowerCase() === 'admin';
         const isCoord = (payloadToken.perfil || '').toLowerCase() === 'coordenador';
@@ -220,7 +264,7 @@ function renderizarTabelaUsuários(lista){
                     <div class="small text-dark">${emailFormatado}</div>
                     <div class="text-muted small">${telFormatado}</div>
                 </td>
-                <td><div class="d-flex align-items-center gap-1">${seletorPerfil} ${deptoBadge}</div></td>
+                <td><div class="d-flex align-items-center gap-1">${seletorPerfil} ${deptoHtml}</div></td>
                 <td>
                     <div class="d-flex flex-column gap-1">${badgeLgpd}${badgeImagem}</div>
                 </td>
@@ -327,7 +371,7 @@ if(formColaborador) {
     formColaborador.addEventListener('submit', async (e) => {
         e.preventDefault();
         const msgDiv = document.getElementById('msgColab');
-        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> A cadastrar colaborador...</span>';
+        msgDiv.innerHTML = '<span class="text-primary small"><span class="spinner-border spinner-border-sm me-1"></span> Cadastrando colaborador...</span>';
 
         const payload = {
             nome: document.getElementById('colabNome').value,
@@ -358,7 +402,7 @@ if(formColaborador) {
                 msgDiv.innerHTML = `<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> ${data.erro}</div>`;
             }
         } catch (error) {
-            msgDiv.innerHTML = '<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-wifi-off me-1"></i> Erro de ligação com o servidor.</div>';
+            msgDiv.innerHTML = '<div class="alert alert-danger py-2 small mb-0"><i class="bi bi-wifi-off me-1"></i> Erro de conexão com o servidor.</div>';
         }
     });
 }
@@ -1060,10 +1104,23 @@ function inicializarSeletoresDepartamento() {
 
     if (selAdmin && typeof popularSelectDepartamentos === 'function') {
         popularSelectDepartamentos(selAdmin, deptoAtual, true);
-        selAdmin.addEventListener('change', () => {
+        selAdmin.addEventListener('change', async () => {
             const novoDepto = selAdmin.value;
             if (typeof setDepartamentoAtivo === 'function' && novoDepto !== 'TODOS') {
                 setDepartamentoAtivo(novoDepto);
+                // Persiste o departamento no perfil do próprio admin
+                try {
+                    await fetch(`${API_URL}/admin/usuarios/me/departamento`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ departamento: novoDepto })
+                    });
+                } catch (e) {
+                    console.error('Erro ao sincronizar departamento no perfil:', e);
+                }
             }
             if (selColab && novoDepto !== 'TODOS') {
                 selColab.value = novoDepto;
@@ -1093,3 +1150,61 @@ if (document.readyState === 'loading') {
 } else {
     inicializarSeletoresDepartamento();
 }
+
+// ============================================================================
+// FUNÇÕES DE ATUALIZAÇÃO DE DEPARTAMENTO (REGRAS RBAC)
+// ============================================================================
+async function alterarMeuProprioDepartamento(novoDepto) {
+    if (!novoDepto) return;
+    try {
+        const response = await fetch(`${API_URL}/admin/usuarios/me/departamento`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ departamento: novoDepto })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            if (typeof setDepartamentoAtivo === 'function') {
+                setDepartamentoAtivo(novoDepto);
+            }
+            alert(`Seu departamento foi atualizado para ${novoDepto} com sucesso!`);
+            carregarUsuários();
+            carregarProfissionaisNoSelect(novoDepto);
+        } else {
+            alert(data.erro || 'Erro ao atualizar seu departamento.');
+            carregarUsuários();
+        }
+    } catch (e) {
+        alert('Erro de conexão ao atualizar seu departamento.');
+    }
+}
+window.alterarMeuProprioDepartamento = alterarMeuProprioDepartamento;
+
+async function alterarDepartamentoUsuario(userId, novoDepto) {
+    if (!userId || !novoDepto) return;
+    try {
+        const response = await fetch(`${API_URL}/admin/usuarios/${userId}/departamento`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ departamento: novoDepto })
+        });
+        const data = await response.json();
+        if (response.ok) {
+            alert(data.mensagem || `Departamento atualizado para ${novoDepto} com sucesso!`);
+            carregarUsuários();
+            carregarProfissionaisNoSelect();
+        } else {
+            alert(data.erro || 'Não é permitido alterar o departamento deste usuário.');
+            carregarUsuários();
+        }
+    } catch (e) {
+        alert('Erro de conexão ao alterar departamento.');
+    }
+}
+window.alterarDepartamentoUsuario = alterarDepartamentoUsuario;

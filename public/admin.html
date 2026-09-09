@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Connect Senac - Central de AdministraÃ§Ã£o</title>
+    <title>Connect Senac - Central de Administração</title>
     <!-- Favicon / Meta -->
     <meta name="theme-color" content="#004a8d" />
     <link rel="icon" type="image/png" href="assets/logo-connect-senac.png" />
@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="css/style.css" />
       <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#004a8d">
-    <meta property="og:title" content="Connect Senac â€” Seja Modelo em Cursos PrÃ¡ticos">
+    <meta property="og:title" content="Connect Senac â€” Seja Modelo em Cursos Práticos">
     <meta property="og:description" content="Atendimentos 100% gratuitos e supervisionados por docentes do SENAC. Agende sua vaga online!">
     <meta property="og:image" content="/assets/logo-connect-senac.png">
     <meta property="og:type" content="website">
@@ -38,13 +38,13 @@
           <img class="navbar-brand-logo" src="assets/logo-connect-senac.png" alt="Connect Senac" />
           <span>Connect Senac</span>
           <span class="navbar-role-badge">
-            <i class="bi bi-shield-lock-fill"></i> AdministraÃ§Ã£o
+            <i class="bi bi-shield-lock-fill"></i> Administração
           </span>
         </a>
 
-        <!-- Controles Mobile (ConfiguraÃ§Ãµes + Tema + HambÃºrguer) -->
+        <!-- Controles Mobile (Configurações + Tema + Hambúrguer) -->
         <div class="d-flex align-items-center gap-2 d-lg-none">
-          <button class="btn btn-settings-toggle btn-settings-trigger" id="btnMobileConfiguracoesTop" title="ConfiguraÃ§Ãµes da Conta" aria-label="Abrir ConfiguraÃ§Ãµes">
+          <button class="btn btn-settings-toggle btn-settings-trigger" id="btnMobileConfiguracoesTop" title="Configurações da Conta" aria-label="Abrir Configurações">
             <i class="bi bi-gear-fill"></i>
           </button>
           <button class="btn btn-theme-toggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
@@ -56,14 +56,14 @@
         </div>
 
         <div class="d-none d-lg-flex align-items-center gap-2 mt-2 mt-lg-0">
-          <button class="btn btn-settings-toggle btn-settings-trigger me-1" id="btnConfiguracoes" title="ConfiguraÃ§Ãµes da Conta" aria-label="Abrir ConfiguraÃ§Ãµes">
+          <button class="btn btn-settings-toggle btn-settings-trigger me-1" id="btnConfiguracoes" title="Configurações da Conta" aria-label="Abrir Configurações">
             <i class="bi bi-gear-fill"></i>
           </button>
           <button class="btn btn-theme-toggle me-1" id="btnThemeToggle" title="Alternar Modo Escuro / Claro" aria-label="Alternar Modo Escuro">
             <i class="bi bi-moon-stars-fill"></i>
           </button>
           <a href="painel.html" class="btn btn-sm btn-outline-light px-3 fw-semibold">
-            <i class="bi bi-eye me-1"></i> VisÃ£o do Modelo
+            <i class="bi bi-eye me-1"></i> Visão do Modelo
           </a>
           <button class="btn btn-sm btn-light-custom px-3" id="btnSair">
             <i class="bi bi-box-arrow-right"></i> Sair
@@ -94,16 +94,16 @@
             </div>
           </div>
 
-          <!-- Links de NavegaÃ§Ã£o pelas Abas no Mobile -->
+          <!-- Links de Navegação pelas Abas no Mobile -->
           <nav class="drawer-nav-list">
             <a class="drawer-link active" href="#" onclick="ativarTabMobile('operacoes-tab')" data-bs-dismiss="offcanvas">
-              <i class="bi bi-grid-fill"></i> OperaÃ§Ãµes & Cadastro
+              <i class="bi bi-grid-fill"></i> Operações & Cadastro
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabMobile('catalogo-tab')" data-bs-dismiss="offcanvas">
-              <i class="bi bi-tags-fill"></i> CatÃ¡logo de Cursos
+              <i class="bi bi-tags-fill"></i> Catálogo de Cursos
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabMobile('usuarios-tab')" data-bs-dismiss="offcanvas">
-              <i class="bi bi-people-fill"></i> UsuÃ¡rios & ModeraÃ§Ã£o
+              <i class="bi bi-people-fill"></i> Usuários & Moderação
             </a>
             <a class="drawer-link" href="#" onclick="ativarTabMobile('pautas-tab')" data-bs-dismiss="offcanvas">
               <i class="bi bi-journal-album"></i> Pautas Globais
@@ -112,11 +112,11 @@
               <i class="bi bi-person-plus-fill"></i> Equipe Institucional
             </a>
             <a class="drawer-link btn-settings-trigger" href="javascript:void(0)" id="btnDrawerConfiguracoes" data-bs-dismiss="offcanvas">
-              <i class="bi bi-gear-fill"></i> ConfiguraÃ§Ãµes da Conta
+              <i class="bi bi-gear-fill"></i> Configurações da Conta
             </a>
             <hr class="border-white border-opacity-15 my-2">
             <a class="drawer-link text-warning fw-semibold" href="painel.html">
-              <i class="bi bi-eye text-warning"></i> VisÃ£o do Modelo
+              <i class="bi bi-eye text-warning"></i> Visão do Modelo
             </a>
 
             <div class="drawer-section-divider"></div>
@@ -127,7 +127,7 @@
               <i class="bi bi-whatsapp text-success"></i> WhatsApp Oficial
             </a>
             <a class="drawer-link" href="#" data-bs-dismiss="offcanvas" onclick="openSenacAiChat(); return false;">
-              <i class="bi bi-chat-dots-fill text-info"></i> DÃºvidas (Connect AI)
+              <i class="bi bi-chat-dots-fill text-info"></i> Dúvidas (Connect AI)
             </a>
             <a class="drawer-link" href="#" data-bs-dismiss="offcanvas" onclick="openAccessibilityMenu(true, event); return false;">
               <i class="bi bi-universal-access text-warning"></i> Acessibilidade
@@ -170,9 +170,9 @@
     <main class="container pb-5 flex-grow-1">
       <section class="workspace-hero workspace-hero-admin fade-in-up">
         <div>
-          <span class="workspace-kicker"><i class="bi bi-command"></i> Central de operaÃ§Ãµes</span>
-          <h1>GestÃ£o clara, decisÃµes rÃ¡pidas.</h1>
-          <p>Acompanhe a operaÃ§Ã£o, organize cursos, vagas e pessoas em uma visÃ£o integrada.</p>
+          <span class="workspace-kicker"><i class="bi bi-command"></i> Central de operações</span>
+          <h1>Gestão clara, decisões rápidas.</h1>
+          <p>Acompanhe a operação, organize cursos, vagas e pessoas em uma visão integrada.</p>
         </div>
         <div class="admin-hero-visual" aria-hidden="true">
           <span class="admin-visual-glow"></span>
@@ -193,7 +193,7 @@
             type="button"
             role="tab"
           >
-            <i class="bi bi-speedometer2"></i> VisÃ£o Geral & OperaÃ§Ã£o
+            <i class="bi bi-speedometer2"></i> Visão Geral & Operação
           </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -205,7 +205,7 @@
             type="button"
             role="tab"
           >
-            <i class="bi bi-tags-fill"></i> GestÃ£o de Cursos
+            <i class="bi bi-tags-fill"></i> Gestão de Cursos
           </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -217,7 +217,7 @@
             type="button"
             role="tab"
           >
-            <i class="bi bi-people-fill"></i> UsuÃ¡rios & ModeraÃ§Ã£o
+            <i class="bi bi-people-fill"></i> Usuários & Moderação
           </button>
         </li>
         <li class="nav-item" role="presentation">
@@ -251,7 +251,7 @@
         <!-- ABA 1: VISÃƒO GERAL & OPERAÃ‡ÃƒO -->
         <div class="tab-pane fade show active" id="visao" role="tabpanel">
           
-          <!-- MÃ©tricas KPI -->
+          <!-- Métricas KPI -->
           <div class="row g-3 mb-4" id="painelMetricas">
             <div class="col-md-4">
               <div class="kpi-card kpi-blue">
@@ -294,7 +294,7 @@
             </div>
           </div>
 
-          <!-- FormulÃ¡rios Operacionais -->
+          <!-- Formulários Operacionais -->
           <div class="row g-4">
             <!-- Form Cadastrar Curso -->
             <div class="col-lg-6">
@@ -322,13 +322,13 @@
                         class="form-select"
                         id="selectProfissional"
                         required
-                        aria-label="Professor ResponsÃ¡vel"
+                        aria-label="Professor Responsável"
                       >
                         <option value="" disabled selected>
                           Carregando professores...
                         </option>
                       </select>
-                      <label for="selectProfissional"><i class="bi bi-person-badge me-1"></i> Professor ResponsÃ¡vel</label>
+                      <label for="selectProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsável</label>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -336,11 +336,11 @@
                         type="text"
                         class="form-control"
                         id="localCurso"
-                        value="SENAC - Santo AntÃ´nio de Jesus, BA"
+                        value="SENAC - Santo Antônio de Jesus, BA"
                         required
-                        placeholder="LocalizaÃ§Ã£o"
+                        placeholder="Localização"
                       />
-                      <label for="localCurso"><i class="bi bi-geo-alt me-1"></i> LocalizaÃ§Ã£o / Unidade</label>
+                      <label for="localCurso"><i class="bi bi-geo-alt me-1"></i> Localização / Unidade</label>
                     </div>
 
                     <!-- Upload e Imagem de Capa do Curso -->
@@ -354,12 +354,12 @@
                         <input type="file" id="fileInputCurso" accept="image/png, image/jpeg, image/webp, image/gif" class="d-none">
                         <i class="bi bi-cloud-arrow-up-fill upload-dropzone-icon"></i>
                         <div class="fw-semibold small text-dark">Arraste uma imagem aqui ou <span class="text-primary text-decoration-underline">clique para selecionar do dispositivo</span></div>
-                        <div class="text-muted" style="font-size: 0.75rem;">Suporta PNG, JPG, JPEG, WEBP (OtimizaÃ§Ã£o automÃ¡tica)</div>
+                        <div class="text-muted" style="font-size: 0.75rem;">Suporta PNG, JPG, JPEG, WEBP (Otimização automática)</div>
                       </div>
 
                       <!-- Preview da Imagem -->
                       <div class="upload-preview-container mb-2 d-none" id="previewContainerCurso">
-                        <img src="" alt="PrÃ©via do Curso" id="previewImgCurso" class="upload-preview-img">
+                        <img src="" alt="Prévia do Curso" id="previewImgCurso" class="upload-preview-img">
                         <div class="upload-preview-overlay">
                           <button type="button" class="btn btn-sm btn-danger shadow-sm py-1 px-2" id="btnRemoverFotoCurso" title="Remover Imagem">
                             <i class="bi bi-trash3 me-1"></i> Remover
@@ -384,10 +384,10 @@
                         class="form-control"
                         id="descricaoCurso"
                         style="height: 80px"
-                        placeholder="DescriÃ§Ã£o"
+                        placeholder="Descrição"
                         required
                       ></textarea>
-                      <label for="descricaoCurso"><i class="bi bi-card-text me-1"></i> DescriÃ§Ã£o do Curso / ServiÃ§o</label>
+                      <label for="descricaoCurso"><i class="bi bi-card-text me-1"></i> Descrição do Curso / Serviço</label>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -395,9 +395,9 @@
                         class="form-control"
                         id="motivoCurso"
                         style="height: 60px"
-                        placeholder="BenefÃ­cios para o modelo"
+                        placeholder="Benefícios para o modelo"
                       ></textarea>
-                      <label for="motivoCurso"><i class="bi bi-gift me-1"></i> BenefÃ­cios para o Modelo</label>
+                      <label for="motivoCurso"><i class="bi bi-gift me-1"></i> Benefícios para o Modelo</label>
                     </div>
 
                     <div class="form-floating mb-3">
@@ -405,9 +405,9 @@
                         class="form-control"
                         id="restricoesCurso"
                         style="height: 60px"
-                        placeholder="RestriÃ§Ãµes"
+                        placeholder="Restrições"
                       ></textarea>
-                      <label for="restricoesCurso"><i class="bi bi-exclamation-triangle me-1"></i> RestriÃ§Ãµes / ContraindicaÃ§Ãµes</label>
+                      <label for="restricoesCurso"><i class="bi bi-exclamation-triangle me-1"></i> Restrições / Contraindicações</label>
                     </div>
 
                     <div id="msgCurso" class="mb-3 text-center small fw-bold"></div>
@@ -425,7 +425,7 @@
               <div class="card-premium h-100">
                 <div class="p-3 px-4 border-bottom bg-light">
                   <h6 class="mb-0 fw-bold font-heading text-success">
-                    <i class="bi bi-calendar-plus-fill me-1"></i> Disponibilizar Vagas e HorÃ¡rios
+                    <i class="bi bi-calendar-plus-fill me-1"></i> Disponibilizar Vagas e Horários
                   </h6>
                 </div>
                 <div class="p-4">
@@ -448,7 +448,7 @@
                             id="dataHora"
                             required
                           />
-                          <label for="dataHora"><i class="bi bi-clock me-1"></i> Data e HorÃ¡rio da Aula</label>
+                          <label for="dataHora"><i class="bi bi-clock me-1"></i> Data e Horário da Aula</label>
                         </div>
                       </div>
                       <div class="col-sm-4">
@@ -469,17 +469,17 @@
                     <div id="msgVaga" class="mb-3 text-center small fw-bold"></div>
 
                     <button type="submit" class="btn btn-orange w-100 py-3 shadow-sm">
-                      <i class="bi bi-unlock-fill me-1"></i> Abrir Grade de HorÃ¡rio
+                      <i class="bi bi-unlock-fill me-1"></i> Abrir Grade de Horário
                     </button>
                   </form>
 
                   <!-- Card Informativo -->
                   <div class="p-3 bg-light rounded-3 mt-4 border">
                     <h6 class="fw-bold small text-dark mb-1">
-                      <i class="bi bi-info-circle-fill text-primary me-1"></i> Dica de GestÃ£o
+                      <i class="bi bi-info-circle-fill text-primary me-1"></i> Dica de Gestão
                     </h6>
                     <p class="small text-muted mb-0">
-                      As vagas abertas ficam disponÃ­veis instantaneamente para agendamento pelos candidatos no painel de modelos.
+                      As vagas abertas ficam disponíveis instantaneamente para agendamento pelos candidatos no painel de modelos.
                     </p>
                   </div>
                 </div>
@@ -489,13 +489,13 @@
 
         </div>
 
-        <!-- ABA 2: GESTÃƒO DE CURSOS (CATÃLOGO) -->
+        <!-- ABA 2: GESTÃƒO DE CURSOS (CATÁLOGO) -->
         <div class="tab-pane fade" id="catalogo" role="tabpanel">
           <div class="card-premium">
             <div class="p-4 border-bottom d-flex justify-content-between align-items-center">
               <div>
                 <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
-                  <i class="bi bi-tags-fill me-1"></i> CatÃ¡logo Completo de Cursos
+                  <i class="bi bi-tags-fill me-1"></i> Catálogo Completo de Cursos
                 </h5>
                 <p class="text-muted small mb-0 mt-1">Gerencie status, instrutores vinculados e detalhes de cada procedimento ofertado.</p>
               </div>
@@ -505,17 +505,17 @@
                 <thead>
                   <tr>
                     <th>Curso</th>
-                    <th>Professor ResponsÃ¡vel</th>
-                    <th>LocalizaÃ§Ã£o</th>
+                    <th>Professor Responsável</th>
+                    <th>Localização</th>
                     <th>Status</th>
-                    <th class="text-end">AÃ§Ãµes Administrativas</th>
+                    <th class="text-end">Ações Administrativas</th>
                   </tr>
                 </thead>
                 <tbody id="tabelaCursosBody">
                   <tr>
                     <td colspan="5" class="text-center text-muted py-4">
                       <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-                      Carregando catÃ¡logo...
+                      Carregando catálogo...
                     </td>
                   </tr>
                 </tbody>
@@ -524,13 +524,13 @@
           </div>
         </div>
 
-        <!-- ABA 3: usuÃ¡rios & MODERAÃ‡ÃƒO -->
+        <!-- ABA 3: usuários & MODERAÃ‡ÃƒO -->
         <div class="tab-pane fade" id="usuarios" role="tabpanel">
           <div class="card-premium p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
-                  <i class="bi bi-people-fill me-1"></i> Base de UsuÃ¡rios e HistÃ³rico
+                  <i class="bi bi-people-fill me-1"></i> Base de Usuários e Histórico
                 </h5>
                 <p class="text-muted small mb-0 mt-1">Pesquise, filtre, promova cargos ou modere contas ativas na plataforma.</p>
               </div>
@@ -564,20 +564,20 @@
               <table class="table table-custom align-middle">
                 <thead>
                   <tr>
-                    <th>UsuÃ¡rio / Status</th>
+                    <th>Usuário / Status</th>
                     <th>E-mail & Contato</th>
-                    <th>Cargo / FunÃ§Ã£o</th>
+                    <th>Cargo / Função</th>
                     <th>LGPD & Imagem</th>
-                    <th>MatrÃ­cula</th>
-                    <th class="text-center">SessÃµes</th>
-                    <th class="text-center" style="min-width: 125px;">AÃ§Ãµes (Admin)</th>
+                    <th>Matrícula</th>
+                    <th class="text-center">Sessões</th>
+                    <th class="text-center" style="min-width: 125px;">Ações (Admin)</th>
                   </tr>
                 </thead>
                 <tbody id="tabelaUsuariosBody">
                   <tr>
                     <td colspan="7" class="text-center text-muted py-4">
                       <div class="spinner-border text-primary spinner-border-sm me-2" role="status"></div>
-                      Carregando usuÃ¡rios...
+                      Carregando usuários...
                     </td>
                   </tr>
                 </tbody>
@@ -592,16 +592,16 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <h5 class="fw-bold mb-0 font-heading" style="color: var(--senac-blue);">
-                  <i class="bi bi-calendar3-range-fill me-1"></i> Pautas e InscriÃ§Ãµes por Turma
+                  <i class="bi bi-calendar3-range-fill me-1"></i> Pautas e Inscrições por Turma
                 </h5>
-                <p class="text-muted small mb-0 mt-1">VisÃ£o global de todas as disciplinas prÃ¡ticas, docentes e modelos confirmados.</p>
+                <p class="text-muted small mb-0 mt-1">Visão global de todas as disciplinas práticas, docentes e modelos confirmados.</p>
               </div>
             </div>
             
             <div class="accordion accordion-custom" id="accordionPautasGlobais">
               <div class="empty-state-card py-5">
                 <div class="spinner-border text-primary mb-3" role="status"></div>
-                <h6 class="empty-state-title">Carregando a visÃ£o global de pautas...</h6>
+                <h6 class="empty-state-title">Carregando a visão global de pautas...</h6>
               </div>
             </div>
           </div>
@@ -669,7 +669,7 @@
                     <label for="colabDepartamento"><i class="bi bi-building me-1"></i> Departamento Regional (SENAC)</label>
                   </div>
                   <div class="form-floating mb-4">
-                    <select class="form-select" id="colabPerfil" required aria-label="Cargo / PermissÃ£o">
+                    <select class="form-select" id="colabPerfil" required aria-label="Cargo / Permissão">
                       <option value="profissional">
                         Profissional (Professor)
                       </option>
@@ -678,7 +678,7 @@
                       </option>
                       <option value="admin">Administrador Global</option>
                     </select>
-                    <label for="colabPerfil"><i class="bi bi-shield-check me-1"></i> Cargo / NÃ­vel de PermissÃ£o (RBAC)</label>
+                    <label for="colabPerfil"><i class="bi bi-shield-check me-1"></i> Cargo / Nível de Permissão (RBAC)</label>
                   </div>
 
                   <div id="msgColab" class="mb-3 text-center small fw-bold"></div>
@@ -700,7 +700,7 @@
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content modal-content-custom">
           <div class="modal-header modal-header-custom" style="cursor: grab;" title="Clique e arraste para mover">
-            <h5 class="modal-title" style="color: var(--senac-blue);"><i class="bi bi-arrows-move me-2 text-muted"></i><i class="bi bi-pencil-square me-1"></i> Editar InformaÃ§Ãµes do Curso</h5>
+            <h5 class="modal-title" style="color: var(--senac-blue);"><i class="bi bi-arrows-move me-2 text-muted"></i><i class="bi bi-pencil-square me-1"></i> Editar Informações do Curso</h5>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"><i class="bi bi-x-lg"></i></button>
           </div>
           <div class="modal-body modal-body-custom">
@@ -715,21 +715,21 @@
               <div class="row g-3 mb-3">
                 <div class="col-md-6">
                   <div class="form-floating">
-                    <select class="form-select" id="editProfissional" required aria-label="Professor ResponsÃ¡vel"></select>
-                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor ResponsÃ¡vel</label>
+                    <select class="form-select" id="editProfissional" required aria-label="Professor Responsável"></select>
+                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsável</label>
                   </div>
                 </div>
                 <div class="col-md-6">
                   <div class="form-floating">
-                    <input type="text" class="form-control" id="editLocal" placeholder="LocalizaÃ§Ã£o">
-                    <label for="editLocal"><i class="bi bi-geo-alt me-1"></i> LocalizaÃ§Ã£o</label>
+                    <input type="text" class="form-control" id="editLocal" placeholder="Localização">
+                    <label for="editLocal"><i class="bi bi-geo-alt me-1"></i> Localização</label>
                   </div>
                 </div>
               </div>
 
               <div class="form-floating mb-3">
-                <textarea class="form-control" id="editDescricao" style="height: 90px" placeholder="DescriÃ§Ã£o" required></textarea>
-                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> DescriÃ§Ã£o do Curso / ServiÃ§o</label>
+                <textarea class="form-control" id="editDescricao" style="height: 90px" placeholder="Descrição" required></textarea>
+                <label for="editDescricao"><i class="bi bi-card-text me-1"></i> Descrição do Curso / Serviço</label>
               </div>
 
               <div class="form-floating mb-3">
@@ -737,9 +737,9 @@
                   class="form-control"
                   id="editMotivo"
                   style="height: 60px"
-                  placeholder="BenefÃ­cios para o modelo"
+                  placeholder="Benefícios para o modelo"
                 ></textarea>
-                <label for="editMotivo"><i class="bi bi-gift me-1"></i> BenefÃ­cios para o Modelo</label>
+                <label for="editMotivo"><i class="bi bi-gift me-1"></i> Benefícios para o Modelo</label>
               </div>
 
               <div class="form-floating mb-3">
@@ -747,9 +747,9 @@
                   class="form-control"
                   id="editRestricoes"
                   style="height: 60px"
-                  placeholder="RestriÃ§Ãµes"
+                  placeholder="Restrições"
                 ></textarea>
-                <label for="editRestricoes"><i class="bi bi-exclamation-triangle me-1"></i> RestriÃ§Ãµes / ContraindicaÃ§Ãµes</label>
+                <label for="editRestricoes"><i class="bi bi-exclamation-triangle me-1"></i> Restrições / Contraindicações</label>
               </div>
 
               <!-- Upload e Imagem de Capa do Curso no Modal -->
@@ -766,7 +766,7 @@
                 </div>
 
                 <div class="upload-preview-container mb-2 d-none" id="previewContainerEditCurso">
-                  <img src="" alt="PrÃ©via do Curso" id="previewImgEditCurso" class="upload-preview-img">
+                  <img src="" alt="Prévia do Curso" id="previewImgEditCurso" class="upload-preview-img">
                   <div class="upload-preview-overlay">
                     <button type="button" class="btn btn-sm btn-danger shadow-sm py-1 px-2" id="btnRemoverFotoEditCurso" title="Remover Imagem">
                       <i class="bi bi-trash3 me-1"></i> Remover
@@ -807,7 +807,7 @@
               <strong class="text-white">Connect Senac</strong>
             </div>
             <p class="small text-white-50 mb-0 mt-1">
-              Central Administrativa e de CoordenaÃ§Ã£o AcadÃªmica.
+              Central Administrativa e de Coordenação Acadêmica.
             </p>
           </div>
           <div class="col-md-6 text-center text-md-end text-white-50 small">

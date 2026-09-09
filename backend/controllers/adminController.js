@@ -313,4 +313,68 @@ exports.listarPautasGlobais = async (req, res) => {
     }
 };
 
+// 6. Alterar o Próprio Departamento (Admin ou Coordenador)
+exports.alterarMeuDepartamento = async (req, res) => {
+    const { departamento } = req.body;
+    const executorId = req.usuario.id;
+
+    if (!departamento) {
+        return res.status(400).json({ erro: 'O departamento é obrigatório.' });
+    }
+
+    try {
+        setProfessorDepartamento(executorId, departamento);
+        res.json({
+            mensagem: `Seu departamento foi atualizado para ${departamento} com sucesso!`,
+            departamento
+        });
+    } catch (error) {
+        console.error('Erro ao alterar meu departamento:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao atualizar seu departamento.' });
+    }
+};
+
+// 7. Alterar Departamento de Usuário (com regra estrita: admin/coord só alteram o seu próprio)
+exports.alterarDepartamento = async (req, res) => {
+    const { id } = req.params;
+    const { departamento } = req.body;
+    const executorId = req.usuario.id;
+
+    if (!departamento) {
+        return res.status(400).json({ erro: 'O departamento é obrigatório.' });
+    }
+
+    try {
+        const { data: alvo, error: erroBusca } = await supabase
+            .from('usuarios')
+            .select('id, perfil, nome')
+            .eq('id', id)
+            .single();
+
+        if (erroBusca || !alvo) {
+            return res.status(404).json({ erro: 'Usuário não encontrado.' });
+        }
+
+        // Regra de Segurança:
+        // Administrador e Coordenador só podem editar o seu PRÓPRIO departamento,
+        // nunca o de outros administradores ou coordenadores!
+        if (['admin', 'coordenador'].includes(alvo.perfil) && id !== executorId) {
+            return res.status(403).json({
+                erro: 'Não é permitido alterar o departamento de outros administradores ou coordenadores. Você só pode alterar o seu próprio departamento.'
+            });
+        }
+
+        setProfessorDepartamento(id, departamento);
+
+        res.json({
+            mensagem: `Departamento atualizado para ${departamento} com sucesso!`,
+            departamento
+        });
+    } catch (error) {
+        console.error('Erro ao alterar departamento:', error.message);
+        res.status(500).json({ erro: 'Erro interno ao atualizar departamento.' });
+    }
+};
+
+
 

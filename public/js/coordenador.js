@@ -832,7 +832,7 @@ async function carregarCandidatos() {
     renderizarCandidatos(baseCandidatos);
   } catch (error) {
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao ligar ao servidor.</td></tr>';
+      '<tr><td colspan="7" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao conectar ao servidor.</td></tr>';
   }
 }
 
@@ -1039,10 +1039,22 @@ function inicializarSeletoresDepartamentoCoord() {
 
   if (selCoord && typeof popularSelectDepartamentos === "function") {
     popularSelectDepartamentos(selCoord, deptoAtual, false);
-    selCoord.addEventListener("change", () => {
+    selCoord.addEventListener("change", async () => {
       const novoDepto = selCoord.value;
       if (typeof setDepartamentoAtivo === "function") {
         setDepartamentoAtivo(novoDepto);
+        try {
+          await fetch(`${API_URL}/admin/usuarios/me/departamento`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ departamento: novoDepto }),
+          });
+        } catch (e) {
+          console.error("Erro ao sincronizar departamento do coordenador:", e);
+        }
       }
       if (selProf) {
         selProf.value = novoDepto;
