@@ -177,7 +177,7 @@ if (formCadastro) {
     // Validação de WhatsApp / Telefone
     if (ddi === "+55") {
       if (apenasDigitos.length !== 11) {
-        msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> O WhatsApp deve conter o DDD e os 9 dígitos do celular (exatos 11 dígitos). Exemplo: (75) 98888-7777.</div>`;
+        msgDiv.innerHTML = `<div class="alert alert-danger py-2 mb-0"><i class="bi bi-exclamation-circle-fill me-1"></i> O WhatsApp deve conter o DDD e os 9 dígitos do celular (exatos 11 dígitos). Exemplo: (71) 93186-4000.</div>`;
         document.getElementById("telefone").focus();
         return;
       }

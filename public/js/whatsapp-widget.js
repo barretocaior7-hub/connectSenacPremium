@@ -1,4 +1,4 @@
-﻿// public/js/whatsapp-widget.js - Botão Flutuante de Atendimento WhatsApp
+// public/js/whatsapp-widget.js - Botão Flutuante de Atendimento WhatsApp
 
 (() => {
   'use strict';
@@ -9,7 +9,7 @@
     const zapBtn = document.createElement('a');
     zapBtn.id = 'whatsapp-floating-btn';
     zapBtn.className = 'whatsapp-floating-btn shadow-lg';
-    zapBtn.href = 'https://wa.me/5575999999999?text=' + encodeURIComponent('Olá! Gostaria de tirar uma dúvida sobre os atendimentos e cursos do Connect Senac.');
+    zapBtn.href = 'https://wa.me/5571931864000?text=' + encodeURIComponent('Olá! Gostaria de tirar uma dúvida sobre os atendimentos e cursos do Connect Senac.');
     zapBtn.target = '_blank';
     zapBtn.rel = 'noopener noreferrer';
     zapBtn.title = 'Fale conosco no WhatsApp';
