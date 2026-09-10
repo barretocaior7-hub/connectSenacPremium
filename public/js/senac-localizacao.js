@@ -295,6 +295,92 @@
     }
   }
 
+  // Modal Pop-up de Solicitação de Permissão de Localização
+  let modalPermissaoInstance = null;
+
+  function garantirModalPermissao() {
+    if (document.getElementById('modalPermissaoLocalizacao')) return;
+
+    const modalDiv = document.createElement('div');
+    modalDiv.className = 'modal fade';
+    modalDiv.id = 'modalPermissaoLocalizacao';
+    modalDiv.tabIndex = -1;
+    modalDiv.setAttribute('aria-labelledby', 'modalPermissaoLocalizacaoTitulo');
+    modalDiv.setAttribute('aria-hidden', 'true');
+    modalDiv.setAttribute('data-bs-backdrop', 'static');
+    modalDiv.innerHTML = `
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-custom border-0 shadow-lg" style="border-radius: 22px; overflow: hidden;">
+          <div class="modal-body p-4 text-center">
+            <div class="d-inline-flex align-items-center justify-content-center p-3 rounded-circle bg-primary bg-opacity-10 text-primary mb-3 shadow-sm" style="width: 72px; height: 72px;">
+              <i class="bi bi-geo-alt-fill fs-1 text-danger"></i>
+            </div>
+            
+            <h4 class="fw-bold font-heading mb-2 text-dark" id="modalPermissaoLocalizacaoTitulo">
+              Ver cursos na sua região?
+            </h4>
+            
+            <p class="text-secondary small mb-3 px-2" style="line-height: 1.6;">
+              Deseja permitir o acesso à sua <strong>localização atual</strong>? Com isso, filtraremos automaticamente os cursos práticos e atendimentos gratuitos disponíveis no departamento regional do SENAC mais próximo de você.
+            </p>
+
+            <div id="statusDetectandoLoc" class="alert alert-info py-2 px-3 small rounded-3 d-none mb-3">
+              <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+              Identificando sua localização e buscando cursos da sua região...
+            </div>
+
+            <div class="d-grid gap-2 pt-2">
+              <button type="button" class="btn btn-brand py-3 fw-bold shadow-sm" id="btnPermitirLocalizacaoPopup">
+                <i class="bi bi-crosshair me-2"></i> Permitir Localização
+              </button>
+              <button type="button" class="btn btn-light py-2 border small text-muted" id="btnNegarLocalizacaoPopup">
+                Agora não / Escolher Estado
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modalDiv);
+
+    const btnPermitir = modalDiv.querySelector('#btnPermitirLocalizacaoPopup');
+    const btnNegar = modalDiv.querySelector('#btnNegarLocalizacaoPopup');
+    const statusDiv = modalDiv.querySelector('#statusDetectandoLoc');
+
+    btnPermitir.addEventListener('click', () => {
+      btnPermitir.disabled = true;
+      btnNegar.disabled = true;
+      if (statusDiv) statusDiv.classList.remove('d-none');
+
+      solicitarGeolocalizacao(btnPermitir, (res) => {
+        if (modalPermissaoInstance) modalPermissaoInstance.hide();
+      }, (err) => {
+        if (modalPermissaoInstance) modalPermissaoInstance.hide();
+      });
+    });
+
+    btnNegar.addEventListener('click', () => {
+      localStorage.setItem(STORAGE_KEY_STATUS, 'denied');
+      if (modalPermissaoInstance) modalPermissaoInstance.hide();
+      abrirModalSelecao();
+    });
+  }
+
+  function checarExibirPopupPermissao() {
+    const status = localStorage.getItem(STORAGE_KEY_STATUS);
+    // Se o usuário ainda não definiu a permissão de localização
+    if (!status) {
+      setTimeout(() => {
+        garantirModalPermissao();
+        const modalEl = document.getElementById('modalPermissaoLocalizacao');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+          modalPermissaoInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+          modalPermissaoInstance.show();
+        }
+      }, 600);
+    }
+  }
+
   // Renderizar o Banner ou a Barra de Região no container especificado
   function renderizarBarraOuBanner(containerId, onLocationChanged) {
     const container = document.getElementById(containerId);
@@ -364,12 +450,28 @@
     getNomeDepartamento,
     solicitarGeolocalizacao,
     abrirModalSelecao,
+    abrirPopupPermissao: () => {
+      garantirModalPermissao();
+      const modalEl = document.getElementById('modalPermissaoLocalizacao');
+      if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+        modalPermissaoInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalPermissaoInstance.show();
+      }
+    },
     renderizarBarraOuBanner,
     detectarGPS: function (btnElement) {
       solicitarGeolocalizacao(btnElement, (res) => {
         if (modalSelecaoInstance) modalSelecaoInstance.hide();
+        if (modalPermissaoInstance) modalPermissaoInstance.hide();
       });
     }
   };
+
+  // Disparo automático do pop-up ao carregar a página
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checarExibirPopupPermissao);
+  } else {
+    checarExibirPopupPermissao();
+  }
 
 })(window);

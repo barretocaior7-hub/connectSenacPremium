@@ -196,6 +196,9 @@
             </div>
         </div>
 
+        <!-- Barra Dinâmica de Região e Geolocalização -->
+        <div id="containerRegiaoVitrine" class="mb-3"></div>
+
         <!-- Filtros & Busca -->
         <div class="mb-4 d-flex flex-column flex-md-row gap-3 justify-content-between align-items-md-center">
             <div class="input-group search-bar-premium" style="max-width: 360px;">
@@ -508,6 +511,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/senac-localizacao.js?v=2.5"></script>
     <script>
         const token = localStorage.getItem('token');
         const authButtons = document.getElementById('authNavButtons');
@@ -554,14 +558,27 @@
         async function carregarVitrinePublica() {
             const div = document.getElementById('catalogoPublico');
             try {
-                const res = await fetch('/api/cursos/ativos');
+                if (window.SenacLocalizacao) {
+                    window.SenacLocalizacao.renderizarBarraOuBanner('containerRegiaoVitrine');
+                }
+
+                const depto = window.SenacLocalizacao ? window.SenacLocalizacao.getDepartamentoUsuario() : 'DR/BA';
+                const query = depto && depto !== 'TODOS' ? `?departamento=${encodeURIComponent(depto)}` : '';
+
+                div.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="text-muted small mt-2">Buscando cursos da sua região...</p></div>';
+
+                const res = await fetch(`/api/cursos/ativos${query}`);
                 cursosPublicos = await res.json();
                 if (!Array.isArray(cursosPublicos)) cursosPublicos = [];
                 renderizarCardsPublicos();
             } catch (e) {
-                div.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Erro ao carregar catálogo. Tente novamente mais tarde.</div>';
+                div.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Erro ao carregar catálogo da sua região. Tente novamente mais tarde.</div>';
             }
         }
+
+        window.addEventListener('senacRegiaoUsuarioChanged', () => {
+            carregarVitrinePublica();
+        });
 
         function renderizarCardsPublicos() {
             const div = document.getElementById('catalogoPublico');
@@ -584,12 +601,17 @@
             });
 
             if (filtrados.length === 0) {
+                const deptoAtual = window.SenacLocalizacao ? window.SenacLocalizacao.getDepartamentoUsuario() : 'DR/BA';
+                const nomeDepto = window.SenacLocalizacao ? window.SenacLocalizacao.getNomeDepartamento(deptoAtual) : deptoAtual;
                 div.innerHTML = `
                     <div class="col-12">
-                        <div class="empty-state-card">
-                            <div class="empty-state-icon"><i class="bi bi-search"></i></div>
-                            <h5 class="empty-state-title">Nenhum curso encontrado</h5>
-                            <p class="empty-state-desc">Tente ajustar o termo de busca ou selecionar outra categoria.</p>
+                        <div class="empty-state-card text-center p-5 bg-white rounded-3 shadow-sm border">
+                            <div class="empty-state-icon mb-3 fs-1 text-warning"><i class="bi bi-geo-alt"></i></div>
+                            <h5 class="empty-state-title">Nenhum curso disponível no momento para ${escapeHTML(nomeDepto)}</h5>
+                            <p class="empty-state-desc text-muted mb-3">Não encontramos vagas abertas para esta região no momento.</p>
+                            <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="if(window.SenacLocalizacao) SenacLocalizacao.abrirModalSelecao()">
+                                <i class="bi bi-globe me-1"></i> Escolher Outro Estado / Região
+                            </button>
                         </div>
                     </div>
                 `;
