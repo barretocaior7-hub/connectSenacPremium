@@ -321,6 +321,7 @@ if (formCurso) {
       foto_url: document.getElementById("fotoCurso").value,
       localizacao: document.getElementById("localCurso").value,
       profissional_id: document.getElementById("selectProfissional").value,
+      departamento: document.getElementById("deptoCurso") ? document.getElementById("deptoCurso").value : (typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA"),
     };
 
     try {
@@ -576,6 +577,11 @@ function abrirModalEdicao(cursoParam) {
   document.getElementById("editFoto").value = curso.foto_url || "";
   dropzoneEditCursoHandler.updatePreview(curso.foto_url || "");
 
+  const selectEditDepto = document.getElementById("editDepto");
+  if (selectEditDepto && typeof popularSelectDepartamentos === "function") {
+    popularSelectDepartamentos(selectEditDepto, curso.departamento || "DR/BA", false);
+  }
+
   const selectPrincipal = document.getElementById("selectProfissional");
   const selectEdit = document.getElementById("editProfissional");
   if (selectPrincipal && selectEdit) {
@@ -604,6 +610,7 @@ if (formEditarCurso) {
       localizacao: document.getElementById("editLocal").value,
       foto_url: document.getElementById("editFoto").value,
       profissional_id: document.getElementById("editProfissional").value,
+      departamento: document.getElementById("editDepto") ? document.getElementById("editDepto").value : "DR/BA",
     };
 
     try {
@@ -1060,6 +1067,7 @@ window.toggleBloqueioCandidato = toggleBloqueioCandidato;
 function inicializarSeletoresDepartamentoCoord() {
   const selCoord = document.getElementById("selectCoordDepartamento");
   const selProf = document.getElementById("coordProfDepartamento");
+  const selDeptoCurso = document.getElementById("deptoCurso");
   const deptoAtual = typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA";
 
   if (selCoord && typeof popularSelectDepartamentos === "function") {
@@ -1084,6 +1092,9 @@ function inicializarSeletoresDepartamentoCoord() {
       if (selProf) {
         selProf.value = novoDepto;
       }
+      if (selDeptoCurso) {
+        selDeptoCurso.value = novoDepto;
+      }
       carregarProfissionaisNoSelect(novoDepto);
       carregarProfissionaisCoord(novoDepto);
       carregarCandidatos();
@@ -1094,11 +1105,16 @@ function inicializarSeletoresDepartamentoCoord() {
     popularSelectDepartamentos(selProf, deptoAtual, false);
   }
 
+  if (selDeptoCurso && typeof popularSelectDepartamentos === "function") {
+    popularSelectDepartamentos(selDeptoCurso, deptoAtual, false);
+  }
+
   window.addEventListener('senacDepartamentoChanged', (e) => {
     const d = e.detail?.departamento;
     if (d && selCoord && selCoord.value !== d) {
       selCoord.value = d;
       if (selProf) selProf.value = d;
+      if (selDeptoCurso) selDeptoCurso.value = d;
       carregarProfissionaisNoSelect(d);
       carregarProfissionaisCoord(d);
       carregarCandidatos();

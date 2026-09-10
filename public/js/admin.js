@@ -585,6 +585,7 @@ if (formCurso) {
             restricoes: document.getElementById('restricoesCurso').value,
             foto_url: document.getElementById('fotoCurso').value,
             localizacao: document.getElementById('localCurso').value,
+            departamento: document.getElementById('deptoCurso') ? document.getElementById('deptoCurso').value : (typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : 'DR/BA'),
             profissional_id: document.getElementById('selectProfissional').value
         };
 
@@ -888,6 +889,11 @@ function abrirModalEdicao(cursoParam){
     document.getElementById('editFoto').value = curso.foto_url || '';
     dropzoneEditCursoHandler.updatePreview(curso.foto_url || '');
 
+    const selectEditDepto = document.getElementById('editDepto');
+    if (selectEditDepto && typeof popularSelectDepartamentos === 'function') {
+        popularSelectDepartamentos(selectEditDepto, curso.departamento || 'DR/BA', false);
+    }
+
     const selectPrincipal = document.getElementById('selectProfissional');
     const selectEdit = document.getElementById('editProfissional');
     if (selectPrincipal && selectEdit) {
@@ -914,7 +920,8 @@ if (formEditarCurso) {
             restricoes: document.getElementById('editRestricoes').value,
             localizacao: document.getElementById('editLocal').value,
             foto_url: document.getElementById('editFoto').value,
-            profissional_id: document.getElementById('editProfissional').value
+            profissional_id: document.getElementById('editProfissional').value,
+            departamento: document.getElementById('editDepto') ? document.getElementById('editDepto').value : 'DR/BA'
         };
 
         try {
@@ -1131,6 +1138,7 @@ window.alterarPerfil = alterarPerfil;
 function inicializarSeletoresDepartamento() {
     const selAdmin = document.getElementById('selectAdminDepartamento');
     const selColab = document.getElementById('colabDepartamento');
+    const selDeptoCurso = document.getElementById('deptoCurso');
     const deptoAtual = typeof getDepartamentoAtivo === 'function' ? getDepartamentoAtivo() : 'DR/BA';
 
     if (selAdmin && typeof popularSelectDepartamentos === 'function') {
@@ -1156,6 +1164,9 @@ function inicializarSeletoresDepartamento() {
             if (selColab && novoDepto !== 'TODOS') {
                 selColab.value = novoDepto;
             }
+            if (selDeptoCurso && novoDepto !== 'TODOS') {
+                selDeptoCurso.value = novoDepto;
+            }
             carregarProfissionaisNoSelect(novoDepto);
             carregarUsuários();
         });
@@ -1165,11 +1176,16 @@ function inicializarSeletoresDepartamento() {
         popularSelectDepartamentos(selColab, deptoAtual === 'TODOS' ? 'DR/BA' : deptoAtual, false);
     }
 
+    if (selDeptoCurso && typeof popularSelectDepartamentos === 'function') {
+        popularSelectDepartamentos(selDeptoCurso, deptoAtual === 'TODOS' ? 'DR/BA' : deptoAtual, false);
+    }
+
     window.addEventListener('senacDepartamentoChanged', (e) => {
         const d = e.detail?.departamento;
         if (d && selAdmin && selAdmin.value !== d) {
             selAdmin.value = d;
             if (selColab) selColab.value = d;
+            if (selDeptoCurso) selDeptoCurso.value = d;
             carregarProfissionaisNoSelect(d);
             carregarUsuários();
         }

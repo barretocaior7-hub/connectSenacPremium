@@ -2,21 +2,43 @@
 const supabase = require('../config/database');
 const fs = require('fs');
 const path = require('path');
-const deptFilePath = path.join(__dirname, '../config/professores_departamentos.json');
+const deptProfFilePath = path.join(__dirname, '../config/professores_departamentos.json');
+const deptCursoFilePath = path.join(__dirname, '../config/cursos_departamentos.json');
 
 function getProfessoresDepartamentos() {
     try {
-        if (!fs.existsSync(deptFilePath)) return {};
-        return JSON.parse(fs.readFileSync(deptFilePath, 'utf8'));
+        if (!fs.existsSync(deptProfFilePath)) return {};
+        return JSON.parse(fs.readFileSync(deptProfFilePath, 'utf8'));
     } catch (_) {
         return {};
     }
 }
 
-function resolverDepartamentoCurso(curso, deptoMap) {
+function getCursosDepartamentos() {
+    try {
+        if (!fs.existsSync(deptCursoFilePath)) return {};
+        return JSON.parse(fs.readFileSync(deptCursoFilePath, 'utf8'));
+    } catch (_) {
+        return {};
+    }
+}
+
+function setCursoDepartamento(cursoId, departamento) {
+    if (!cursoId || !departamento) return;
+    try {
+        const mapa = getCursosDepartamentos();
+        mapa[cursoId] = departamento;
+        fs.writeFileSync(deptCursoFilePath, JSON.stringify(mapa, null, 2), 'utf8');
+    } catch (e) {
+        console.error('Erro ao persistir departamento do curso:', e.message);
+    }
+}
+
+function resolverDepartamentoCurso(curso, deptoProfMap, deptoCursosMap) {
+    if (curso.id && deptoCursosMap[curso.id]) return deptoCursosMap[curso.id];
     if (curso.departamento) return curso.departamento;
-    if (curso.profissional_id && deptoMap[curso.profissional_id]) {
-        return deptoMap[curso.profissional_id];
+    if (curso.profissional_id && deptoProfMap[curso.profissional_id]) {
+        return deptoProfMap[curso.profissional_id];
     }
     if (curso.localizacao) {
         const match = curso.localizacao.match(/\b(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/i);
@@ -42,10 +64,11 @@ exports.listarAtivos = async (req, res) => {
 
         if (error) throw error;
 
-        const deptoMap = getProfessoresDepartamentos();
+        const deptoProfMap = getProfessoresDepartamentos();
+        const deptoCursosMap = getCursosDepartamentos();
 
         let cursosProcessados = (cursos || []).map(c => {
-            const depto = resolverDepartamentoCurso(c, deptoMap);
+            const depto = resolverDepartamentoCurso(c, deptoProfMap, deptoCursosMap);
             if (Array.isArray(c.disponibilidades)) {
                 c.disponibilidades.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
             }
@@ -55,7 +78,7 @@ exports.listarAtivos = async (req, res) => {
             };
         });
 
-        // Filtragem por departamento regional
+        // Filtragem estrita por departamento regional
         const deptoFiltro = req.query.departamento || (req.query.uf ? `DR/${req.query.uf.toUpperCase()}` : null);
         if (deptoFiltro && deptoFiltro !== 'TODOS') {
             cursosProcessados = cursosProcessados.filter(c => c.departamento === deptoFiltro);
@@ -63,6 +86,7 @@ exports.listarAtivos = async (req, res) => {
 
         res.json(cursosProcessados);
     } catch (error) {
+        console.error('Erro ao listar cursos ativos:', error);
         res.status(500).json({ erro: 'Erro ao buscar o catálogo de cursos.' });
     }
 };
@@ -77,10 +101,12 @@ exports.listarTodosAdmin = async (req, res) => {
 
         if (error) throw error;
 
-        const deptoMap = getProfessoresDepartamentos();
+        const deptoProfMap = getProfessoresDepartamentos();
+        const deptoCursosMap = getCursosDepartamentos();
+
         let cursosComDepto = (cursos || []).map(c => ({
             ...c,
-            departamento: resolverDepartamentoCurso(c, deptoMap)
+            departamento: resolverDepartamentoCurso(c, deptoProfMap, deptoCursosMap)
         }));
 
         if (req.query.departamento && req.query.departamento !== 'TODOS') {
@@ -89,46 +115,98 @@ exports.listarTodosAdmin = async (req, res) => {
 
         res.json(cursosComDepto);
     } catch (error) {
-        res.status(500).json({ erro: 'Erro ao listar os cursos para a administracao.' });
+        console.error('Erro ao listar cursos para admin:', error);
+        res.status(500).json({ erro: 'Erro ao listar os cursos para a administração.' });
     }
 };
 
-// 3. [ADMIN] Criar Curso
+// 3. [ADMIN/COORDENADOR] Criar Curso com Departamento
 exports.criar = async (req, res) => {
-    const { nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id } = req.body;
+    const { nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id, departamento } = req.body;
 
     if (!nome || !descricao || !profissional_id) {
         return res.status(400).json({ erro: 'Nome, descrição e professor são obrigatórios.' });
     }
 
-    try {
-        const { data: novoCurso, error } = await supabase
-            .from('cursos')
-            .insert([{ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id }])
-            .select();
+    const deptoFinal = departamento || 'DR/BA';
 
-        if (error) throw error;
-        res.status(201).json({ mensagem: 'Curso criado com sucesso!', curso: novoCurso[0] });
+    try {
+        let novoCurso = null;
+        
+        // Tentativa de inserção com a coluna departamento
+        try {
+            const { data, error } = await supabase
+                .from('cursos')
+                .insert([{ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id, departamento: deptoFinal }])
+                .select();
+            if (error) throw error;
+            novoCurso = data[0];
+        } catch (insertColErr) {
+            // Fallback caso a tabela no Supabase ainda não tenha a coluna departamento
+            const { data, error } = await supabase
+                .from('cursos')
+                .insert([{ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id }])
+                .select();
+            if (error) throw error;
+            novoCurso = data[0];
+        }
+
+        // Persistência garantida no mapa de departamentos por curso
+        if (novoCurso && novoCurso.id) {
+            setCursoDepartamento(novoCurso.id, deptoFinal);
+            novoCurso.departamento = deptoFinal;
+        }
+
+        res.status(201).json({ mensagem: 'Curso criado com sucesso!', curso: novoCurso });
     } catch (error) {
+        console.error('Erro ao criar curso:', error);
         res.status(500).json({ erro: 'Erro interno ao criar o curso.' });
     }
 };
 
-// 4. [ADMIN] Atualizar Curso
+// 4. [ADMIN/COORDENADOR] Atualizar Curso
 exports.atualizar = async (req, res) => {
     const { id } = req.params;
-    const { nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id } = req.body;
+    const { nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id, departamento } = req.body;
 
     try {
-        const { data, error } = await supabase
-            .from('cursos')
-            .update({ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id })
-            .eq('id', id)
-            .select();
+        let cursoAtualizado = null;
 
-        if (error) throw error;
-        res.json({ mensagem: 'Curso atualizado com sucesso!', curso: data[0] });
+        // Tentativa de update incluindo coluna departamento
+        if (departamento) {
+            try {
+                const { data, error } = await supabase
+                    .from('cursos')
+                    .update({ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id, departamento })
+                    .eq('id', id)
+                    .select();
+                if (error) throw error;
+                cursoAtualizado = data[0];
+            } catch (_) {
+                // Fallback sem coluna departamento
+                const { data, error } = await supabase
+                    .from('cursos')
+                    .update({ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id })
+                    .eq('id', id)
+                    .select();
+                if (error) throw error;
+                cursoAtualizado = data[0];
+            }
+            setCursoDepartamento(id, departamento);
+            if (cursoAtualizado) cursoAtualizado.departamento = departamento;
+        } else {
+            const { data, error } = await supabase
+                .from('cursos')
+                .update({ nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, profissional_id })
+                .eq('id', id)
+                .select();
+            if (error) throw error;
+            cursoAtualizado = data[0];
+        }
+
+        res.json({ mensagem: 'Curso atualizado com sucesso!', curso: cursoAtualizado });
     } catch (error) {
+        console.error('Erro ao atualizar curso:', error);
         res.status(500).json({ erro: 'Erro ao atualizar o curso.' });
     }
 };

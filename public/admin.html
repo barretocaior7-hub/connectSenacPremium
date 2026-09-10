@@ -332,6 +332,13 @@
                     </div>
 
                     <div class="form-floating mb-3">
+                      <select class="form-select select-departamento-picker" id="deptoCurso" required aria-label="Departamento Regional">
+                        <option value="DR/BA" selected>Bahia (DR/BA)</option>
+                      </select>
+                      <label for="deptoCurso"><i class="bi bi-geo-alt-fill text-primary me-1"></i> Departamento Regional (DR)</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
                       <input
                         type="text"
                         class="form-control"
@@ -713,13 +720,19 @@
               </div>
 
               <div class="row g-3 mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                   <div class="form-floating">
-                    <select class="form-select" id="editProfissional" required aria-label="Professor Responsável"></select>
-                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor Responsável</label>
+                    <select class="form-select select-departamento-picker" id="editDepto" required aria-label="Departamento Regional"></select>
+                    <label for="editDepto"><i class="bi bi-geo-alt-fill text-primary me-1"></i> Departamento (DR)</label>
                   </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
+                  <div class="form-floating">
+                    <select class="form-select" id="editProfissional" required aria-label="Professor Responsável"></select>
+                    <label for="editProfissional"><i class="bi bi-person-badge me-1"></i> Professor</label>
+                  </div>
+                </div>
+                <div class="col-md-4">
                   <div class="form-floating">
                     <input type="text" class="form-control" id="editLocal" placeholder="Localização">
                     <label for="editLocal"><i class="bi bi-geo-alt me-1"></i> Localização</label>
