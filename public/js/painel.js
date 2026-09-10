@@ -101,6 +101,12 @@ async function carregarCursos(){
     const divCursos = document.getElementById('listaCursos');
     if (!divCursos) return;
 
+    if (window.SenacLocalizacao) {
+        window.SenacLocalizacao.renderizarBarraOuBanner('containerLocalizacaoPainel', () => {
+            carregarCursos();
+        });
+    }
+
     // Renderizar Skeletons de Carregamento
     divCursos.innerHTML = `
         <div class="col-md-6 col-lg-4">
@@ -130,7 +136,9 @@ async function carregarCursos(){
     `;
 
     try {
-        const response = await fetchAuth(`${API_URL}/cursos/ativos`);
+        const depto = window.SenacLocalizacao ? window.SenacLocalizacao.getDepartamentoUsuario() : 'DR/BA';
+        const query = depto ? `?departamento=${encodeURIComponent(depto)}` : '';
+        const response = await fetchAuth(`${API_URL}/cursos/ativos${query}`);
         baseCursos = await response.json();
 
         if (!Array.isArray(baseCursos)) baseCursos = [];
@@ -193,12 +201,17 @@ function renderizarVitrineCursos(){
     });
 
     if (cursosFiltrados.length === 0) {
+        const deptoAtual = window.SenacLocalizacao ? window.SenacLocalizacao.getDepartamentoUsuario() : 'DR/BA';
+        const nomeDepto = window.SenacLocalizacao ? window.SenacLocalizacao.getNomeDepartamento(deptoAtual) : deptoAtual;
         divCursos.innerHTML = `
             <div class="col-12">
-                <div class="empty-state-card">
-                    <div class="empty-state-icon"><i class="bi bi-search"></i></div>
-                    <h5 class="empty-state-title">Nenhum serviço encontrado</h5>
-                    <p class="empty-state-desc">Tente ajustar o termo de pesquisa ou selecionar outra categoria para ver mais opções.</p>
+                <div class="empty-state-card p-5 text-center bg-white rounded-3 shadow-sm border">
+                    <div class="empty-state-icon mb-3 text-warning fs-1"><i class="bi bi-geo-alt"></i></div>
+                    <h5 class="empty-state-title">Nenhum serviço disponível para ${escapeHTML(nomeDepto)}</h5>
+                    <p class="empty-state-desc text-muted mb-3">Não encontramos vagas ou procedimentos abertos para esta região no momento.</p>
+                    <button type="button" class="btn btn-outline-primary btn-sm px-3" onclick="if(window.SenacLocalizacao) SenacLocalizacao.abrirModalSelecao()">
+                        <i class="bi bi-globe me-1"></i> Escolher Outro Estado / Região
+                    </button>
                 </div>
             </div>
         `;
@@ -227,12 +240,17 @@ function renderizarVitrineCursos(){
             ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-calendar-event me-1"></i> ${qtdHorarios} data(s)</span>`
             : '';
 
+        const deptoBadge = curso.departamento
+            ? `<span class="badge bg-primary text-white position-absolute top-0 end-0 m-2 shadow-sm" style="font-size: 0.72rem;"><i class="bi bi-geo-alt-fill me-1"></i>${escapeHTML(curso.departamento)}</span>`
+            : '';
+
         const card = `
             <div class="col-md-6 col-lg-4">
                 <div class="course-detail-card h-100" onclick="abrirModalDetalhesCurso('${curso.id}')" style="cursor: pointer;">
                     <div class="card-img-container position-relative" style="height: 140px; overflow: hidden;">
                         <img src="${imagem}" alt="${nomeFormatado}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
                         <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-stars me-1"></i> ${totalVagas > 0 ? `${totalVagas} Vagas Abertas` : 'Consulte Vagas'}</span>
+                        ${deptoBadge}
                     </div>
                     <div class="p-3 d-flex flex-column flex-grow-1">
                         <h5 class="fw-bold mb-1 text-dark font-heading" style="font-size: 1.05rem;">${nomeFormatado}</h5>
@@ -978,3 +996,6 @@ carregarCursos().then(() => {
     }
 });
 carregarMeusAgendamentos();
+window.addEventListener('senacRegiaoUsuarioChanged', () => {
+    carregarCursos();
+});

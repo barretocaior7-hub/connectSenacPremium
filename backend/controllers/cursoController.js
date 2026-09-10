@@ -1,13 +1,39 @@
 // backend/controllers/cursoController.js
 const supabase = require('../config/database');
+const fs = require('fs');
+const path = require('path');
+const deptFilePath = path.join(__dirname, '../config/professores_departamentos.json');
 
-// 1. [VITRINE] Listar todos os cursos ativos (Para o candidato)
+function getProfessoresDepartamentos() {
+    try {
+        if (!fs.existsSync(deptFilePath)) return {};
+        return JSON.parse(fs.readFileSync(deptFilePath, 'utf8'));
+    } catch (_) {
+        return {};
+    }
+}
+
+function resolverDepartamentoCurso(curso, deptoMap) {
+    if (curso.departamento) return curso.departamento;
+    if (curso.profissional_id && deptoMap[curso.profissional_id]) {
+        return deptoMap[curso.profissional_id];
+    }
+    if (curso.localizacao) {
+        const match = curso.localizacao.match(/\b(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/i);
+        if (match) {
+            return `DR/${match[1].toUpperCase()}`;
+        }
+    }
+    return 'DR/BA';
+}
+
+// 1. [VITRINE] Listar todos os cursos ativos (Para o candidato, filtrável por região/departamento)
 exports.listarAtivos = async (req, res) => {
     try {
         const { data: cursos, error } = await supabase
             .from('cursos')
             .select(`
-                id, nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, status,
+                id, nome, descricao, motivo_modelo, restricoes, foto_url, localizacao, status, profissional_id,
                 usuarios ( nome ),
                 disponibilidades ( id, data_hora, vagas_totais, vagas_ocupadas )
             `)
@@ -16,17 +42,28 @@ exports.listarAtivos = async (req, res) => {
 
         if (error) throw error;
 
-        if (Array.isArray(cursos)) {
-            cursos.forEach(c => {
-                if (Array.isArray(c.disponibilidades)) {
-                    c.disponibilidades.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
-                }
-            });
+        const deptoMap = getProfessoresDepartamentos();
+
+        let cursosProcessados = (cursos || []).map(c => {
+            const depto = resolverDepartamentoCurso(c, deptoMap);
+            if (Array.isArray(c.disponibilidades)) {
+                c.disponibilidades.sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
+            }
+            return {
+                ...c,
+                departamento: depto
+            };
+        });
+
+        // Filtragem por departamento regional
+        const deptoFiltro = req.query.departamento || (req.query.uf ? `DR/${req.query.uf.toUpperCase()}` : null);
+        if (deptoFiltro && deptoFiltro !== 'TODOS') {
+            cursosProcessados = cursosProcessados.filter(c => c.departamento === deptoFiltro);
         }
 
-        res.json(cursos);
+        res.json(cursosProcessados);
     } catch (error) {
-        res.status(500).json({ erro: 'Erro ao buscar o catálogo.' });
+        res.status(500).json({ erro: 'Erro ao buscar o catálogo de cursos.' });
     }
 };
 
@@ -39,7 +76,18 @@ exports.listarTodosAdmin = async (req, res) => {
             .order('created_at', { ascending: false });
 
         if (error) throw error;
-        res.json(cursos);
+
+        const deptoMap = getProfessoresDepartamentos();
+        let cursosComDepto = (cursos || []).map(c => ({
+            ...c,
+            departamento: resolverDepartamentoCurso(c, deptoMap)
+        }));
+
+        if (req.query.departamento && req.query.departamento !== 'TODOS') {
+            cursosComDepto = cursosComDepto.filter(c => c.departamento === req.query.departamento);
+        }
+
+        res.json(cursosComDepto);
     } catch (error) {
         res.status(500).json({ erro: 'Erro ao listar os cursos para a administracao.' });
     }
@@ -113,6 +161,9 @@ exports.buscarAtivoPorId = async (req, res) => {
 
         if (error) throw error;
         if (!curso) return res.status(404).json({ erro: 'Curso não encontrado.' });
+
+        const deptoMap = getProfessoresDepartamentos();
+        curso.departamento = resolverDepartamentoCurso(curso, deptoMap);
 
         res.json(curso);
     } catch (error) {

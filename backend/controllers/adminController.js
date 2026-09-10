@@ -56,7 +56,7 @@ exports.listarUsuarios = async (req, res) => {
         });
 
         if (req.query.departamento && req.query.departamento !== 'TODOS') {
-            usuariosCompletos = usuariosCompletos.filter(u => u.departamento === req.query.departamento);
+            usuariosCompletos = usuariosCompletos.filter(u => !u.departamento || u.departamento === req.query.departamento);
         }
 
         res.json(usuariosCompletos);

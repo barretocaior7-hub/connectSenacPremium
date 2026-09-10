@@ -1,5 +1,5 @@
-﻿// Service Worker - Connect Senac PWA
-const CACHE_NAME = 'connect-senac-cache-v1';
+// Service Worker - Connect Senac PWA
+const CACHE_NAME = 'connect-senac-cache-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -41,29 +41,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Estratégia Network-First: garante arquivos JS e HTML sempre atualizados
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      return (
-        cachedResponse ||
-        fetch(event.request).then((networkResponse) => {
-          if (
-            networkResponse &&
-            networkResponse.status === 200 &&
-            networkResponse.type === 'basic' &&
-            event.request.method === 'GET'
-          ) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
-          }
-          return networkResponse;
-        }).catch(() => {
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type === 'basic' &&
+          event.request.method === 'GET'
+        ) {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        return caches.match(event.request).then((cached) => {
+          if (cached) return cached;
           if (event.request.mode === 'navigate') {
             return caches.match('/index.html');
           }
-        })
-      );
-    })
+        });
+      })
   );
 });

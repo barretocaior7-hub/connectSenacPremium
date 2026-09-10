@@ -4,6 +4,14 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"
+    },
+    {
+      "source": "/cursos/:id",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/cursos",
+      "destination": "/cursos.html"
     }
   ]
 }

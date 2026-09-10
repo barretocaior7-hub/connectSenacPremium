@@ -100,10 +100,25 @@ async function carregarUsuários(){
         const response = await fetch(`${API_URL}/admin/usuarios${query}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
+
+        if (response.status === 401) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-warning text-center py-4"><i class="bi bi-clock-history me-2"></i>Sua sessão expirou. Redirecionando para o login...</td></tr>`;
+            setTimeout(() => {
+                localStorage.removeItem('token');
+                window.location.href = 'login.html';
+            }, 1500);
+            return;
+        }
+
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.erro || `Erro HTTP ${response.status}`);
+        }
         baseUsuários = await response.json();
         renderizarTabelaUsuários(baseUsuários);
     } catch (error) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao conectar ao servidor.</td></tr>';
+        console.error('Erro ao carregar usuários:', error);
+        tbody.innerHTML = `<tr><td colspan="8" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Não foi possível conectar ao servidor. <span class="small text-muted d-block mt-1">Certifique-se de que o backend Node.js está em execução na porta 3000 (${escapeHTML(error.message || 'Falha de rede')})</span></td></tr>`;
     }
 }
 
@@ -173,7 +188,11 @@ function renderizarTabelaUsuários(lista){
             `;
         }
 
-                const userDepto = user.departamento || 'DR/BA';
+        const isSelf = user.id === payloadToken.id;
+        const isAdmin = (payloadToken.perfil || '').toLowerCase() === 'admin';
+        const isCoord = (payloadToken.perfil || '').toLowerCase() === 'coordenador';
+
+        const userDepto = user.departamento || 'DR/BA';
         let deptoHtml = '';
 
         if (isSelf) {
@@ -195,7 +214,7 @@ function renderizarTabelaUsuários(lista){
             // Outro Admin ou outro Coordenador: BLOQUEADO POR SEGURANÇA (somente leitura com cadeado)
             deptoHtml = `
                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle ms-1 d-inline-flex align-items-center gap-1 py-1 px-2"
-                      style="font-size: 0.72rem; cursor: not-allowed;"
+                      style="font-size: 0.73rem; cursor: not-allowed;"
                       title="O departamento de outros administradores e coordenadores não pode ser alterado por segurança.">
                     <i class="bi bi-lock-fill text-muted"></i> ${escapeHTML(userDepto)}
                 </span>
@@ -218,9 +237,6 @@ function renderizarTabelaUsuários(lista){
         } else {
             deptoHtml = user.departamento ? `<span class="badge bg-light text-muted border ms-1" style="font-size: 0.72rem;">${escapeHTML(user.departamento)}</span>` : '';
         }
-        const isSelf = user.id === payloadToken.id;
-        const isAdmin = (payloadToken.perfil || '').toLowerCase() === 'admin';
-        const isCoord = (payloadToken.perfil || '').toLowerCase() === 'coordenador';
 
         let btnBloqueio = '';
         if (isSelf) {
@@ -283,12 +299,22 @@ function renderizarTabelaUsuários(lista){
     });
 }
 
+function normalizarTexto(str) {
+    return (str || '')
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+
 function aplicarFiltrosUsuarios(){
-    const termo = (document.getElementById('filtroTextoUser')?.value || '').toLowerCase();
+    const termo = normalizarTexto(document.getElementById('filtroTextoUser')?.value);
     const perfil = document.getElementById('filtroPerfilUser')?.value || '';
 
     const listaFiltrada = baseUsuários.filter(user => {
-        const matchTexto = (user.nome || '').toLowerCase().includes(termo) || (user.email || '').toLowerCase().includes(termo);
+        const nomeNorm = normalizarTexto(user.nome);
+        const emailNorm = normalizarTexto(user.email);
+        const matchTexto = !termo || nomeNorm.includes(termo) || emailNorm.includes(termo);
         const matchPerfil = perfil === "" || user.perfil === perfil;
         return matchTexto && matchPerfil;
     });
@@ -1045,6 +1071,11 @@ async function carregarPautasGlobais(){
 const pautasTab = document.getElementById('pautas-tab');
 if (pautasTab) {
     pautasTab.addEventListener('click', carregarPautasGlobais);
+}
+
+const usuariosTab = document.getElementById('usuarios-tab');
+if (usuariosTab) {
+    usuariosTab.addEventListener('click', carregarUsuários);
 }
 
 // Inicializações

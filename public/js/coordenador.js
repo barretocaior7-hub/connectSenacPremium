@@ -821,9 +821,27 @@ async function carregarCandidatos() {
   if (!tbody) return;
 
   try {
-    const response = await fetch(`${API_URL}/admin/usuarios`, {
+    const selCoord = document.getElementById("selectCoordDepartamento");
+    const depto = selCoord ? selCoord.value : (typeof getDepartamentoAtivo === "function" ? getDepartamentoAtivo() : "DR/BA");
+    const query = depto && depto !== "TODOS" ? `?departamento=${encodeURIComponent(depto)}` : "";
+    const response = await fetch(`${API_URL}/admin/usuarios${query}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
+
+    if (response.status === 401) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-warning text-center py-4"><i class="bi bi-clock-history me-2"></i>Sua sessão expirou. Redirecionando para o login...</td></tr>`;
+      setTimeout(() => {
+        localStorage.removeItem("token");
+        window.location.href = "login.html";
+      }, 1500);
+      return;
+    }
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.erro || `Erro HTTP ${response.status}`);
+    }
+
     const todos = await response.json();
     // Coordenador so ve candidatos
     baseCandidatos = Array.isArray(todos)
@@ -831,8 +849,9 @@ async function carregarCandidatos() {
       : [];
     renderizarCandidatos(baseCandidatos);
   } catch (error) {
+    console.error("Erro ao carregar candidatos:", error);
     tbody.innerHTML =
-      '<tr><td colspan="7" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Erro ao conectar ao servidor.</td></tr>';
+      `<tr><td colspan="6" class="text-danger text-center py-4"><i class="bi bi-wifi-off me-2"></i>Não foi possível conectar ao servidor. <span class="small text-muted d-block mt-1">Certifique-se de que o backend Node.js está em execução na porta 3000 (${escapeHTML(error.message || 'Falha de rede')})</span></td></tr>`;
   }
 }
 
@@ -913,15 +932,21 @@ function renderizarCandidatos(lista) {
   });
 }
 
+function normalizarTexto(str) {
+  return (str || '')
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
 function aplicarFiltroCandidatos() {
-  const termo = (
-    document.getElementById("filtroTextoUser")?.value || ""
-  ).toLowerCase();
-  const filtrados = baseCandidatos.filter(
-    (u) =>
-      (u.nome || "").toLowerCase().includes(termo) ||
-      (u.email || "").toLowerCase().includes(termo)
-  );
+  const termo = normalizarTexto(document.getElementById("filtroTextoUser")?.value);
+  const filtrados = baseCandidatos.filter((u) => {
+    const nomeNorm = normalizarTexto(u.nome);
+    const emailNorm = normalizarTexto(u.email);
+    return !termo || nomeNorm.includes(termo) || emailNorm.includes(termo);
+  });
   renderizarCandidatos(filtrados);
 }
 
@@ -1061,6 +1086,7 @@ function inicializarSeletoresDepartamentoCoord() {
       }
       carregarProfissionaisNoSelect(novoDepto);
       carregarProfissionaisCoord(novoDepto);
+      carregarCandidatos();
     });
   }
 
@@ -1075,6 +1101,7 @@ function inicializarSeletoresDepartamentoCoord() {
       if (selProf) selProf.value = d;
       carregarProfissionaisNoSelect(d);
       carregarProfissionaisCoord(d);
+      carregarCandidatos();
     }
   });
 
