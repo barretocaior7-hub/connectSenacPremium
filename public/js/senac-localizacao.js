@@ -85,8 +85,38 @@
     return ufMaisProxima;
   }
 
-  // Reverse Geocoding usando serviço gratuito leve
+  // Reverse Geocoding usando Google Maps Geocoder ou serviço gratuito leve com fallback
   async function identificarUfPorCoordenadas(lat, lon) {
+    // 1. Tentar via Google Maps Geocoder se o SDK estiver ativo
+    if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
+      try {
+        const geocoder = new google.maps.Geocoder();
+        const response = await geocoder.geocode({ location: { lat, lng: lon } });
+        if (response.results && response.results.length > 0) {
+          let uf = '';
+          let cidade = '';
+          for (const component of response.results[0].address_components) {
+            if (component.types.includes('administrative_area_level_1')) {
+              uf = component.short_name.toUpperCase();
+            }
+            if (component.types.includes('administrative_area_level_2') || component.types.includes('locality')) {
+              cidade = component.long_name;
+            }
+          }
+          if (uf && DEPARTAMENTOS_MAP[uf]) {
+            return {
+              uf,
+              cidade,
+              depto: DEPARTAMENTOS_MAP[uf].sigla
+            };
+          }
+        }
+      } catch (gErr) {
+        console.warn('Google Maps Geocoding fallback acionado:', gErr);
+      }
+    }
+
+    // 2. Tentar via BigDataCloud Reverse Geocoding
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 6000);
@@ -120,7 +150,7 @@
       // Fallback em caso de offline/bloqueador
     }
 
-    // Fallback matemático
+    // 3. Fallback matemático por proximidade de coordenadas
     const ufFallback = aproximarUfPorCoordenadas(lat, lon);
     return {
       uf: ufFallback,

@@ -452,7 +452,7 @@
                             <span class="text-muted small" id="confLocalizacao">SENAC - Santo Antônio de Jesus, BA</span>
                         </div>
                         
-                        <div class="maps-embed-container">
+                        <div class="maps-embed-container position-relative" style="height: 240px; border-radius: 16px;">
                             <iframe 
                                 width="100%" 
                                 height="100%" 
@@ -461,8 +461,20 @@
                                 allowfullscreen 
                                 referrerpolicy="no-referrer-when-downgrade"
                                 src="https://maps.google.com/maps?q=-12.965733710857474,-39.26765047467337&hl=pt-BR&z=17&output=embed"
-                                title="Localização do SENAC Santo Antônio de Jesus">
+                                title="Localização do SENAC Santo Antônio de Jesus no Google Maps">
                             </iframe>
+                        </div>
+
+                        <div class="d-flex flex-wrap gap-2 mt-3 justify-content-center">
+                            <button type="button" class="btn btn-sm btn-brand fw-semibold shadow-sm" onclick="GoogleMapsSenac.abrirRota()">
+                                <i class="bi bi-compass me-1"></i> Traçar Rota no Google Maps
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-info text-dark fw-semibold" onclick="GoogleMapsSenac.abrirWaze()">
+                                <i class="bi bi-cursor-fill me-1"></i> Waze
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="GoogleMapsSenac.copiarEndereco(this)" title="Copiar endereço completo">
+                                <i class="bi bi-clipboard me-1"></i> Copiar Endereço
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -514,6 +526,7 @@
     <script src="js/whatsapp-widget.js"></script>
     <script src="js/assistant-ia.js"></script>
     <script src="js/user-settings.js"></script>
+    <script src="js/google-maps.js"></script>
 
 </body>
 </html>
