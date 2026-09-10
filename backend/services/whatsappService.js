@@ -1,4 +1,4 @@
-﻿// backend/services/whatsappService.js
+// backend/services/whatsappService.js
 // Servico de Notificacoes e Integracao WhatsApp do Connect Senac
 
 const https = require('https');
@@ -134,7 +134,7 @@ async function enviarMensagemWhatsApp({ telefone, mensagem, tipo = 'NOTIFICACAO'
                 headers: {
                     'Content-Type': 'application/json',
                     'Content-Length': Buffer.byteLength(payload),
-                    ...(apiToken ? { 'Authorization': `Bearer ${apiToken}`, 'apikey': apiToken } : {})
+                    ...(apiToken ? { 'Authorization': `Bearer ${apiToken}`, 'apikey': apiToken, 'Client-Token': apiToken } : {})
                 }
             };
 
