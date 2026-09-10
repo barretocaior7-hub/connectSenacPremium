@@ -105,6 +105,17 @@ app.use('/api/profissional', require('./backend/routes/profissionalRoutes'));
 app.use('/api/feedbacks', require('./backend/routes/feedbackRoutes'));
 app.use('/api/assistente', require('./backend/routes/assistenteRoutes'));
 
+// Endpoint para acionamento de Cron Serverless / Verificação de Notificações
+app.get('/api/cron/notificador', async (req, res) => {
+    try {
+        const notificador = require('./backend/cron/notificador');
+        const resultado = await notificador.executarVarreduraNotificacoes();
+        res.json({ mensagem: 'Varredura de notificações e reconfirmações executada com sucesso!', resultado });
+    } catch (e) {
+        res.status(500).json({ erro: e.message });
+    }
+});
+
 
 
 // A Vercel importa o app como uma Function. O listener é necessário apenas

@@ -1,5 +1,6 @@
 // backend/controllers/agendamentoController.js
 const supabase = require('../config/database');
+const whatsappService = require('../services/whatsappService');
 
 // ============================================================================
 // LÓGICA DO CANDIDATO
@@ -18,7 +19,10 @@ exports.criar = async (req, res) => {
         // 1. Verificar se a vaga existe, se a data é futura e se tem espaço (Regra de Overbooking)
         const { data: disponibilidade, error: erroDisp } = await supabase
             .from('disponibilidades')
-            .select('id, data_hora, vagas_totais, vagas_ocupadas')
+            .select(`
+                id, data_hora, vagas_totais, vagas_ocupadas,
+                cursos ( id, nome, localizacao, departamento )
+            `)
             .eq('id', disponibilidade_id)
             .single();
 
@@ -33,6 +37,17 @@ exports.criar = async (req, res) => {
 
         if (disponibilidade.vagas_ocupadas >= disponibilidade.vagas_totais) {
             return res.status(400).json({ erro: 'Infelizmente, não há mais vagas para este horário.' });
+        }
+
+        // Buscar dados cadastrais do usuário (WhatsApp e Nome)
+        let usuario = req.usuario;
+        if (!usuario || !usuario.telefone) {
+            const { data: uDb } = await supabase
+                .from('usuarios')
+                .select('id, nome, email, telefone')
+                .eq('id', usuario_id)
+                .maybeSingle();
+            if (uDb) usuario = { ...usuario, ...uDb };
         }
 
         // Verificar se já existe agendamento anterior para este usuário/disponibilidade
@@ -90,13 +105,33 @@ exports.criar = async (req, res) => {
             throw erroUpdateDisp;
         }
 
-        // Disparo de notificação imediata de confirmação
-        console.log(`\n🔔 [NOTIFICAÇÃO ENVIADA] Agendamento Confirmado!`);
-        console.log(`👤 Usuário ID: ${usuario_id} | 📅 Data: ${new Date(disponibilidade.data_hora).toLocaleString('pt-BR')} | 🏷️ Vaga ID: ${disponibilidade_id}\n`);
+        // 4. Disparo de Notificação WhatsApp (Dia, Horário, Endereço e 20 minutos de antecedência)
+        const cursoNome = disponibilidade.cursos?.nome || 'Atendimento Prático';
+        const cursoLocal = disponibilidade.cursos?.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
+        const usuarioNome = usuario?.nome || 'Modelo';
+        const usuarioTel = usuario?.telefone || null;
+
+        const textoConfirmacao = whatsappService.montarMensagemConfirmacao({
+            nome: usuarioNome,
+            curso: cursoNome,
+            dataHora: disponibilidade.data_hora,
+            localizacao: cursoLocal
+        });
+
+        const zapRes = await whatsappService.enviarMensagemWhatsApp({
+            telefone: usuarioTel,
+            mensagem: textoConfirmacao,
+            tipo: 'CONFIRMACAO_AGENDAMENTO'
+        });
 
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
-            agendamento: agendamentoFinal
+            agendamento: agendamentoFinal,
+            whatsapp: {
+                telefone: zapRes.telefone,
+                link: zapRes.link,
+                mensagem: textoConfirmacao
+            }
         });
 
     } catch (error) {

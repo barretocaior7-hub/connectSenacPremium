@@ -1,13 +1,13 @@
-// backend/cron/notificador.js
+﻿// backend/cron/notificador.js
 const cron = require('node-cron');
 const supabase = require('../config/database');
+const whatsappService = require('../services/whatsappService');
 
 // Conjunto para controle de idempotência (evita reenvio duplicado dentro da janela)
 const notificacoesEnviadas = new Set();
 
-// Expressão CRON: '* * * * *' significa "Executar a cada minuto"
-cron.schedule('* * * * *', async () => {
-    console.log('🤖 [CRON] Executando varredura de notificações de agendamentos...');
+async function executarVarreduraNotificacoes() {
+    console.log('🤖 [CRON] Executando varredura de notificações e reconfirmações no WhatsApp...');
 
     try {
         const agora = new Date();
@@ -17,14 +17,14 @@ cron.schedule('* * * * *', async () => {
         const limiteInferior = agora.toISOString();
         const limiteSuperior = daquiA25Horas.toISOString();
 
-        // 1. Procurar agendamentos confirmados que acontecem nas próximas 25h
+        // 1. Procurar agendamentos ativos que acontecem nas próximas 25h
         const { data: agendamentos, error } = await supabase
             .from('agendamentos')
             .select(`
                 id,
                 status,
                 usuarios ( nome, email, telefone ),
-                disponibilidades!inner ( data_hora, cursos ( nome ) )
+                disponibilidades!inner ( data_hora, cursos ( nome, localizacao ) )
             `)
             .eq('status', 'agendado')
             .gt('disponibilidades.data_hora', limiteInferior)
@@ -33,51 +33,84 @@ cron.schedule('* * * * *', async () => {
         if (error) throw error;
 
         if (!agendamentos || agendamentos.length === 0) {
-            return;
+            return { total: 0, disparados: 0 };
         }
 
+        let disparados = 0;
+
         // 2. Disparar os avisos com tolerância de janela e controle de envio
-        agendamentos.forEach(ag => {
+        for (const ag of agendamentos) {
             if (!ag.disponibilidades || !ag.disponibilidades.data_hora) {
-                console.log(`⚠️ [CRON AVISO] Agendamento ${ag.id} ignorado: Dados de horário ausentes.`);
-                return;
+                continue;
             }
 
             const dataCurso = new Date(ag.disponibilidades.data_hora);
             const diferencaEmMinutos = Math.floor((dataCurso - agora) / (1000 * 60));
 
             const curso = ag.disponibilidades.cursos?.nome || 'Curso não identificado';
-            const cliente = ag.usuarios?.nome || 'Aluno';
-            const horaFormatada = dataCurso.toLocaleString('pt-BR', { timeStyle: 'short' });
+            const localizacao = ag.disponibilidades.cursos?.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
+            const cliente = ag.usuarios?.nome || 'Modelo';
+            const telefone = ag.usuarios?.telefone;
+            const horaFormatada = dataCurso.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
             const dataFormatada = dataCurso.toLocaleDateString('pt-BR');
 
-            // Notificação de 24 Horas (Janela: entre 1430 e 1445 minutos)
-            const chave24h = `${ag.id}_24h`;
-            if (diferencaEmMinutos >= 1430 && diferencaEmMinutos <= 1445 && !notificacoesEnviadas.has(chave24h)) {
-                notificacoesEnviadas.add(chave24h);
-                console.log(`\n📧 [EMAIL 24H ENVIADO] Para: ${ag.usuarios?.email || 'Sem e-mail'}`);
-                console.log(`Olá, ${cliente}! Lembramos que seu agendamento para "${curso}" será amanhã (${dataFormatada}) às ${horaFormatada}.`);
-                console.log(`Em caso de imprevistos, cancele na plataforma com no mínimo 2 horas de antecedência.\n`);
+            // -------------------------------------------------------------
+            // RECONFIRMAÇÃO 2 HORAS ANTES (Janela: entre 110 e 135 minutos)
+            // Solicita ao modelo se ele confirma sua presença
+            // -------------------------------------------------------------
+            const chave2h = `${ag.id}_reconfirmacao_2h`;
+            if (diferencaEmMinutos >= 110 && diferencaEmMinutos <= 135 && !notificacoesEnviadas.has(chave2h)) {
+                notificacoesEnviadas.add(chave2h);
+                disparados++;
+
+                const msg2h = whatsappService.montarMensagemReconfirmacao2h({
+                    nome: cliente,
+                    curso,
+                    dataHora: ag.disponibilidades.data_hora,
+                    localizacao
+                });
+
+                await whatsappService.enviarMensagemWhatsApp({
+                    telefone,
+                    mensagem: msg2h,
+                    tipo: 'RECONFIRMACAO_2H_WHATSAPP'
+                });
             }
 
-            // Notificação de 3 Horas (Janela: entre 170 e 185 minutos)
-            const chave3h = `${ag.id}_3h`;
-            if (diferencaEmMinutos >= 170 && diferencaEmMinutos <= 185 && !notificacoesEnviadas.has(chave3h)) {
-                notificacoesEnviadas.add(chave3h);
-                console.log(`\n🔔 [AVISO 3H ENVIADO] Para: ${ag.usuarios?.email || 'Sem e-mail'}`);
-                console.log(`Olá, ${cliente}! Seu atendimento para "${curso}" acontecerá hoje às ${horaFormatada}.`);
-                console.log(`Chegue com 10 minutos de antecedência na unidade SENAC.\n`);
+            // -------------------------------------------------------------
+            // Lembrete de 24 Horas (Janela: entre 1420 e 1450 minutos)
+            // -------------------------------------------------------------
+            const chave24h = `${ag.id}_24h`;
+            if (diferencaEmMinutos >= 1420 && diferencaEmMinutos <= 1450 && !notificacoesEnviadas.has(chave24h)) {
+                notificacoesEnviadas.add(chave24h);
+                disparados++;
+
+                console.log(`\n📧 [LEMBRETE 24H] Para: ${ag.usuarios?.email || 'Sem e-mail'} | Tel: ${telefone}`);
+                console.log(`Olá, ${cliente}! Lembramos que seu atendimento para "${curso}" será amanhã (${dataFormatada}) às ${horaFormatada}.`);
+                console.log(`Compareça com 20 minutos de antecedência. Em caso de imprevistos, cancele na plataforma com no mínimo 2 horas de antecedência.\n`);
             }
-        });
+        }
 
         // Limpeza de cache de agendamentos passados para poupar memória
         if (notificacoesEnviadas.size > 2000) {
             notificacoesEnviadas.clear();
         }
 
+        return { total: agendamentos.length, disparados };
     } catch (error) {
         console.error('❌ [CRON ERRO] Falha ao varrer notificações:', error.message);
+        return { erro: error.message };
     }
+}
+
+// Expressão CRON: '* * * * *' (Executar a cada minuto)
+cron.schedule('* * * * *', async () => {
+    await executarVarreduraNotificacoes();
 });
 
-console.log('⏳ Motor de Notificações (CRON) ativado e a aguardar...');
+console.log('⏳ Motor de Notificações e Reconfirmações WhatsApp (CRON) ativado e aguardando...');
+
+module.exports = {
+    executarVarreduraNotificacoes,
+    notificacoesEnviadas
+};

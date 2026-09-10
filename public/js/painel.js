@@ -607,15 +607,26 @@ async function realizarAgendamento(disponibilidadeId){
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerHTML = originalBtn;
 
-                // Abrir Modal Flutuante de Confirmação com Google Maps
+                // Abrir Modal Flutuante de Confirmação com Google Maps e WhatsApp
                 if (modalConfirmacaoSucesso) {
                     const confCurso = document.getElementById('confCursoNome');
                     const confData = document.getElementById('confDataHora');
                     const confLoc = document.getElementById('confLocalizacao');
+                    const btnZap = document.getElementById('btnAbrirZapConfirmacao');
+                    const boxZap = document.getElementById('boxNotificacaoWhatsApp');
 
                     if (confCurso) confCurso.textContent = window.currentSchedulingData.cursoNome;
                     if (confData) confData.textContent = window.currentSchedulingData.dataHoraFormatada || 'Data e horário agendados';
                     if (confLoc) confLoc.textContent = window.currentSchedulingData.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
+
+                    if (data.whatsapp && data.whatsapp.link && btnZap) {
+                        btnZap.href = data.whatsapp.link;
+                        if (boxZap) boxZap.classList.remove('d-none');
+                    } else if (btnZap) {
+                        // Fallback wa.me se o backend não retornou link direto
+                        const msgFallback = encodeURIComponent(`🎉 Agendamento Confirmado no Connect Senac!\nProcedimento: ${window.currentSchedulingData.cursoNome}\nData: ${window.currentSchedulingData.dataHoraFormatada || ''}\nEndereço: ${window.currentSchedulingData.localizacao || ''}\nCompareça com 20 minutos de antecedência.`);
+                        btnZap.href = `https://wa.me/?text=${msgFallback}`;
+                    }
 
                     modalConfirmacaoSucesso.show();
                 }
