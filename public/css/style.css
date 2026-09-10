@@ -633,32 +633,55 @@ a:hover {
 }
 
 .input-password-wrapper {
-  position: relative;
+  position: relative !important;
 }
 
-.btn-toggle-password {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.15rem;
-  width: 36px;
-  height: 36px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 10;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast), background-color var(--transition-fast);
+.input-password-wrapper .form-control {
+  padding-right: 3rem !important;
 }
 
-.btn-toggle-password:hover {
-  color: var(--senac-blue);
-  background-color: var(--senac-blue-light);
+.btn-toggle-password,
+.form-floating .btn-toggle-password,
+.input-password-wrapper .btn-toggle-password {
+  position: absolute !important;
+  right: 12px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  background: transparent !important;
+  border: none !important;
+  color: var(--text-muted, #8493a3) !important;
+  font-size: 1.15rem !important;
+  width: 36px !important;
+  height: 36px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
+  border-radius: var(--radius-sm, 8px) !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  transition: color var(--transition-fast, 0.2s), background-color var(--transition-fast, 0.2s) !important;
+}
+
+.btn-toggle-password:hover,
+.form-floating .btn-toggle-password:hover,
+.input-password-wrapper .btn-toggle-password:hover {
+  color: var(--senac-blue, #004a8d) !important;
+  background-color: var(--senac-blue-light, rgba(0, 74, 141, 0.08)) !important;
+}
+
+[data-theme="dark"] .btn-toggle-password,
+body.dark-mode .btn-toggle-password {
+  color: #a0aec0 !important;
+}
+
+[data-theme="dark"] .btn-toggle-password:hover,
+body.dark-mode .btn-toggle-password:hover {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }
 
 /* ==========================================================================
