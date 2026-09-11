@@ -1,6 +1,7 @@
 // backend/controllers/agendamentoController.js
 const supabase = require('../config/database');
 const whatsappService = require('../services/whatsappService');
+const emailService = require('../services/emailService');
 const { getInicioDeHojeBrasil, isHorarioFuturo, parseDataNoFuso } = require('../utils/dateUtils');
 
 // ============================================================================
@@ -134,12 +135,26 @@ exports.criar = async (req, res) => {
             throw erroUpdateDisp;
         }
 
-        // 4. Disparo de Notificação WhatsApp (Dia, Horário, Endereço e 20 minutos de antecedência)
+        // 4. Disparo de Notificação de Confirmação por E-mail (Resend) e WhatsApp
         const cursoNome = disponibilidade.cursos?.nome || 'Atendimento Prático';
         const cursoLocal = disponibilidade.cursos?.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
         const usuarioNome = usuario?.nome || 'Modelo';
+        const usuarioEmail = usuario?.email || req.usuario?.email || null;
         const usuarioTel = usuario?.telefone || null;
 
+        // Disparo prioritário de E-mail via Resend
+        let emailRes = { sucesso: false };
+        if (usuarioEmail) {
+            emailRes = await emailService.enviarEmailConfirmacao({
+                to: usuarioEmail,
+                nome: usuarioNome,
+                curso: cursoNome,
+                dataHora: disponibilidade.data_hora,
+                localizacao: cursoLocal
+            });
+        }
+
+        // Notificação complementar via WhatsApp (mensagem e link wa.me direto)
         const textoConfirmacao = whatsappService.montarMensagemConfirmacao({
             nome: usuarioNome,
             curso: cursoNome,
@@ -156,6 +171,11 @@ exports.criar = async (req, res) => {
         res.status(201).json({
             mensagem: 'Agendamento realizado com sucesso!',
             agendamento: agendamentoFinal,
+            email: {
+                enviado: emailRes.sucesso,
+                destinatario: usuarioEmail,
+                id: emailRes.id || null
+            },
             whatsapp: {
                 telefone: zapRes.telefone,
                 link: zapRes.link,

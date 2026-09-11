@@ -1,7 +1,8 @@
-﻿// backend/cron/notificador.js
+// backend/cron/notificador.js
 const cron = require('node-cron');
 const supabase = require('../config/database');
 const whatsappService = require('../services/whatsappService');
+const emailService = require('../services/emailService');
 
 // Conjunto para controle de idempotência (evita reenvio duplicado dentro da janela)
 const notificacoesEnviadas = new Set();
@@ -56,13 +57,27 @@ async function executarVarreduraNotificacoes() {
 
             // -------------------------------------------------------------
             // RECONFIRMAÇÃO 2 HORAS ANTES (Janela: entre 110 e 135 minutos)
-            // Solicita ao modelo se ele confirma sua presença
+            // Solicita ao modelo se ele confirma sua presença via E-mail (Resend) e WhatsApp
             // -------------------------------------------------------------
             const chave2h = `${ag.id}_reconfirmacao_2h`;
             if (diferencaEmMinutos >= 110 && diferencaEmMinutos <= 135 && !notificacoesEnviadas.has(chave2h)) {
                 notificacoesEnviadas.add(chave2h);
                 disparados++;
 
+                const emailCliente = ag.usuarios?.email;
+
+                // Disparo prioritário de E-mail via Resend
+                if (emailCliente) {
+                    await emailService.enviarEmailReconfirmacao2h({
+                        to: emailCliente,
+                        nome: cliente,
+                        curso,
+                        dataHora: ag.disponibilidades.data_hora,
+                        localizacao
+                    });
+                }
+
+                // Disparo complementar via WhatsApp
                 const msg2h = whatsappService.montarMensagemReconfirmacao2h({
                     nome: cliente,
                     curso,

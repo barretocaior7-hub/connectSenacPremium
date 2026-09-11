@@ -725,17 +725,23 @@ async function realizarAgendamento(disponibilidadeId){
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerHTML = originalBtn;
 
-                // Abrir Modal Flutuante de Confirmação com Google Maps e WhatsApp
+                // Abrir Modal Flutuante de Confirmação com E-mail, Google Maps e WhatsApp
                 if (modalConfirmacaoSucesso) {
                     const confCurso = document.getElementById('confCursoNome');
                     const confData = document.getElementById('confDataHora');
                     const confLoc = document.getElementById('confLocalizacao');
                     const btnZap = document.getElementById('btnAbrirZapConfirmacao');
                     const boxZap = document.getElementById('boxNotificacaoWhatsApp');
+                    const confEmailEl = document.getElementById('confEmailDestinatario');
+                    const boxEmail = document.getElementById('boxNotificacaoEmail');
 
                     if (confCurso) confCurso.textContent = window.currentSchedulingData.cursoNome;
                     if (confData) confData.textContent = window.currentSchedulingData.dataHoraFormatada || 'Data e horário agendados';
                     if (confLoc) confLoc.textContent = window.currentSchedulingData.localizacao || 'SENAC - Santo Antônio de Jesus, BA';
+
+                    const emailDest = data.email?.destinatario || (payloadTokenGlobal?.email || 'seu e-mail');
+                    if (confEmailEl) confEmailEl.textContent = emailDest;
+                    if (boxEmail) boxEmail.classList.remove('d-none');
 
                     if (data.whatsapp && data.whatsapp.link && btnZap) {
                         btnZap.href = data.whatsapp.link;
