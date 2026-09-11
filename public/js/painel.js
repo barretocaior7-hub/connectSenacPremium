@@ -491,9 +491,14 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
     resumo.classList.add('d-none');
     resumo.innerHTML = '';
 
+    let selectedDisponibilidadeId = null;
+
     const btnConfirmar = document.getElementById('btnConfirmarAgendamento');
     btnConfirmar.disabled = true;
-    btnConfirmar.onclick = () => realizarAgendamento(select.value);
+    btnConfirmar.onclick = () => {
+        const idFinal = selectedDisponibilidadeId || select.value;
+        realizarAgendamento(idFinal);
+    };
 
     modalAgendamento.show();
 
@@ -555,6 +560,7 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 });
                 chip.classList.add('is-selected');
                 chip.setAttribute('aria-checked', 'true');
+                selectedDisponibilidadeId = h.id;
                 select.value = h.id;
                 btnConfirmar.disabled = false;
                 window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora}`;
@@ -576,10 +582,11 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
 async function realizarAgendamento(disponibilidadeId){
     const msgDiv = document.getElementById('msgAgendamento');
     const btnConfirmar = document.getElementById('btnConfirmarAgendamento');
-    const originalBtn = btnConfirmar.innerHTML;
+    const originalBtn = btnConfirmar ? btnConfirmar.innerHTML : 'Confirmar agendamento';
 
-    if (!disponibilidadeId) {
-        msgDiv.innerHTML = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> Por favor, selecione um horário na lista.</div>';
+    if (!disponibilidadeId || disponibilidadeId === 'undefined' || disponibilidadeId === 'null') {
+        msgDiv.innerHTML = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> Por favor, selecione um horário na lista acima antes de confirmar.</div>';
+        if (btnConfirmar) btnConfirmar.disabled = false;
         return;
     }
 

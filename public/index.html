@@ -776,8 +776,10 @@
         }
 
         function redirecionarParaAgendar(cursoId, horarioId = null) {
+            if (!cursoId) return;
             const token = localStorage.getItem('token');
-            const horarioParam = horarioId ? `&horario=${encodeURIComponent(horarioId)}` : '';
+            const validHorario = (horarioId && horarioId !== 'undefined' && horarioId !== 'null') ? horarioId : null;
+            const horarioParam = validHorario ? `&horario=${encodeURIComponent(validHorario)}` : '';
             if (token) {
                 // Usuário autenticado: direciona ao painel
                 window.location.href = `painel.html?curso=${encodeURIComponent(cursoId)}${horarioParam}#vitrine`;

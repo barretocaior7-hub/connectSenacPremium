@@ -11,8 +11,8 @@ exports.criar = async (req, res) => {
     const { disponibilidade_id } = req.body;
     const usuario_id = req.usuario.id; // Pegamos o ID de quem está logado pelo token!
 
-    if (!disponibilidade_id) {
-        return res.status(400).json({ erro: 'O ID da disponibilidade é obrigatório.' });
+    if (!disponibilidade_id || typeof disponibilidade_id !== 'string' || disponibilidade_id.trim() === '' || disponibilidade_id === 'undefined' || disponibilidade_id === 'null') {
+        return res.status(400).json({ erro: 'Por favor, selecione um horário válido na lista de vagas antes de confirmar.' });
     }
 
     try {
@@ -20,12 +20,17 @@ exports.criar = async (req, res) => {
         const { data: dispData, error: erroDisp } = await supabase
             .from('disponibilidades')
             .select('id, curso_id, data_hora, vagas_totais, vagas_ocupadas')
-            .eq('id', disponibilidade_id)
+            .eq('id', String(disponibilidade_id).trim())
             .maybeSingle();
 
-        if (erroDisp || !dispData) {
-            console.error('Erro ao buscar disponibilidade:', erroDisp || 'Horário inexistente');
-            return res.status(404).json({ erro: 'Horário não encontrado.' });
+        if (erroDisp) {
+            console.error('Erro ao consultar disponibilidade no banco:', erroDisp);
+            return res.status(500).json({ erro: 'Erro ao consultar os dados do horário selecionado.' });
+        }
+
+        if (!dispData) {
+            console.warn('Disponibilidade não encontrada para o ID:', disponibilidade_id);
+            return res.status(404).json({ erro: 'O horário selecionado não foi encontrado ou não está mais disponível.' });
         }
 
         const disponibilidade = dispData;
