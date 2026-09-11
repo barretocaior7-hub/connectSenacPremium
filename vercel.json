@@ -3,7 +3,7 @@
   "crons": [
     {
       "path": "/api/cron/notificador",
-      "schedule": "*/5 * * * *"
+      "schedule": "0 10 * * *"
     }
   ],
   "rewrites": [
