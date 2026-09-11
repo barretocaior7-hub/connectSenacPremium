@@ -16,23 +16,43 @@ exports.criar = async (req, res) => {
     }
 
     try {
-        // 1. Verificar se a vaga existe, se a data é futura e se tem espaço (Regra de Overbooking)
-        const { data: disponibilidade, error: erroDisp } = await supabase
+        // 1. Verificar se a vaga existe e se tem espaço (Regra de Overbooking)
+        const { data: dispData, error: erroDisp } = await supabase
             .from('disponibilidades')
-            .select(`
-                id, data_hora, vagas_totais, vagas_ocupadas,
-                cursos ( id, nome, localizacao, departamento )
-            `)
+            .select('id, curso_id, data_hora, vagas_totais, vagas_ocupadas')
             .eq('id', disponibilidade_id)
-            .single();
+            .maybeSingle();
 
-        if (erroDisp || !disponibilidade) {
+        if (erroDisp || !dispData) {
+            console.error('Erro ao buscar disponibilidade:', erroDisp || 'Horário inexistente');
             return res.status(404).json({ erro: 'Horário não encontrado.' });
         }
 
-        // Validação contra agendamento retroativo
-        if (new Date(disponibilidade.data_hora) <= new Date()) {
-            return res.status(400).json({ erro: 'Este horário já ocorreu ou encerrou as inscrições.' });
+        const disponibilidade = dispData;
+
+        // Buscar dados do curso de forma segura e resiliente
+        let cursoData = null;
+        if (disponibilidade.curso_id) {
+            try {
+                const { data: c } = await supabase
+                    .from('cursos')
+                    .select('id, nome, localizacao')
+                    .eq('id', disponibilidade.curso_id)
+                    .maybeSingle();
+                cursoData = c;
+            } catch (errCurso) {
+                console.warn('Aviso ao buscar dados do curso:', errCurso.message);
+            }
+        }
+        disponibilidade.cursos = cursoData || { nome: 'Atendimento Prático', localizacao: 'SENAC - Santo Antônio de Jesus, BA' };
+
+        // Validação contra agendamento em dias passados (permite agendar no mesmo dia / hoje)
+        const dataCurso = new Date(disponibilidade.data_hora);
+        const inicioDeHoje = new Date();
+        inicioDeHoje.setHours(0, 0, 0, 0);
+
+        if (dataCurso < inicioDeHoje) {
+            return res.status(400).json({ erro: 'Este horário é de um dia anterior e as inscrições foram encerradas.' });
         }
 
         if (disponibilidade.vagas_ocupadas >= disponibilidade.vagas_totais) {

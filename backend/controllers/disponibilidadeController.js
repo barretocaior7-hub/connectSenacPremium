@@ -15,8 +15,15 @@ exports.criar = async (req, res) => {
     }
 
     const dataObj = new Date(data_hora);
-    if (isNaN(dataObj.getTime()) || dataObj <= new Date()) {
-        return res.status(400).json({ erro: 'A data e hora deve ser válida e estar no futuro.' });
+    if (isNaN(dataObj.getTime())) {
+        return res.status(400).json({ erro: 'A data e hora informada é inválida.' });
+    }
+
+    const inicioDeHoje = new Date();
+    inicioDeHoje.setHours(0, 0, 0, 0);
+
+    if (dataObj < inicioDeHoje) {
+        return res.status(400).json({ erro: 'A data e hora não pode ser de dias passados.' });
     }
 
     try {
@@ -52,15 +59,16 @@ exports.listarPorCurso = async (req, res) => {
     const { curso_id } = req.params;
 
     try {
-        // Pega a data e hora atual em formato ISO para comparar com o banco
-        const agora = new Date().toISOString();
+        // Pega o início do dia de hoje (00:00:00) para listar vagas de hoje e dias futuros
+        const inicioDeHoje = new Date();
+        inicioDeHoje.setHours(0, 0, 0, 0);
 
         const { data: disponibilidades, error } = await supabase
             .from('disponibilidades')
             .select('id, data_hora, vagas_totais, vagas_ocupadas')
             .eq('curso_id', curso_id)
-            // Filtra para mostrar apenas horários que ainda não passaram
-            .gt('data_hora', agora)
+            // Filtra para mostrar vagas de hoje em diante
+            .gte('data_hora', inicioDeHoje.toISOString())
             .order('data_hora', { ascending: true });
 
         if (error) throw error;
