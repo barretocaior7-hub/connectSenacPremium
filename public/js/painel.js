@@ -667,7 +667,8 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 selectedDisponibilidadeId = h.id;
                 select.value = h.id;
                 btnConfirmar.disabled = false;
-                window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora} (${siglaFuso})`;
+                const horaApenas = hora.includes(',') ? hora.split(',').pop().trim() : hora;
+                window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${horaApenas} (${siglaFuso})`;
                 
                 const dataCompletaCap = dataCompleta.charAt(0).toUpperCase() + dataCompleta.slice(1);
                 let relSummaryTag = '';
@@ -680,7 +681,7 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                     <i class="bi bi-check2-circle text-success fs-4 me-2"></i>
                     <div class="schedule-summary-content">
                         <small class="text-muted d-block fw-semibold text-uppercase" style="letter-spacing: 0.05em;">Horário selecionado (${siglaFuso}):</small>
-                        <strong class="schedule-summary-title">${dataCompletaCap} às ${hora}</strong>
+                        <strong class="schedule-summary-title">${dataCompletaCap} às ${horaApenas}</strong>
                     </div>
                     ${relSummaryTag}
                 `;
@@ -742,13 +743,11 @@ async function realizarAgendamento(disponibilidadeId){
                 btnConfirmar.disabled = false;
                 btnConfirmar.innerHTML = originalBtn;
 
-                // Abrir Modal Flutuante de Confirmação com E-mail, Google Maps e WhatsApp
+                // Abrir Modal Flutuante de Confirmação com E-mail e Google Maps
                 if (modalConfirmacaoSucesso) {
                     const confCurso = document.getElementById('confCursoNome');
                     const confData = document.getElementById('confDataHora');
                     const confLoc = document.getElementById('confLocalizacao');
-                    const btnZap = document.getElementById('btnAbrirZapConfirmacao');
-                    const boxZap = document.getElementById('boxNotificacaoWhatsApp');
                     const confEmailEl = document.getElementById('confEmailDestinatario');
                     const boxEmail = document.getElementById('boxNotificacaoEmail');
 
@@ -759,15 +758,6 @@ async function realizarAgendamento(disponibilidadeId){
                     const emailDest = data.email?.destinatario || (payloadTokenGlobal?.email || 'seu e-mail');
                     if (confEmailEl) confEmailEl.textContent = emailDest;
                     if (boxEmail) boxEmail.classList.remove('d-none');
-
-                    if (data.whatsapp && data.whatsapp.link && btnZap) {
-                        btnZap.href = data.whatsapp.link;
-                        if (boxZap) boxZap.classList.remove('d-none');
-                    } else if (btnZap) {
-                        // Fallback wa.me se o backend não retornou link direto
-                        const msgFallback = encodeURIComponent(`🎉 Agendamento Confirmado no Connect Senac!\nProcedimento: ${window.currentSchedulingData.cursoNome}\nData: ${window.currentSchedulingData.dataHoraFormatada || ''}\nEndereço: ${window.currentSchedulingData.localizacao || ''}\nCompareça com 20 minutos de antecedência.`);
-                        btnZap.href = `https://wa.me/?text=${msgFallback}`;
-                    }
 
                     modalConfirmacaoSucesso.show();
                 }
