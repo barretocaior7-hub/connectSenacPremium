@@ -604,31 +604,31 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 diaSemana = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { weekday: 'short' }).replace('.', '').toUpperCase();
                 diaMes = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { day: '2-digit', month: '2-digit' });
                 hora = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { hour: '2-digit', minute: '2-digit' });
-                dataCompleta = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { weekday: 'long', day: '2-digit', month: 'long' });
+                dataCompleta = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
                 rel = window.SenacLocalizacao.calcularTempoRelativo(h.data_hora, deptoCurso);
             } else {
                 const data = new Date(h.data_hora);
                 diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase();
                 diaMes = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
                 hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                dataCompleta = data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+                dataCompleta = data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
             }
             const vagasLivres = h.vagas_totais - h.vagas_ocupadas;
 
+            // Formatação do badge de data relativa (apenas se for Hoje ou Amanhã)
             let relBadge = '';
             let optRelText = '';
             if (rel) {
-                optRelText = ` [${rel.texto}]`;
                 if (rel.isHoje) {
-                    relBadge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.68rem;"><i class="bi bi-clock-history me-1"></i>${rel.texto}</span>`;
-                } else if (rel.isAmanha) {
-                    relBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.68rem;"><i class="bi bi-calendar-check me-1"></i>Amanhã</span>`;
-                } else {
-                    relBadge = `<span class="badge bg-light text-muted border" style="font-size: 0.68rem;">${rel.texto}</span>`;
+                    optRelText = ` [Hoje]`;
+                    relBadge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 schedule-rel-badge"><i class="bi bi-clock-history me-1"></i>Hoje</span>`;
+                } else if (rel.isAmanha || (rel.diffHoras > 0 && rel.diffHoras <= 36)) {
+                    optRelText = ` [Amanhã]`;
+                    relBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 schedule-rel-badge"><i class="bi bi-calendar-check me-1"></i>Amanhã</span>`;
                 }
             }
 
-            select.innerHTML += `<option value="${h.id}">${dataCompleta}, ${hora} (${siglaFuso})${optRelText}</option>`;
+            select.innerHTML += `<option value="${h.id}">${dataCompleta}, às ${hora} (${siglaFuso})${optRelText}</option>`;
 
             const chip = document.createElement('div');
             chip.className = 'schedule-chip';
@@ -638,20 +638,23 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
 
             let badgeStatus = '';
             if (vagasLivres === 1) {
-                badgeStatus = '<span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 chip-status"><i class="bi bi-fire text-danger"></i> Última vaga</span>';
+                badgeStatus = '<span class="badge bg-warning bg-opacity-15 text-warning-emphasis border border-warning border-opacity-30 chip-status"><i class="bi bi-fire text-danger me-1"></i>1 vaga</span>';
             } else if (vagasLivres === 2) {
-                badgeStatus = '<span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25 chip-status">Últimas 2 vagas</span>';
+                badgeStatus = '<span class="badge bg-warning bg-opacity-15 text-warning-emphasis border border-warning border-opacity-30 chip-status">2 vagas</span>';
             } else {
-                badgeStatus = `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 chip-status"><i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i> ${vagasLivres} vagas</span>`;
+                badgeStatus = `<span class="badge bg-success bg-opacity-15 text-success border border-success border-opacity-30 chip-status"><i class="bi bi-circle-fill me-1" style="font-size: 0.45rem;"></i>${vagasLivres} vagas</span>`;
             }
 
             chip.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
-                    <span class="small fw-bold text-muted">${diaSemana} • ${diaMes}</span>
+                <div class="schedule-chip-header">
+                    <span class="schedule-chip-date">${diaSemana} • ${diaMes}</span>
                     ${relBadge}
                 </div>
-                <span class="chip-time">${hora} <small class="text-muted" style="font-size: 0.7rem; font-weight: normal;">${siglaFuso}</small></span>
-                <div class="mt-2">${badgeStatus}</div>
+                <div class="schedule-chip-body">
+                    <span class="chip-time">${hora}</span>
+                    <span class="chip-fuso">${siglaFuso}</span>
+                </div>
+                <div class="schedule-chip-footer">${badgeStatus}</div>
             `;
 
             chip.addEventListener('click', () => {
@@ -665,8 +668,22 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 select.value = h.id;
                 btnConfirmar.disabled = false;
                 window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora} (${siglaFuso})`;
-                const relHtml = rel ? `<span class="badge bg-light text-primary border ms-1">${rel.texto}</span>` : '';
-                resumo.innerHTML = `<i class="bi bi-check2-circle text-success me-1"></i><span><small class="text-muted d-block">Horário selecionado (${siglaFuso}):</small><strong class="text-dark">${dataCompleta}, às ${hora}</strong> ${relHtml}</span>`;
+                
+                const dataCompletaCap = dataCompleta.charAt(0).toUpperCase() + dataCompleta.slice(1);
+                let relSummaryTag = '';
+                if (rel && (rel.isHoje || rel.isAmanha)) {
+                    const relLabel = rel.isHoje ? 'Hoje' : 'Amanhã';
+                    relSummaryTag = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 ms-2">${relLabel}</span>`;
+                }
+
+                resumo.innerHTML = `
+                    <i class="bi bi-check2-circle text-success fs-4 me-2"></i>
+                    <div class="schedule-summary-content">
+                        <small class="text-muted d-block fw-semibold text-uppercase" style="letter-spacing: 0.05em;">Horário selecionado (${siglaFuso}):</small>
+                        <strong class="schedule-summary-title">${dataCompletaCap} às ${hora}</strong>
+                    </div>
+                    ${relSummaryTag}
+                `;
                 resumo.classList.remove('d-none');
             });
             grade.appendChild(chip);

@@ -123,17 +123,20 @@
     if (isNaN(d.getTime())) return 'Data inválida';
 
     const info = getInfoFusoDepartamento(depto || getDepartamentoUsuario() || 'DR/BA');
-    const defaultOptions = {
-      timeZone: info.timeZone,
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    };
+    
+    const finalOptions = Object.keys(options).length > 0
+      ? { timeZone: info.timeZone, ...options }
+      : {
+          timeZone: info.timeZone,
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        };
 
-    return new Intl.DateTimeFormat('pt-BR', { ...defaultOptions, ...options }).format(d);
+    return new Intl.DateTimeFormat('pt-BR', finalOptions).format(d);
   }
 
   function calcularTempoRelativo(dataHora, depto) {
