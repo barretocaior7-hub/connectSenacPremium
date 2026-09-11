@@ -30,7 +30,7 @@ exports.criar = async (req, res) => {
 
         if (!dispData) {
             console.warn('Disponibilidade não encontrada para o ID:', disponibilidade_id);
-            return res.status(404).json({ erro: 'O horário selecionado não foi encontrado ou não está mais disponível.' });
+            return res.status(400).json({ erro: 'O horário selecionado não foi encontrado ou não possui mais vagas abertas. Por favor, escolha outro horário.' });
         }
 
         const disponibilidade = dispData;

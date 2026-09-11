@@ -537,6 +537,7 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
             chip.className = 'schedule-chip';
             chip.setAttribute('role', 'radio');
             chip.setAttribute('aria-checked', 'false');
+            chip.setAttribute('data-disp-id', String(h.id));
 
             let badgeStatus = '';
             if (vagasLivres === 1) {
@@ -568,11 +569,21 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 resumo.classList.remove('d-none');
             });
             grade.appendChild(chip);
-
-            if (preselectedDispId && String(h.id) === String(preselectedDispId)) {
-                setTimeout(() => chip.click(), 100);
-            }
         });
+
+        // Auto-selecionar o horário se houver apenas 1 disponível ou se veio pré-selecionado
+        if (preselectedDispId) {
+            const chipPre = Array.from(grade.querySelectorAll('.schedule-chip')).find(el => el.getAttribute('data-disp-id') === String(preselectedDispId));
+            if (chipPre) {
+                setTimeout(() => chipPre.click(), 80);
+            } else {
+                const primeiro = grade.querySelector('.schedule-chip');
+                if (primeiro) setTimeout(() => primeiro.click(), 80);
+            }
+        } else if (horariosLivres.length === 1) {
+            const unicoChip = grade.querySelector('.schedule-chip');
+            if (unicoChip) setTimeout(() => unicoChip.click(), 80);
+        }
 
     } catch (error) {
         grade.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-wifi-off fs-2 d-block mb-2"></i>Não foi possível carregar os horários.</div>';
