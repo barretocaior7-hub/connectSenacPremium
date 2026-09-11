@@ -1,5 +1,8 @@
 // backend/controllers/disponibilidadeController.js
 const supabase = require('../config/database');
+const { getInicioDeHojeBrasil } = require('../utils/dateUtils');
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Função RESTRITA (Admin/Coordenador): Criar uma nova data/hora para um curso
 exports.criar = async (req, res) => {
@@ -7,6 +10,10 @@ exports.criar = async (req, res) => {
 
     if (!curso_id || !data_hora || vagas_totais === undefined || vagas_totais === null) {
         return res.status(400).json({ erro: 'Curso, data/hora e número de vagas são obrigatórios.' });
+    }
+
+    if (!uuidRegex.test(String(curso_id).trim())) {
+        return res.status(400).json({ erro: 'Identificador do curso inválido.' });
     }
 
     const vagas = parseInt(vagas_totais, 10);
@@ -19,8 +26,7 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: 'A data e hora informada é inválida.' });
     }
 
-    const inicioDeHoje = new Date();
-    inicioDeHoje.setHours(0, 0, 0, 0);
+    const inicioDeHoje = getInicioDeHojeBrasil();
 
     if (dataObj < inicioDeHoje) {
         return res.status(400).json({ erro: 'A data e hora não pode ser de dias passados.' });
@@ -58,24 +64,25 @@ exports.criar = async (req, res) => {
 exports.listarPorCurso = async (req, res) => {
     const { curso_id } = req.params;
 
+    if (!curso_id || !uuidRegex.test(String(curso_id).trim())) {
+        return res.status(400).json({ erro: 'Identificador do curso inválido.' });
+    }
+
     try {
-        // Pega o início do dia de hoje (00:00:00) para listar vagas de hoje e dias futuros
-        const inicioDeHoje = new Date();
-        inicioDeHoje.setHours(0, 0, 0, 0);
+        const inicioDeHoje = getInicioDeHojeBrasil();
 
         const { data: disponibilidades, error } = await supabase
             .from('disponibilidades')
             .select('id, data_hora, vagas_totais, vagas_ocupadas')
-            .eq('curso_id', curso_id)
+            .eq('curso_id', String(curso_id).trim())
             // Filtra para mostrar vagas de hoje em diante
             .gte('data_hora', inicioDeHoje.toISOString())
             .order('data_hora', { ascending: true });
 
         if (error) throw error;
 
-        // Opcional: Filtrar no JavaScript para retornar apenas os que têm vagas livres
-        // (Isso também pode ser feito direto na query, mas aqui fica mais didático)
-        const horariosLivres = disponibilidades.filter(d => d.vagas_ocupadas < d.vagas_totais);
+        // Filtrar no JavaScript para retornar apenas os que têm vagas livres
+        const horariosLivres = (disponibilidades || []).filter(d => (d.vagas_totais - d.vagas_ocupadas) > 0);
 
         res.json(horariosLivres);
     } catch (error) {

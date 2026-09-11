@@ -1,6 +1,9 @@
 // backend/controllers/agendamentoController.js
 const supabase = require('../config/database');
 const whatsappService = require('../services/whatsappService');
+const { getInicioDeHojeBrasil } = require('../utils/dateUtils');
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // ============================================================================
 // LÓGICA DO CANDIDATO
@@ -11,16 +14,18 @@ exports.criar = async (req, res) => {
     const { disponibilidade_id } = req.body;
     const usuario_id = req.usuario.id; // Pegamos o ID de quem está logado pelo token!
 
-    if (!disponibilidade_id || typeof disponibilidade_id !== 'string' || disponibilidade_id.trim() === '' || disponibilidade_id === 'undefined' || disponibilidade_id === 'null') {
+    if (!disponibilidade_id || typeof disponibilidade_id !== 'string' || !uuidRegex.test(disponibilidade_id.trim())) {
         return res.status(400).json({ erro: 'Por favor, selecione um horário válido na lista de vagas antes de confirmar.' });
     }
 
     try {
+        const idLimpo = disponibilidade_id.trim();
+
         // 1. Verificar se a vaga existe e se tem espaço (Regra de Overbooking)
         const { data: dispData, error: erroDisp } = await supabase
             .from('disponibilidades')
             .select('id, curso_id, data_hora, vagas_totais, vagas_ocupadas')
-            .eq('id', String(disponibilidade_id).trim())
+            .eq('id', idLimpo)
             .maybeSingle();
 
         if (erroDisp) {
@@ -29,8 +34,8 @@ exports.criar = async (req, res) => {
         }
 
         if (!dispData) {
-            console.warn('Disponibilidade não encontrada para o ID:', disponibilidade_id);
-            return res.status(400).json({ erro: 'O horário selecionado não foi encontrado ou não possui mais vagas abertas. Por favor, escolha outro horário.' });
+            console.warn('Disponibilidade não encontrada para o ID:', idLimpo);
+            return res.status(404).json({ erro: 'O horário selecionado não foi encontrado na grade ou não está mais disponível. Por favor, selecione outro horário.' });
         }
 
         const disponibilidade = dispData;
@@ -53,8 +58,7 @@ exports.criar = async (req, res) => {
 
         // Validação contra agendamento em dias passados (permite agendar no mesmo dia / hoje)
         const dataCurso = new Date(disponibilidade.data_hora);
-        const inicioDeHoje = new Date();
-        inicioDeHoje.setHours(0, 0, 0, 0);
+        const inicioDeHoje = getInicioDeHojeBrasil();
 
         if (dataCurso < inicioDeHoje) {
             return res.status(400).json({ erro: 'Este horário é de um dia anterior e as inscrições foram encerradas.' });

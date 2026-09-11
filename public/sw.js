@@ -1,5 +1,5 @@
 // Service Worker - Connect Senac PWA
-const CACHE_NAME = 'connect-senac-cache-v4';
+const CACHE_NAME = 'connect-senac-cache-v5';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

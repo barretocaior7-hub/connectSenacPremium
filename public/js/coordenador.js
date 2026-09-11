@@ -760,7 +760,7 @@ async function carregarPautasGlobais() {
         });
       } else {
         disponibilidadesHTML =
-          '<div class="alert alert-light border text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Nenhum horario cadastrado para este curso.</div>';
+          '<div class="alert alert-light border text-muted small mb-0"><i class="bi bi-info-circle me-1"></i> Nenhum horário cadastrado para este curso.</div>';
       }
 
       const itemOpen = index === 0 ? "show" : "";

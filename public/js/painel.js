@@ -142,6 +142,8 @@ async function carregarCursos(){
         baseCursos = await response.json();
 
         if (!Array.isArray(baseCursos)) baseCursos = [];
+        window.cursosAtivosMap.clear();
+        baseCursos.forEach(c => window.cursosAtivosMap.set(String(c.id), c));
         renderizarVitrineCursos();
 
         const urlParams = new URLSearchParams(window.location.search);
@@ -500,6 +502,18 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
         realizarAgendamento(idFinal);
     };
 
+    select.onchange = () => {
+        const val = select.value;
+        if (!val) return;
+        const targetChip = Array.from(grade.querySelectorAll('.schedule-chip')).find(el => el.getAttribute('data-disp-id') === String(val));
+        if (targetChip) {
+            targetChip.click();
+        } else {
+            selectedDisponibilidadeId = val;
+            btnConfirmar.disabled = false;
+        }
+    };
+
     modalAgendamento.show();
 
     try {
@@ -571,18 +585,16 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
             grade.appendChild(chip);
         });
 
-        // Auto-selecionar o horário se houver apenas 1 disponível ou se veio pré-selecionado
+        // Auto-selecionar o horário se veio pré-selecionado ou o primeiro disponível
+        let chipParaSelecionar = null;
         if (preselectedDispId) {
-            const chipPre = Array.from(grade.querySelectorAll('.schedule-chip')).find(el => el.getAttribute('data-disp-id') === String(preselectedDispId));
-            if (chipPre) {
-                setTimeout(() => chipPre.click(), 80);
-            } else {
-                const primeiro = grade.querySelector('.schedule-chip');
-                if (primeiro) setTimeout(() => primeiro.click(), 80);
-            }
-        } else if (horariosLivres.length === 1) {
-            const unicoChip = grade.querySelector('.schedule-chip');
-            if (unicoChip) setTimeout(() => unicoChip.click(), 80);
+            chipParaSelecionar = Array.from(grade.querySelectorAll('.schedule-chip')).find(el => el.getAttribute('data-disp-id') === String(preselectedDispId));
+        }
+        if (!chipParaSelecionar) {
+            chipParaSelecionar = grade.querySelector('.schedule-chip');
+        }
+        if (chipParaSelecionar) {
+            setTimeout(() => chipParaSelecionar.click(), 60);
         }
 
     } catch (error) {
@@ -595,7 +607,8 @@ async function realizarAgendamento(disponibilidadeId){
     const btnConfirmar = document.getElementById('btnConfirmarAgendamento');
     const originalBtn = btnConfirmar ? btnConfirmar.innerHTML : 'Confirmar agendamento';
 
-    if (!disponibilidadeId || disponibilidadeId === 'undefined' || disponibilidadeId === 'null') {
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!disponibilidadeId || !uuidRegex.test(String(disponibilidadeId).trim())) {
         msgDiv.innerHTML = '<div class="alert alert-warning py-2 small mb-0"><i class="bi bi-exclamation-triangle-fill me-1"></i> Por favor, selecione um horário na lista acima antes de confirmar.</div>';
         if (btnConfirmar) btnConfirmar.disabled = false;
         return;
