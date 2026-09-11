@@ -1,8 +1,6 @@
 // backend/controllers/disponibilidadeController.js
 const supabase = require('../config/database');
-const { getInfoFusoDepartamento, isHorarioFuturo } = require('../utils/dateUtils');
-
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const { getInfoFusoDepartamento, isHorarioFuturo, parseDataNoFuso } = require('../utils/dateUtils');
 
 // Função RESTRITA (Admin/Coordenador): Criar uma nova data/hora para um curso
 exports.criar = async (req, res) => {
@@ -12,7 +10,8 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: 'Curso, data/hora e número de vagas são obrigatórios.' });
     }
 
-    if (!uuidRegex.test(String(curso_id).trim())) {
+    const cid = String(curso_id).trim();
+    if (!cid || cid === 'undefined' || cid === 'null') {
         return res.status(400).json({ erro: 'Identificador do curso inválido.' });
     }
 
@@ -21,12 +20,26 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: 'O número de vagas deve ser um número inteiro positivo (mínimo 1).' });
     }
 
-    const dataObj = new Date(data_hora);
-    if (isNaN(dataObj.getTime())) {
+    let depto = 'DR/BA';
+    try {
+        const { data: cursoData } = await supabase
+            .from('cursos')
+            .select('localizacao')
+            .eq('id', cid)
+            .maybeSingle();
+
+        if (cursoData && cursoData.localizacao) {
+            const match = cursoData.localizacao.match(/\b(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/i);
+            if (match) depto = `DR/${match[1].toUpperCase()}`;
+        }
+    } catch (_) {}
+
+    const dataObj = parseDataNoFuso(data_hora, depto);
+    if (!dataObj || isNaN(dataObj.getTime())) {
         return res.status(400).json({ erro: 'A data e hora informada é inválida.' });
     }
 
-    if (!isHorarioFuturo(dataObj)) {
+    if (!isHorarioFuturo(dataObj, depto, -15)) {
         return res.status(400).json({ erro: 'A data e horário da aula deve estar no futuro em relação ao momento atual.' });
     }
 
@@ -34,7 +47,7 @@ exports.criar = async (req, res) => {
         const { data: novaDisponibilidade, error } = await supabase
             .from('disponibilidades')
             .insert([{
-                curso_id,
+                curso_id: cid,
                 data_hora: dataObj.toISOString(),
                 vagas_totais: vagas
             }])
@@ -61,8 +74,9 @@ exports.criar = async (req, res) => {
 // Função PÚBLICA (Para logados): Listar horários futuros e com vagas de um curso específico
 exports.listarPorCurso = async (req, res) => {
     const { curso_id } = req.params;
+    const cid = String(curso_id || '').trim();
 
-    if (!curso_id || !uuidRegex.test(String(curso_id).trim())) {
+    if (!cid || cid === 'undefined' || cid === 'null') {
         return res.status(400).json({ erro: 'Identificador do curso inválido.' });
     }
 
@@ -73,7 +87,7 @@ exports.listarPorCurso = async (req, res) => {
             const { data: cursoData } = await supabase
                 .from('cursos')
                 .select('id, localizacao')
-                .eq('id', String(curso_id).trim())
+                .eq('id', cid)
                 .maybeSingle();
 
             if (cursoData && cursoData.localizacao) {
@@ -87,7 +101,7 @@ exports.listarPorCurso = async (req, res) => {
         const { data: disponibilidades, error } = await supabase
             .from('disponibilidades')
             .select('id, data_hora, vagas_totais, vagas_ocupadas')
-            .eq('curso_id', String(curso_id).trim())
+            .eq('curso_id', cid)
             .order('data_hora', { ascending: true });
 
         if (error) throw error;

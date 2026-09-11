@@ -1,9 +1,7 @@
 // backend/controllers/agendamentoController.js
 const supabase = require('../config/database');
 const whatsappService = require('../services/whatsappService');
-const { getInicioDeHojeBrasil, isHorarioFuturo } = require('../utils/dateUtils');
-
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const { getInicioDeHojeBrasil, isHorarioFuturo, parseDataNoFuso } = require('../utils/dateUtils');
 
 // ============================================================================
 // LÓGICA DO CANDIDATO
@@ -14,13 +12,12 @@ exports.criar = async (req, res) => {
     const { disponibilidade_id } = req.body;
     const usuario_id = req.usuario.id; // Pegamos o ID de quem está logado pelo token!
 
-    if (!disponibilidade_id || typeof disponibilidade_id !== 'string' || !uuidRegex.test(disponibilidade_id.trim())) {
+    const idLimpo = String(disponibilidade_id || '').trim();
+    if (!idLimpo || idLimpo === 'undefined' || idLimpo === 'null') {
         return res.status(400).json({ erro: 'Por favor, selecione um horário válido na lista de vagas antes de confirmar.' });
     }
 
     try {
-        const idLimpo = disponibilidade_id.trim();
-
         // 1. Verificar se a vaga existe e se tem espaço (Regra de Overbooking)
         const { data: dispData, error: erroDisp } = await supabase
             .from('disponibilidades')
@@ -29,7 +26,7 @@ exports.criar = async (req, res) => {
             .maybeSingle();
 
         if (erroDisp) {
-            console.error('Erro ao consultar disponibilidade no banco:', erroDisp);
+            console.error('Erro ao consultar disponibilidade no banco:', erroDisp, 'ID:', idLimpo);
             return res.status(500).json({ erro: 'Erro ao consultar os dados do horário selecionado.' });
         }
 

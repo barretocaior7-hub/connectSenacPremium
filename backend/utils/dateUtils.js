@@ -107,17 +107,56 @@ function getAgoraNoFuso(departamento = 'DR/BA') {
 }
 
 /**
- * Verifica se um horário de curso/aula ainda está no futuro em relação ao momento atual.
- * Permite uma margem de segurança em minutos (ex: impedir agendamentos com menos de 10 min de antecedência).
+ * Interpreta com precisão qualquer formato de data/hora (ISO, SQL, local sem offset)
+ * aplicando o fuso horário correto do Departamento Regional correspondente.
  */
-function isHorarioFuturo(dataHora, departamento = 'DR/BA', margemMinutos = 0) {
+function parseDataNoFuso(dataHora, departamento = 'DR/BA') {
+    if (!dataHora) return null;
+    if (dataHora instanceof Date) return isNaN(dataHora.getTime()) ? null : dataHora;
+
+    const str = String(dataHora).trim();
+    if (!str) return null;
+
+    // Caso a string já possua indicador de fuso explícito (Z ou offset +/-HH:MM / +/-HHMM / +/-HH)
+    if (/(?:Z|[+-]\d{2}(?::?\d{2})?)$/i.test(str)) {
+        const d = new Date(str);
+        return isNaN(d.getTime()) ? null : d;
+    }
+
+    // Se não tiver indicador de fuso explícito (ex: "2026-09-15 14:30:00" ou "2026-09-15T14:30"),
+    // associamos ao offset oficial do Departamento Regional (ex: UTC-3 para DR/BA)
+    const { offset } = getInfoFusoDepartamento(departamento);
+    const sinal = offset < 0 ? '-' : '+';
+    const offsetAbs = Math.abs(offset).toString().padStart(2, '0');
+    const isoFormatado = str.replace(' ', 'T');
+    
+    // Tratamento de segundos caso não existam
+    let dataCompleta = isoFormatado;
+    if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(isoFormatado)) {
+        dataCompleta += ':00';
+    }
+
+    const dComOffset = new Date(`${dataCompleta}${sinal}${offsetAbs}:00`);
+    if (!isNaN(dComOffset.getTime())) {
+        return dComOffset;
+    }
+
+    const dFallback = new Date(str);
+    return isNaN(dFallback.getTime()) ? null : dFallback;
+}
+
+/**
+ * Verifica se um horário de curso/aula ainda está no futuro em relação ao momento atual.
+ * Permite uma margem de segurança em minutos (ex: tolerância para início recente).
+ */
+function isHorarioFuturo(dataHora, departamento = 'DR/BA', margemMinutos = -10) {
     if (!dataHora) return false;
-    const dataAlvo = new Date(dataHora);
-    if (isNaN(dataAlvo.getTime())) return false;
+    const dataAlvo = parseDataNoFuso(dataHora, departamento);
+    if (!dataAlvo || isNaN(dataAlvo.getTime())) return false;
 
     const agora = new Date();
     const limite = new Date(agora.getTime() + (margemMinutos * 60 * 1000));
-    return dataAlvo > limite;
+    return dataAlvo.getTime() > limite.getTime();
 }
 
 module.exports = {
@@ -128,5 +167,7 @@ module.exports = {
     getInicioDeHojeNoFuso,
     getInicioDeHojeBrasil,
     getAgoraNoFuso,
+    parseDataNoFuso,
     isHorarioFuturo
 };
+
