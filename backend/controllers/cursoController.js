@@ -2,7 +2,7 @@
 const supabase = require('../config/database');
 const fs = require('fs');
 const path = require('path');
-const { getInicioDeHojeBrasil } = require('../utils/dateUtils');
+const { getInicioDeHojeBrasil, getInfoFusoDepartamento, isHorarioFuturo } = require('../utils/dateUtils');
 const deptProfFilePath = path.join(__dirname, '../config/professores_departamentos.json');
 const deptCursoFilePath = path.join(__dirname, '../config/cursos_departamentos.json');
 
@@ -67,23 +67,22 @@ exports.listarAtivos = async (req, res) => {
 
         const deptoProfMap = getProfessoresDepartamentos();
         const deptoCursosMap = getCursosDepartamentos();
-        const inicioDeHoje = getInicioDeHojeBrasil();
-
         let cursosProcessados = (cursos || []).map(c => {
             const depto = resolverDepartamentoCurso(c, deptoProfMap, deptoCursosMap);
+            const infoFuso = getInfoFusoDepartamento(depto);
             let dispsValidas = [];
             if (Array.isArray(c.disponibilidades)) {
                 dispsValidas = c.disponibilidades
-                    .filter(d => {
-                        const dataD = new Date(d.data_hora);
-                        return !isNaN(dataD.getTime()) && dataD >= inicioDeHoje;
-                    })
+                    .filter(d => isHorarioFuturo(d.data_hora, depto))
                     .sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora));
             }
             return {
                 ...c,
                 disponibilidades: dispsValidas,
-                departamento: depto
+                departamento: depto,
+                timezone: infoFuso.timeZone,
+                fusoDesc: infoFuso.fusoDesc,
+                siglaFuso: infoFuso.sigla
             };
         });
 

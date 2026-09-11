@@ -638,12 +638,31 @@
                     ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-calendar-event me-1"></i> ${qtdHorarios} data(s)</span>`
                     : '';
 
+                const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(c.departamento) : null;
+                let proximoHorarioBadge = '';
+                if (disps.length > 0 && window.SenacLocalizacao) {
+                    const prox = disps[0];
+                    const rel = window.SenacLocalizacao.calcularTempoRelativo(prox.data_hora, c.departamento);
+                    let badgeStyle = 'bg-light text-muted border';
+                    if (rel.isHoje) {
+                        badgeStyle = 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
+                    } else if (rel.isAmanha) {
+                        badgeStyle = 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+                    }
+                    proximoHorarioBadge = `<span class="badge ${badgeStyle}" style="font-size: 0.74rem;" title="Próximo atendimento"><i class="bi bi-clock-fill me-1"></i>${rel.texto}</span>`;
+                }
+
+                const deptoBadge = c.departamento
+                    ? `<span class="badge bg-primary text-white position-absolute top-0 end-0 m-2 shadow-sm" style="font-size: 0.72rem;"><i class="bi bi-geo-alt-fill me-1"></i>${escapeHTML(c.departamento)}</span>`
+                    : '';
+
                 div.innerHTML += `
                     <div class="col-md-6 col-lg-4">
                         <div class="course-detail-card h-100" onclick="abrirModalDetalhesPublico('${c.id}')" style="cursor: pointer;">
                             <div class="card-img-container position-relative" style="height: 140px; overflow: hidden;">
                                 <img src="${img}" alt="${nome}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1560066984-138dadb4c035?w=800&auto=format&fit=crop&q=60'">
                                 <span class="course-badge position-absolute top-0 start-0 m-2"><i class="bi bi-check-circle-fill me-1"></i> ${totalVagas > 0 ? `${totalVagas} Vagas Abertas` : 'Consulte Vagas'}</span>
+                                ${deptoBadge}
                             </div>
                             <div class="p-3 d-flex flex-column flex-grow-1">
                                 <h5 class="fw-bold font-heading text-dark mb-1" style="font-size: 1.05rem;">${nome}</h5>
@@ -652,14 +671,15 @@
                                     <span>•</span>
                                     <span><i class="bi bi-person-badge-fill text-primary me-1"></i> ${prof}</span>
                                 </div>
-                                <div class="d-flex align-items-center gap-1 mb-2">
+                                <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
                                     ${badgeVagas}
                                     ${badgeHorarios}
+                                    ${proximoHorarioBadge}
                                 </div>
                                 <p class="card-text mb-3 text-secondary" style="font-size: 0.84rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${descResumo}</p>
 
                                 <div class="pt-2 border-top mt-auto d-flex align-items-center justify-content-between">
-                                    <span class="badge bg-light text-primary border"><i class="bi bi-clock me-1"></i> 1h a 2h</span>
+                                    <span class="badge bg-light text-primary border"><i class="bi bi-clock-history me-1"></i> ${fusoInfo ? fusoInfo.siglaFuso : '1h a 2h'}</span>
                                     <button type="button" class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation(); abrirModalDetalhesPublico('${c.id}');">
                                         Ver Detalhes <i class="bi bi-eye ms-1"></i>
                                     </button>
@@ -710,6 +730,9 @@
             const listaHorariosEl = document.getElementById('pubListaHorarios');
             const totalVagasBadgeEl = document.getElementById('pubTotalVagasBadge');
             const disponibilidades = Array.isArray(curso.disponibilidades) ? curso.disponibilidades : [];
+            const deptoCurso = curso.departamento;
+            const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+            const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
 
             let totalVagasLivres = 0;
             let horariosHTML = '';
@@ -726,14 +749,33 @@
                 disponibilidades.forEach(disp => {
                     const vagasLivres = Math.max(0, (disp.vagas_totais || 0) - (disp.vagas_ocupadas || 0));
                     totalVagasLivres += vagasLivres;
-                    const dataHoraFormatada = disp.data_hora
-                        ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-                        : 'Data a definir';
+
+                    let dataHoraFormatada = '';
+                    let rel = null;
+                    if (window.SenacLocalizacao) {
+                        dataHoraFormatada = window.SenacLocalizacao.formatarDataHoraNoFuso(disp.data_hora, deptoCurso);
+                        rel = window.SenacLocalizacao.calcularTempoRelativo(disp.data_hora, deptoCurso);
+                    } else {
+                        dataHoraFormatada = disp.data_hora
+                            ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                            : 'Data a definir';
+                    }
 
                     const isEsgotado = vagasLivres <= 0;
                     const badgeVagas = isEsgotado
                         ? '<span class="badge bg-secondary">Esgotado</span>'
                         : `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-people-fill me-1"></i> ${vagasLivres} vaga(s) livre(s)</span>`;
+
+                    let relBadge = '';
+                    if (rel) {
+                        if (rel.isHoje) {
+                            relBadge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 ms-1" style="font-size: 0.72rem;"><i class="bi bi-clock-history me-1"></i>${rel.texto}</span>`;
+                        } else if (rel.isAmanha) {
+                            relBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 ms-1" style="font-size: 0.72rem;">Amanhã</span>`;
+                        } else {
+                            relBadge = `<span class="badge bg-light text-muted border ms-1" style="font-size: 0.72rem;">${rel.texto}</span>`;
+                        }
+                    }
 
                     const botaoAcao = isEsgotado
                         ? '<button class="btn btn-sm btn-secondary disabled" disabled>Esgotado</button>'
@@ -743,7 +785,10 @@
                         <div class="col-12 col-md-6">
                             <div class="p-2 border rounded d-flex justify-content-between align-items-center bg-light bg-opacity-50">
                                 <div>
-                                    <div class="fw-bold small text-dark"><i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada}</div>
+                                    <div class="fw-bold small text-dark">
+                                        <i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada} <small class="text-muted">(${siglaFuso})</small>
+                                        ${relBadge}
+                                    </div>
                                     <div class="mt-1">${badgeVagas}</div>
                                 </div>
                                 <div>

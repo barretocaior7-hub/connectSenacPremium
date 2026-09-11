@@ -1,6 +1,6 @@
 // backend/controllers/disponibilidadeController.js
 const supabase = require('../config/database');
-const { getInicioDeHojeBrasil } = require('../utils/dateUtils');
+const { getInfoFusoDepartamento, isHorarioFuturo } = require('../utils/dateUtils');
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -26,10 +26,8 @@ exports.criar = async (req, res) => {
         return res.status(400).json({ erro: 'A data e hora informada é inválida.' });
     }
 
-    const inicioDeHoje = getInicioDeHojeBrasil();
-
-    if (dataObj < inicioDeHoje) {
-        return res.status(400).json({ erro: 'A data e hora não pode ser de dias passados.' });
+    if (!isHorarioFuturo(dataObj)) {
+        return res.status(400).json({ erro: 'A data e horário da aula deve estar no futuro em relação ao momento atual.' });
     }
 
     try {
@@ -69,20 +67,40 @@ exports.listarPorCurso = async (req, res) => {
     }
 
     try {
-        const inicioDeHoje = getInicioDeHojeBrasil();
+        // Buscar dados de localização/departamento do curso para timezone correto
+        let depto = 'DR/BA';
+        try {
+            const { data: cursoData } = await supabase
+                .from('cursos')
+                .select('id, localizacao')
+                .eq('id', String(curso_id).trim())
+                .maybeSingle();
+
+            if (cursoData && cursoData.localizacao) {
+                const match = cursoData.localizacao.match(/\b(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/i);
+                if (match) depto = `DR/${match[1].toUpperCase()}`;
+            }
+        } catch (_) {}
+
+        const infoFuso = getInfoFusoDepartamento(depto);
 
         const { data: disponibilidades, error } = await supabase
             .from('disponibilidades')
             .select('id, data_hora, vagas_totais, vagas_ocupadas')
             .eq('curso_id', String(curso_id).trim())
-            // Filtra para mostrar vagas de hoje em diante
-            .gte('data_hora', inicioDeHoje.toISOString())
             .order('data_hora', { ascending: true });
 
         if (error) throw error;
 
-        // Filtrar no JavaScript para retornar apenas os que têm vagas livres
-        const horariosLivres = (disponibilidades || []).filter(d => (d.vagas_totais - d.vagas_ocupadas) > 0);
+        // Filtrar apenas horários estritamente futuros e com vagas livres
+        const horariosLivres = (disponibilidades || [])
+            .filter(d => (d.vagas_totais - d.vagas_ocupadas) > 0 && isHorarioFuturo(d.data_hora, depto))
+            .map(d => ({
+                ...d,
+                timezone: infoFuso.timeZone,
+                fusoDesc: infoFuso.fusoDesc,
+                siglaFuso: infoFuso.sigla
+            }));
 
         res.json(horariosLivres);
     } catch (error) {

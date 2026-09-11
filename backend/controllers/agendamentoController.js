@@ -1,7 +1,7 @@
 // backend/controllers/agendamentoController.js
 const supabase = require('../config/database');
 const whatsappService = require('../services/whatsappService');
-const { getInicioDeHojeBrasil } = require('../utils/dateUtils');
+const { getInicioDeHojeBrasil, isHorarioFuturo } = require('../utils/dateUtils');
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -56,12 +56,15 @@ exports.criar = async (req, res) => {
         }
         disponibilidade.cursos = cursoData || { nome: 'Atendimento Prático', localizacao: 'SENAC - Santo Antônio de Jesus, BA' };
 
-        // Validação contra agendamento em dias passados (permite agendar no mesmo dia / hoje)
-        const dataCurso = new Date(disponibilidade.data_hora);
-        const inicioDeHoje = getInicioDeHojeBrasil();
+        let depto = 'DR/BA';
+        if (disponibilidade.cursos?.localizacao) {
+            const match = disponibilidade.cursos.localizacao.match(/\b(AC|AL|AP|AM|BA|CE|DF|ES|GO|MA|MT|MS|MG|PA|PB|PR|PE|PI|RJ|RN|RS|RO|RR|SC|SP|SE|TO)\b/i);
+            if (match) depto = `DR/${match[1].toUpperCase()}`;
+        }
 
-        if (dataCurso < inicioDeHoje) {
-            return res.status(400).json({ erro: 'Este horário é de um dia anterior e as inscrições foram encerradas.' });
+        // Validação contra agendamento em horários passados em relação ao momento atual na região
+        if (!isHorarioFuturo(disponibilidade.data_hora, depto)) {
+            return res.status(400).json({ erro: 'Este horário já ocorreu ou as inscrições foram encerradas para esta turma.' });
         }
 
         if (disponibilidade.vagas_ocupadas >= disponibilidade.vagas_totais) {

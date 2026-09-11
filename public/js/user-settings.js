@@ -402,15 +402,26 @@
         const fotoUrl = ag.disponibilidades?.cursos?.foto_url || 'assets/logo-connect-senac.png';
         const dataHoraRaw = ag.disponibilidades?.data_hora;
         
+        const deptoCurso = ag.disponibilidades?.cursos?.departamento;
+        const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+        const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
+
         let dataFormatada = 'Data a confirmar';
         let horaFormatada = '';
         let isPassado = false;
 
         if (dataHoraRaw) {
-          const d = new Date(dataHoraRaw);
-          isPassado = d < new Date();
-          dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-          horaFormatada = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+          if (window.SenacLocalizacao) {
+            dataFormatada = window.SenacLocalizacao.formatarDataHoraNoFuso(dataHoraRaw, deptoCurso, { day: '2-digit', month: '2-digit', year: 'numeric' });
+            horaFormatada = `${window.SenacLocalizacao.formatarDataHoraNoFuso(dataHoraRaw, deptoCurso, { hour: '2-digit', minute: '2-digit' })} (${siglaFuso})`;
+            const rel = window.SenacLocalizacao.calcularTempoRelativo(dataHoraRaw, deptoCurso);
+            isPassado = rel ? rel.isPassado : new Date(dataHoraRaw) < new Date();
+          } else {
+            const d = new Date(dataHoraRaw);
+            isPassado = d < new Date();
+            dataFormatada = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            horaFormatada = `${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} (${siglaFuso})`;
+          }
         }
 
         const statusBadges = {

@@ -684,10 +684,12 @@ async function carregarPautasGlobais() {
         );
 
         curso.disponibilidades.forEach((disp) => {
-          const dataFormatada = new Date(disp.data_hora).toLocaleString(
-            "pt-BR",
-            { dateStyle: "short", timeStyle: "short" }
-          );
+          const deptoCurso = curso.departamento;
+          const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+          const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
+          const dataFormatada = window.SenacLocalizacao
+            ? `${window.SenacLocalizacao.formatarDataHoraNoFuso(disp.data_hora, deptoCurso)} (${siglaFuso})`
+            : new Date(disp.data_hora).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
           const agendamentos = disp.agendamentos || [];
 
           let tabelaModelos = "";

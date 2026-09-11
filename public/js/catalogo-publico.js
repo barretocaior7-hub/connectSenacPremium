@@ -69,7 +69,25 @@
     list.innerHTML = filtered.map((course) => {
       const image = escapeHTML(course.foto_url || "/assets/logo-connect-senac.png");
       const deptoBadge = course.departamento ? `<span class="badge bg-primary text-white position-absolute top-0 end-0 m-2 shadow-sm" style="font-size: 0.72rem;">${escapeHTML(course.departamento)}</span>` : '';
-      return `<div class="col-md-6 col-lg-4"><article class="card-premium public-course-card h-100 position-relative"><a href="/cursos/${encodeURIComponent(course.id)}" class="public-course-card-link"><div class="card-img-container"><img src="${image}" alt="${escapeHTML(course.nome)}"><span class="course-badge">Curso SENAC</span>${deptoBadge}</div><div class="card-body p-4"><h2>${escapeHTML(course.nome)}</h2><p><i class="bi bi-geo-alt-fill"></i> ${escapeHTML(course.localizacao || "SENAC")}</p><span class="public-course-cta">Ver detalhes <i class="bi bi-arrow-right"></i></span></div></a></article></div>`;
+      const disps = Array.isArray(course.disponibilidades) ? course.disponibilidades : [];
+      const totalVagas = disps.reduce((acc, d) => acc + Math.max(0, (d.vagas_totais || 0) - (d.vagas_ocupadas || 0)), 0);
+
+      let timeBadge = '';
+      if (disps.length > 0 && window.SenacLocalizacao) {
+        const prox = disps[0];
+        const rel = window.SenacLocalizacao.calcularTempoRelativo(prox.data_hora, course.departamento);
+        const fuso = window.SenacLocalizacao.getInfoFusoDepartamento(course.departamento);
+        let badgeStyle = 'bg-light text-primary border';
+        if (rel.isHoje) badgeStyle = 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
+        else if (rel.isAmanha) badgeStyle = 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+        timeBadge = `<span class="badge ${badgeStyle}" style="font-size: 0.72rem;"><i class="bi bi-clock-fill me-1"></i>${rel.texto} (${fuso.siglaFuso})</span>`;
+      }
+
+      const vagasBadge = totalVagas > 0
+        ? `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25" style="font-size: 0.72rem;"><i class="bi bi-people-fill me-1"></i>${totalVagas} vaga(s)</span>`
+        : `<span class="badge bg-secondary bg-opacity-10 text-secondary border" style="font-size: 0.72rem;">Consulte vagas</span>`;
+
+      return `<div class="col-md-6 col-lg-4"><article class="card-premium public-course-card h-100 position-relative"><a href="/cursos/${encodeURIComponent(course.id)}" class="public-course-card-link"><div class="card-img-container"><img src="${image}" alt="${escapeHTML(course.nome)}"><span class="course-badge">Curso SENAC</span>${deptoBadge}</div><div class="card-body p-4"><h2>${escapeHTML(course.nome)}</h2><p class="mb-2"><i class="bi bi-geo-alt-fill text-danger me-1"></i> ${escapeHTML(course.localizacao || "SENAC")}</p><div class="d-flex flex-wrap align-items-center gap-1 mb-3">${vagasBadge}${timeBadge}</div><span class="public-course-cta">Ver detalhes <i class="bi bi-arrow-right"></i></span></div></a></article></div>`;
     }).join("");
   };
 

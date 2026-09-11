@@ -242,6 +242,20 @@ function renderizarVitrineCursos(){
             ? `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.76rem;"><i class="bi bi-calendar-event me-1"></i> ${qtdHorarios} data(s)</span>`
             : '';
 
+        const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(curso.departamento) : null;
+        let proximoHorarioBadge = '';
+        if (disps.length > 0 && window.SenacLocalizacao) {
+            const prox = disps[0];
+            const rel = window.SenacLocalizacao.calcularTempoRelativo(prox.data_hora, curso.departamento);
+            let badgeStyle = 'bg-light text-muted border';
+            if (rel.isHoje) {
+                badgeStyle = 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25';
+            } else if (rel.isAmanha) {
+                badgeStyle = 'bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25';
+            }
+            proximoHorarioBadge = `<span class="badge ${badgeStyle}" style="font-size: 0.74rem;" title="Próximo atendimento"><i class="bi bi-clock-fill me-1"></i>${rel.texto}</span>`;
+        }
+
         const deptoBadge = curso.departamento
             ? `<span class="badge bg-primary text-white position-absolute top-0 end-0 m-2 shadow-sm" style="font-size: 0.72rem;"><i class="bi bi-geo-alt-fill me-1"></i>${escapeHTML(curso.departamento)}</span>`
             : '';
@@ -261,14 +275,15 @@ function renderizarVitrineCursos(){
                             <span>•</span>
                             <span><i class="bi bi-person-badge-fill text-primary me-1"></i> ${profNome}</span>
                         </div>
-                        <div class="d-flex align-items-center gap-1 mb-2">
+                        <div class="d-flex flex-wrap align-items-center gap-1 mb-2">
                             ${badgeVagas}
                             ${badgeHorarios}
+                            ${proximoHorarioBadge}
                         </div>
                         <p class="card-text mb-3 text-secondary" style="font-size: 0.84rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${descResumo}</p>
 
                         <div class="pt-2 border-top mt-auto d-flex align-items-center justify-content-between">
-                            <span class="badge bg-light text-primary border"><i class="bi bi-clock me-1"></i> 1h a 2h</span>
+                            <span class="badge bg-light text-primary border"><i class="bi bi-clock-history me-1"></i> ${fusoInfo ? fusoInfo.siglaFuso : '1h a 2h'}</span>
                             <button class="btn btn-orange btn-sm px-3 fw-bold" onclick="event.stopPropagation(); abrirModalDetalhesCurso('${curso.id}');">
                                 Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
                             </button>
@@ -341,6 +356,9 @@ function abrirModalDetalhesCurso(cursoParam){
     const listaHorariosEl = document.getElementById('detalheCursoListaHorarios');
     const totalVagasBadgeEl = document.getElementById('detalheCursoTotalVagasBadge');
     const disponibilidades = Array.isArray(curso.disponibilidades) ? curso.disponibilidades : [];
+    const deptoCurso = curso.departamento;
+    const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+    const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
 
     let totalVagasLivres = 0;
     let horariosHTML = '';
@@ -357,14 +375,33 @@ function abrirModalDetalhesCurso(cursoParam){
         disponibilidades.forEach(disp => {
             const vagasLivres = Math.max(0, (disp.vagas_totais || 0) - (disp.vagas_ocupadas || 0));
             totalVagasLivres += vagasLivres;
-            const dataHoraFormatada = disp.data_hora
-                ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
-                : 'Data a definir';
+
+            let dataHoraFormatada = '';
+            let rel = null;
+            if (window.SenacLocalizacao) {
+                dataHoraFormatada = window.SenacLocalizacao.formatarDataHoraNoFuso(disp.data_hora, deptoCurso);
+                rel = window.SenacLocalizacao.calcularTempoRelativo(disp.data_hora, deptoCurso);
+            } else {
+                dataHoraFormatada = disp.data_hora
+                    ? new Date(disp.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
+                    : 'Data a definir';
+            }
 
             const isEsgotado = vagasLivres <= 0;
             const badgeVagasDisp = isEsgotado
                 ? '<span class="badge bg-secondary">Esgotado</span>'
                 : `<span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25"><i class="bi bi-people-fill me-1"></i> ${vagasLivres} vaga(s)</span>`;
+
+            let relBadge = '';
+            if (rel) {
+                if (rel.isHoje) {
+                    relBadge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 ms-1" style="font-size: 0.72rem;"><i class="bi bi-clock-history me-1"></i>${rel.texto}</span>`;
+                } else if (rel.isAmanha) {
+                    relBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 ms-1" style="font-size: 0.72rem;">Amanhã</span>`;
+                } else {
+                    relBadge = `<span class="badge bg-light text-muted border ms-1" style="font-size: 0.72rem;">${rel.texto}</span>`;
+                }
+            }
 
             const botaoAcao = isEsgotado
                 ? '<button class="btn btn-sm btn-secondary disabled" disabled>Esgotado</button>'
@@ -374,7 +411,10 @@ function abrirModalDetalhesCurso(cursoParam){
                 <div class="col-12 col-md-6">
                     <div class="p-2 border rounded d-flex justify-content-between align-items-center bg-light bg-opacity-50">
                         <div>
-                            <div class="fw-bold small text-dark"><i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada}</div>
+                            <div class="fw-bold small text-dark">
+                                <i class="bi bi-clock text-primary me-1"></i> ${dataHoraFormatada} <small class="text-muted">(${siglaFuso})</small>
+                                ${relBadge}
+                            </div>
                             <div class="mt-1">${badgeVagasDisp}</div>
                         </div>
                         <div>
@@ -484,6 +524,22 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
     document.getElementById('modalCursoDescricao').textContent = cursoDescricao;
     document.getElementById('msgAgendamento').innerHTML = '';
 
+    const deptoCurso = cursoObj?.departamento;
+    const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+    const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
+
+    const modalFusoTexto = document.getElementById('modalFusoTexto');
+    if (modalFusoTexto) {
+        if (fusoInfo) {
+            modalFusoTexto.innerHTML = `<strong>Fuso Regional:</strong> ${fusoInfo.fusoDesc} (${fusoInfo.siglaFuso} • ${fusoInfo.offset})`;
+        } else {
+            modalFusoTexto.innerHTML = `<strong>Fuso Regional:</strong> Horário Oficial de Brasília (BRT • UTC-3)`;
+        }
+    }
+    if (window.SenacLocalizacao && typeof window.SenacLocalizacao.iniciarRelogioRegional === 'function') {
+        window.SenacLocalizacao.iniciarRelogioRegional();
+    }
+
     const select = document.getElementById('selectHorarios');
     const grade = document.getElementById('gradeHorarios');
     const resumo = document.getElementById('resumoHorario');
@@ -538,14 +594,41 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
         }
 
         horariosLivres.forEach((h, index) => {
-            const data = new Date(h.data_hora);
-            const diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase();
-            const diaMes = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-            const hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-            const dataCompleta = data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+            let diaSemana = '';
+            let diaMes = '';
+            let hora = '';
+            let dataCompleta = '';
+            let rel = null;
+
+            if (window.SenacLocalizacao) {
+                diaSemana = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { weekday: 'short' }).replace('.', '').toUpperCase();
+                diaMes = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { day: '2-digit', month: '2-digit' });
+                hora = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { hour: '2-digit', minute: '2-digit' });
+                dataCompleta = window.SenacLocalizacao.formatarDataHoraNoFuso(h.data_hora, deptoCurso, { weekday: 'long', day: '2-digit', month: 'long' });
+                rel = window.SenacLocalizacao.calcularTempoRelativo(h.data_hora, deptoCurso);
+            } else {
+                const data = new Date(h.data_hora);
+                diaSemana = data.toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '').toUpperCase();
+                diaMes = data.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                hora = data.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                dataCompleta = data.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' });
+            }
             const vagasLivres = h.vagas_totais - h.vagas_ocupadas;
 
-            select.innerHTML += `<option value="${h.id}">${dataCompleta}, ${hora}</option>`;
+            let relBadge = '';
+            let optRelText = '';
+            if (rel) {
+                optRelText = ` [${rel.texto}]`;
+                if (rel.isHoje) {
+                    relBadge = `<span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25" style="font-size: 0.68rem;"><i class="bi bi-clock-history me-1"></i>${rel.texto}</span>`;
+                } else if (rel.isAmanha) {
+                    relBadge = `<span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25" style="font-size: 0.68rem;"><i class="bi bi-calendar-check me-1"></i>Amanhã</span>`;
+                } else {
+                    relBadge = `<span class="badge bg-light text-muted border" style="font-size: 0.68rem;">${rel.texto}</span>`;
+                }
+            }
+
+            select.innerHTML += `<option value="${h.id}">${dataCompleta}, ${hora} (${siglaFuso})${optRelText}</option>`;
 
             const chip = document.createElement('div');
             chip.className = 'schedule-chip';
@@ -563,8 +646,11 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
             }
 
             chip.innerHTML = `
-                <div class="small fw-bold text-muted mb-1">${diaSemana} • ${diaMes}</div>
-                <span class="chip-time">${hora}</span>
+                <div class="d-flex justify-content-between align-items-center mb-1 gap-1">
+                    <span class="small fw-bold text-muted">${diaSemana} • ${diaMes}</span>
+                    ${relBadge}
+                </div>
+                <span class="chip-time">${hora} <small class="text-muted" style="font-size: 0.7rem; font-weight: normal;">${siglaFuso}</small></span>
                 <div class="mt-2">${badgeStatus}</div>
             `;
 
@@ -578,8 +664,9 @@ async function abrirModalAgendamento(cursoId, cursoNome, cursoDescricao, presele
                 selectedDisponibilidadeId = h.id;
                 select.value = h.id;
                 btnConfirmar.disabled = false;
-                window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora}`;
-                resumo.innerHTML = `<i class="bi bi-check2-circle text-success me-1"></i><span><small class="text-muted d-block">Horário selecionado:</small><strong class="text-dark">${dataCompleta}, às ${hora}</strong></span>`;
+                window.currentSchedulingData.dataHoraFormatada = `${dataCompleta} às ${hora} (${siglaFuso})`;
+                const relHtml = rel ? `<span class="badge bg-light text-primary border ms-1">${rel.texto}</span>` : '';
+                resumo.innerHTML = `<i class="bi bi-check2-circle text-success me-1"></i><span><small class="text-muted d-block">Horário selecionado (${siglaFuso}):</small><strong class="text-dark">${dataCompleta}, às ${hora}</strong> ${relHtml}</span>`;
                 resumo.classList.remove('d-none');
             });
             grade.appendChild(chip);
@@ -773,12 +860,25 @@ async function carregarMeusAgendamentos(){
 
             const rawCursoNome = ag.disponibilidades && ag.disponibilidades.cursos ? ag.disponibilidades.cursos.nome : 'Curso Senac';
             const cursoNome = escapeHTML(rawCursoNome);
-            const dataHora = ag.disponibilidades && ag.disponibilidades.data_hora ? new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+            const deptoCurso = ag.disponibilidades?.cursos?.departamento;
+            const fusoInfo = window.SenacLocalizacao ? window.SenacLocalizacao.getInfoFusoDepartamento(deptoCurso) : null;
+            const siglaFuso = fusoInfo ? fusoInfo.siglaFuso : 'BRT';
+
+            let dataHora = '-';
+            let rel = null;
+            if (ag.disponibilidades && ag.disponibilidades.data_hora) {
+                if (window.SenacLocalizacao) {
+                    dataHora = `${window.SenacLocalizacao.formatarDataHoraNoFuso(ag.disponibilidades.data_hora, deptoCurso)} (${siglaFuso})`;
+                    rel = window.SenacLocalizacao.calcularTempoRelativo(ag.disponibilidades.data_hora, deptoCurso);
+                } else {
+                    dataHora = `${new Date(ag.disponibilidades.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })} (${siglaFuso})`;
+                }
+            }
             let badge = '';
             let acoesHTML = '';
             let avisoExpiracaoHTML = '';
 
-            const isPassado = ag.disponibilidades && ag.disponibilidades.data_hora && new Date(ag.disponibilidades.data_hora) < new Date();
+            const isPassado = rel ? rel.isPassado : (ag.disponibilidades && ag.disponibilidades.data_hora && new Date(ag.disponibilidades.data_hora) < new Date());
 
             if (ag.status === 'agendado') {
                 if (isPassado) {
@@ -829,6 +929,7 @@ async function carregarMeusAgendamentos(){
                         </div>
                         <div class="text-secondary small mb-3">
                             <i class="bi bi-calendar-event text-primary me-1"></i> <strong>${dataHora}</strong>
+                            ${rel && !isPassado ? `<span class="badge bg-light text-primary border ms-1" style="font-size: 0.72rem;">${rel.texto}</span>` : ''}
                         </div>
                         <div class="mt-auto">
                             ${acoesHTML}
